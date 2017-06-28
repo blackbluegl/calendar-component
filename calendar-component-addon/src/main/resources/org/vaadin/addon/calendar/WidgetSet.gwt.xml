@@ -1,0 +1,8 @@
+<module>
+
+	<!-- WS Compiler: manually edited -->
+
+	<!-- Inherit DefaultWidgetSet -->
+	<inherits name="com.vaadin.DefaultWidgetSet" /> 
+
+</module>
