@@ -15,7 +15,7 @@ This component is developed as a hobby with no public roadmap or any guarantees 
 
 ## Download release
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to http://vaadin.com/addon/calendar-component
+Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/directory#!addon/calendar-add-on
 
 ## Building and running demo
 
