@@ -328,7 +328,6 @@ public class CalendarConnector extends AbstractComponentConnector
         widget.setLastDayNumber(state.lastVisibleDayOfWeek);
         widget.setFirstHourOfTheDay(state.firstHourOfDay);
         widget.setLastHourOfTheDay(state.lastHourOfDay);
-        widget.setReadOnly(state.readOnly);
         widget.setDisabled(!state.enabled);
 
         widget.setRangeSelectAllowed(hasEventListener(CalendarEventId.RANGESELECT));

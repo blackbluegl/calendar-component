@@ -1020,7 +1020,7 @@ public class Calendar extends AbstractComponent
      * @see #isEventClickAllowed()
      */
     protected boolean isClientChangeAllowed() {
-        return !isReadOnly();
+        return isEnabled();
     }
 
     /**

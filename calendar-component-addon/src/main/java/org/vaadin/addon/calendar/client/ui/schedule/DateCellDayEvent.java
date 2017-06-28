@@ -279,7 +279,7 @@ public class DateCellDayEvent extends FocusableHTML
             boolean mouseMoved = (xDiff < -3 || xDiff > 3 || yDiff < -3
                     || yDiff > 3);
 
-            if (!weekGrid.getCalendar().isDisabledOrReadOnly() && mouseMoved) {
+            if (!weekGrid.getCalendar().isDisabled() && mouseMoved) {
                 // Event Move:
                 // - calendar must be enabled
                 // - calendar must not be in read-only mode

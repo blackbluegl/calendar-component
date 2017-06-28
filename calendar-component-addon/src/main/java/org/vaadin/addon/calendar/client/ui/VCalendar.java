@@ -75,7 +75,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
     protected final DateTimeFormat time24format_date = DateTimeFormat
             .getFormat("HH:mm");
 
-    private boolean readOnly = false;
     private boolean disabled = false;
 
     private boolean isHeightUndefined = false;
@@ -639,7 +638,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
         dayToolbar.setVerticalSized(isHeightUndefined);
         dayToolbar.setHorizontalSized(isWidthUndefined);
         weekGrid.clearDates();
-        weekGrid.setDisabled(isDisabledOrReadOnly());
+        weekGrid.setDisabled(isDisabled());
 
         for (CalendarDay day : days) {
             String date = day.getDate();
@@ -684,7 +683,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
         rows = (int) Math.ceil(daysCount / (double) 7);
 
         monthGrid = new MonthGrid(this, rows, columns);
-        monthGrid.setEnabled(!isDisabledOrReadOnly());
+        monthGrid.setEnabled(!isDisabled());
         weekToolbar.removeAllRows();
         int pos = 0;
         boolean monthNameDrawn = true;
@@ -853,15 +852,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Is the calendar either disabled or readonly
-     *
-     * @return
-     */
-    public boolean isDisabledOrReadOnly() {
-        return disabled || readOnly;
-    }
-
-    /**
      * Is the component disabled
      */
     public boolean isDisabled() {
@@ -876,23 +866,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
      */
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
-    }
-
-    /**
-     * Is the component read-only
-     */
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    /**
-     * Is the component read-only
-     *
-     * @param readOnly
-     *            True if component is readonly
-     */
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
     }
 
     /**

@@ -466,7 +466,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
 
         MonthEventLabel w = (MonthEventLabel) clickedWidget;
 
-        if (calendar.isDisabledOrReadOnly()) {
+        if (calendar.isDisabled()) {
             Event.releaseCapture(getElement());
             monthEventMouseDown = false;
             startY = -1;

@@ -25,10 +25,6 @@ import java.util.List;
  */
 public class CalendarState extends AbstractComponentState {
 
-    /**
-     * @deprecated
-     */
-    public boolean readOnly;
     public boolean format24H;
     public String[] dayNames;
     public String[] monthNames;
