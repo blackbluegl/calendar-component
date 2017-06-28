@@ -1,0 +1,8 @@
+.idea/
+calendar-component-addon/calendar-component.iml
+calendar-component-addon/target/
+calendar-component-demo/calendar-component-demo.iml
+*.scss.cache
+calendar-component-demo/target/
+calendar-component-root.iml
+pom.xml.versionsBackup
