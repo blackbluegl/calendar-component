@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.vaadin.addon.calendar.server.ui;
+package org.vaadin.addon.calendar.ui;
 
 import com.vaadin.util.ReflectTools;
 import org.vaadin.addon.calendar.Calendar;
 import org.vaadin.addon.calendar.client.CalendarEventId;
-import org.vaadin.addon.calendar.server.ui.event.CalendarEvent;
+import org.vaadin.addon.calendar.event.CalendarEvent;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;

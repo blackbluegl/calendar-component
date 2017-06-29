@@ -5,9 +5,12 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.server.ui.CalendarComponentEvents;
-import org.vaadin.addon.calendar.server.ui.event.BasicEventProvider;
-import org.vaadin.addon.calendar.server.ui.handler.*;
+import org.vaadin.addon.calendar.event.BasicEventProvider;
+import org.vaadin.addon.calendar.handler.BasicBackwardHandler;
+import org.vaadin.addon.calendar.handler.BasicEventMoveHandler;
+import org.vaadin.addon.calendar.handler.BasicEventResizeHandler;
+import org.vaadin.addon.calendar.handler.BasicForwardHandler;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Collection;
 import java.util.Date;
@@ -55,7 +58,7 @@ public class MeetingCalendar extends CustomComponent {
 
         meeting.setStart(event.getStart());
         meeting.setEnd(event.getEnd());
-        //meeting.setName("A Name");
+        meeting.setName("A Name");
         meeting.setDetails("A Detail");
 
         eventProvider.addEvent(new MeetingItem(meeting));

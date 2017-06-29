@@ -27,9 +27,11 @@ import com.vaadin.client.WidgetUtil;
 
 import java.util.*;
 
-public class DateCell extends FocusableComplexPanel implements MouseDownHandler,
-        MouseMoveHandler, MouseUpHandler, KeyDownHandler, ContextMenuHandler {
+public class DateCell extends FocusableComplexPanel
+        implements MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler, ContextMenuHandler {
+
     private static final String DRAGEMPHASISSTYLE = " dragemphasis";
+
     private Date date;
     private int width;
     private int eventRangeStart = -1;

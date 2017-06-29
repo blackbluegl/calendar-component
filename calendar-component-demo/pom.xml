@@ -111,10 +111,10 @@
 				<artifactId>vaadin-maven-plugin</artifactId>
 				<version>${vaadin.plugin.version}</version>
 				<executions>
-					<!-- You are free to mark this as permanently ignored in Eclipse -->
 					<execution>
 						<configuration>
-							<!-- if you don't specify any modules, the plugin will find them -->
+                            <draftCompile>true</draftCompile>
+                            <style>DETAILED</style>
 						</configuration>
 						<goals>
 							<goal>resources</goal>
@@ -134,6 +134,7 @@
 				<version>${jetty.plugin.version}</version>
 				<configuration>
 					<scanIntervalSeconds>2</scanIntervalSeconds>
+                    <jvmArgs>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</jvmArgs>
 				</configuration>
 			</plugin>
 

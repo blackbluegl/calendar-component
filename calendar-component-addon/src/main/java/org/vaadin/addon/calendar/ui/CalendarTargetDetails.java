@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.vaadin.addon.calendar.server.ui;
+package org.vaadin.addon.calendar.ui;
 
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetailsImpl;

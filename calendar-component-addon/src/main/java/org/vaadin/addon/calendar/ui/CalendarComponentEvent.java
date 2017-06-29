@@ -13,32 +13,40 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package org.vaadin.addon.calendar.ui;
 
-package org.vaadin.addon.calendar.server.ui.event;
+import com.vaadin.ui.Component;
+import org.vaadin.addon.calendar.Calendar;
 
 /**
- * An event provider which allows adding and removing events
+ * All Calendar events extends this class.
  *
- * @since 7.1.0
+ * @since 7.1
  * @author Vaadin Ltd.
+ *
  */
+@SuppressWarnings("serial")
 
-public interface CalendarEditableEventProvider<V extends CalendarEvent> extends CalendarEventProvider<V> {
-
-    /**
-     * Adds an event to the event provider
-     *
-     * @param event
-     *            The event to add
-     */
-    void addEvent(V event);
+public class CalendarComponentEvent extends Component.Event {
 
     /**
-     * Removes an event from the event provider
+     * Set the source of the event
      *
-     * @param event
-     *            The event
+     * @param source
+     *            The source calendar
+     *
      */
-    void removeEvent(V event);
+    public CalendarComponentEvent(Calendar source) {
+        super(source);
+    }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.vaadin.ui.Component.Event#getComponent()
+     */
+    @Override
+    public Calendar getComponent() {
+        return (Calendar) super.getComponent();
+    }
 }

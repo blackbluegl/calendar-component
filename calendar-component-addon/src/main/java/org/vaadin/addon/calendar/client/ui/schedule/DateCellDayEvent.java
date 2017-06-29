@@ -39,19 +39,23 @@ import java.util.List;
  *
  * @since 7.1
  */
+
 public class DateCellDayEvent extends FocusableHTML
         implements MouseDownHandler, MouseUpHandler, MouseMoveHandler,
         KeyDownHandler, ContextMenuHandler, HasTooltipKey {
 
+    public static final int halfHourInMilliSeconds = 1800 * 1000;
     private final DateCell dateCell;
-    private Element caption = null;
     private final Element eventContent;
+    private final WeekGrid weekGrid;
+    private final Integer eventIndex;
+    private final List<HandlerRegistration> handlers;
+    private Element caption = null;
     private CalendarEvent calendarEvent = null;
     private HandlerRegistration moveRegistration;
     private int startY = -1;
     private int startX = -1;
     private String moveWidth;
-    public static final int halfHourInMilliSeconds = 1800 * 1000;
     private Date startDatetimeFrom;
     private Date startDatetimeTo;
     private boolean mouseMoveStarted;
@@ -59,30 +63,27 @@ public class DateCellDayEvent extends FocusableHTML
     private int startYrelative;
     private int startXrelative;
     private boolean disabled;
-    private final WeekGrid weekGrid;
     private Element topResizeBar;
     private Element bottomResizeBar;
     private Element clickTarget;
-    private final Integer eventIndex;
     private int slotHeight;
-    private final List<HandlerRegistration> handlers;
     private boolean mouseMoveCanceled;
 
-    public DateCellDayEvent(DateCell dateCell, WeekGrid parent,
-            CalendarEvent event) {
+    public DateCellDayEvent(DateCell dateCell, WeekGrid parent, CalendarEvent calendarEvent) {
         super();
         this.dateCell = dateCell;
 
-        handlers = new LinkedList<HandlerRegistration>();
+        handlers = new LinkedList<>();
 
         setStylePrimaryName("v-calendar-event");
-        setCalendarEvent(event);
+
+        setCalendarEvent(calendarEvent);
 
         weekGrid = parent;
 
         Style s = getElement().getStyle();
-        if (event.getStyleName().length() > 0) {
-            addStyleDependentName(event.getStyleName());
+        if (calendarEvent.getStyleName().length() > 0) {
+            addStyleDependentName(calendarEvent.getStyleName());
         }
         s.setPosition(Position.ABSOLUTE);
 
@@ -105,7 +106,8 @@ public class DateCellDayEvent extends FocusableHTML
             getElement().appendChild(bottomResizeBar);
         }
 
-        eventIndex = event.getIndex();
+        eventIndex = calendarEvent.getIndex();
+
     }
 
     @Override
@@ -339,7 +341,7 @@ public class DateCellDayEvent extends FocusableHTML
         HorizontalPanel parent = (HorizontalPanel) getParent().getParent();
         int relativeX = event.getRelativeX(parent.getElement())
                 - weekGrid.timebar.getOffsetWidth();
-        int halfHourDiff = 0;
+        int halfHourDiff;
         if (moveY > 0) {
             halfHourDiff = (startYrelative + moveY) / slotHeight;
         } else {
@@ -347,7 +349,7 @@ public class DateCellDayEvent extends FocusableHTML
         }
 
         int dateCellWidth = getDateCellWidth();
-        long dayDiff = 0;
+        long dayDiff;
         if (moveX >= 0) {
             dayDiff = (startXrelative + moveX) / dateCellWidth;
         } else {
@@ -519,7 +521,7 @@ public class DateCellDayEvent extends FocusableHTML
     }
 
     /**
-     * @param dateOffset
+     * @param dateOffset The pixel offset
      * @return the amount of pixels the given date is from the left side
      */
     private int calculateDateCellOffsetPx(int dateOffset) {
@@ -541,8 +543,10 @@ public class DateCellDayEvent extends FocusableHTML
      * Check if the given time range is too small for events
      *
      * @param start
+     *              Millies
      * @param end
-     * @return
+     *              Millies
+     * @return true, if the given time range is too small for events
      */
     private boolean isTimeRangeTooSmall(long start, long end) {
         return (end - start) >= getMinTimeRange();
@@ -558,29 +562,25 @@ public class DateCellDayEvent extends FocusableHTML
     /**
      * Build the string for sending resize events to server
      *
-     * @param event
-     * @return
+     * @param event The calendar event
+     * @return The string with resizeing information
      */
     private String buildResizeString(CalendarEvent event) {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append(event.getIndex());
-        buffer.append(",");
-        buffer.append(DateUtil.formatClientSideDate(event.getStart()));
-        buffer.append("-");
-        buffer.append(DateUtil.formatClientSideTime(event.getStartTime()));
-        buffer.append(",");
-        buffer.append(DateUtil.formatClientSideDate(event.getEnd()));
-        buffer.append("-");
-        buffer.append(DateUtil.formatClientSideTime(event.getEndTime()));
 
-        return buffer.toString();
+        return String.valueOf(event.getIndex()) +
+                "," +
+                DateUtil.formatClientSideDate(event.getStart()) +
+                "-" +
+                DateUtil.formatClientSideTime(event.getStartTime()) +
+                "," +
+                DateUtil.formatClientSideDate(event.getEnd()) +
+                "-" +
+                DateUtil.formatClientSideTime(event.getEndTime());
     }
 
     private Date getTargetDateByCurrentPosition(int left) {
-        DateCell newParent = (DateCell) weekGrid.content
-                .getWidget((left / getDateCellWidth()) + 1);
-        Date targetDate = newParent.getDate();
-        return targetDate;
+        DateCell newParent = (DateCell) weekGrid.content.getWidget((left / getDateCellWidth()) + 1);
+        return newParent.getDate();
     }
 
     private int getDateCellWidth() {
@@ -621,20 +621,20 @@ public class DateCellDayEvent extends FocusableHTML
         weekGrid.getCalendar().removeStyleDependentName("sresize");
     }
 
-    public void setCalendarEvent(CalendarEvent calendarEvent) {
-        this.calendarEvent = calendarEvent;
-    }
-
     public CalendarEvent getCalendarEvent() {
         return calendarEvent;
     }
 
-    public void setDisabled(boolean disabled) {
-        this.disabled = disabled;
+    public void setCalendarEvent(CalendarEvent calendarEvent) {
+        this.calendarEvent = calendarEvent;
     }
 
     public boolean isDisabled() {
         return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 
     @Override

@@ -13,47 +13,43 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.vaadin.addon.calendar.server.ui.handler;
+package org.vaadin.addon.calendar.handler;
 
-import org.vaadin.addon.calendar.server.ui.CalendarComponentEvents;
-import org.vaadin.addon.calendar.server.ui.event.CalendarEvent;
-import org.vaadin.addon.calendar.server.ui.event.EditableCalendarEvent;
+import org.vaadin.addon.calendar.event.CalendarEvent;
+import org.vaadin.addon.calendar.event.EditableCalendarEvent;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Date;
 
 /**
- * Implements basic functionality needed to enable moving events.
+ * Implements basic functionality needed to enable event resizing.
  *
  * @since 7.1
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
 
-public class BasicEventMoveHandler implements CalendarComponentEvents.EventMoveHandler {
+public class BasicEventResizeHandler implements CalendarComponentEvents.EventResizeHandler {
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler
-     * #eventMove
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent)
+     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
+     * #eventResize
+     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize)
      */
     @Override
-    public void eventMove(CalendarComponentEvents.MoveEvent event) {
+    public void eventResize(CalendarComponentEvents.EventResize event) {
         CalendarEvent calendarEvent = event.getCalendarEvent();
 
         if (calendarEvent instanceof EditableCalendarEvent) {
+            Date newStartTime = event.getNewStart();
+            Date newEndTime = event.getNewEnd();
 
             EditableCalendarEvent editableEvent = (EditableCalendarEvent) calendarEvent;
 
-            Date newFromTime = event.getNewStart();
-
-            // Update event dates
-            long length = editableEvent.getEnd().getTime()
-                    - editableEvent.getStart().getTime();
-            setDates(editableEvent, newFromTime,
-                    new Date(newFromTime.getTime() + length));
+            setDates(editableEvent, newStartTime, newEndTime);
         }
     }
 

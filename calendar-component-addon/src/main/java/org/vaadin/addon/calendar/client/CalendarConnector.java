@@ -15,7 +15,6 @@
  */
 package org.vaadin.addon.calendar.client;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
@@ -32,6 +31,7 @@ import com.vaadin.client.ui.ActionOwner;
 import com.vaadin.client.ui.SimpleManagedLayout;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.util.SharedUtil;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 import org.vaadin.addon.calendar.client.ui.schedule.*;
@@ -392,18 +392,21 @@ public class CalendarConnector extends AbstractComponentConnector
     }
 
     @Override
-    public TooltipInfo getTooltipInfo(
-            Element element) {
+    public TooltipInfo getTooltipInfo(Element element) {
+
         TooltipInfo tooltipInfo = null;
-        Widget w = WidgetUtil.findWidget(element, null);
+
+        Widget w = WidgetUtil.findWidget(element, DateCellDayEvent.class);
+
         if (w instanceof HasTooltipKey) {
-            tooltipInfo = GWT.create(TooltipInfo.class);
             String title = tooltips.get(((HasTooltipKey) w).getTooltipKey());
-            tooltipInfo.setTitle(title != null ? title : "");
+            tooltipInfo = new TooltipInfo(title != null ? title : "", ContentMode.HTML,null, this);
         }
+
         if (tooltipInfo == null) {
             tooltipInfo = super.getTooltipInfo(element);
         }
+
         return tooltipInfo;
     }
 

@@ -33,15 +33,15 @@ import org.vaadin.addon.calendar.client.CalendarEventId;
 import org.vaadin.addon.calendar.client.CalendarServerRpc;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.server.ui.CalendarComponentEvent;
-import org.vaadin.addon.calendar.server.ui.CalendarComponentEvents;
-import org.vaadin.addon.calendar.server.ui.CalendarDateRange;
-import org.vaadin.addon.calendar.server.ui.CalendarTargetDetails;
-import org.vaadin.addon.calendar.server.ui.event.BasicEventProvider;
-import org.vaadin.addon.calendar.server.ui.event.CalendarEditableEventProvider;
-import org.vaadin.addon.calendar.server.ui.event.CalendarEvent;
-import org.vaadin.addon.calendar.server.ui.event.CalendarEventProvider;
-import org.vaadin.addon.calendar.server.ui.handler.*;
+import org.vaadin.addon.calendar.event.BasicEventProvider;
+import org.vaadin.addon.calendar.event.CalendarEditableEventProvider;
+import org.vaadin.addon.calendar.event.CalendarEvent;
+import org.vaadin.addon.calendar.event.CalendarEventProvider;
+import org.vaadin.addon.calendar.handler.*;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvent;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
+import org.vaadin.addon.calendar.ui.CalendarDateRange;
+import org.vaadin.addon.calendar.ui.CalendarTargetDetails;
 
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -420,7 +420,7 @@ public class Calendar extends AbstractComponent
         events = getEventProvider().getEvents(firstDateToShow, lastDateToShow);
         cacheMinMaxTimeOfDay(events);
 
-        List<CalendarState.Event> calendarStateEvents = new ArrayList<CalendarState.Event>();
+        List<CalendarState.Event> calendarStateEvents = new ArrayList<>();
         if (events != null) {
             for (int i = 0; i < events.size(); i++) {
                 CalendarEvent e = events.get(i);
@@ -431,10 +431,8 @@ public class Calendar extends AbstractComponent
                 event.dateTo = df_date.format(e.getEnd());
                 event.timeFrom = df_time.format(e.getStart());
                 event.timeTo = df_time.format(e.getEnd());
-                event.description = e.getDescription() == null ? ""
-                        : e.getDescription();
-                event.styleName = e.getStyleName() == null ? ""
-                        : e.getStyleName();
+                event.description = e.getDescription() == null ? "" : e.getDescription();
+                event.styleName = e.getStyleName() == null ? "" : e.getStyleName();
                 event.allDay = e.isAllDay();
                 calendarStateEvents.add(event);
             }

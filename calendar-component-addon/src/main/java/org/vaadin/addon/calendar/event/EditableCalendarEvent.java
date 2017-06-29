@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.vaadin.addon.calendar.server.ui.event;
+package org.vaadin.addon.calendar.event;
 
 import java.util.Date;
 
 /**
  * <p>
- * Extension to the basic {@link org.vaadin.addon.calendar.server.ui.event.CalendarEvent
+ * Extension to the basic {@link CalendarEvent
  * CalendarEvent}. This interface provides setters (and thus editing
- * capabilities) for all {@link org.vaadin.addon.calendar.server.ui.event.CalendarEvent
+ * capabilities) for all {@link CalendarEvent
  * CalendarEvent} fields. For descriptions on the fields, refer to the extended
  * interface.
  * </p>
