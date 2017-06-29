@@ -1,5 +1,6 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
@@ -90,6 +91,8 @@ public class MeetingCalendar extends CustomComponent {
         calendar.setHeight(100.0f, Unit.PERCENTAGE);
         calendar.setEventCaptionAsHtml(true);
         calendar.setResponsive(true);
+
+        calendar.setContentMode(ContentMode.HTML);
 
         calendar.setFirstVisibleDayOfWeek(1);
         calendar.setLastVisibleDayOfWeek(7);

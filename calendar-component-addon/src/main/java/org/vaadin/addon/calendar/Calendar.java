@@ -23,6 +23,7 @@ import com.vaadin.event.dd.TargetDetails;
 import com.vaadin.server.KeyMapper;
 import com.vaadin.server.PaintException;
 import com.vaadin.server.PaintTarget;
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.LegacyComponent;
 import com.vaadin.ui.declarative.DesignAttributeHandler;
@@ -291,6 +292,22 @@ public class Calendar extends AbstractComponent
         setupDaysAndActions();
         setupCalendarEvents();
         rpc.scroll(scrollTop);
+    }
+
+    /**
+     * Set the ContentMode
+     *
+     * @param contentMode The new content mode
+     */
+    public void setContentMode(ContentMode contentMode) {
+        getState().descriptionContentMode = Objects.isNull(contentMode) ? ContentMode.PREFORMATTED : contentMode;
+    }
+
+    /**
+     * @return The content mode
+     */
+    public ContentMode getContentMode() {
+        return getState().descriptionContentMode;
     }
 
     /**

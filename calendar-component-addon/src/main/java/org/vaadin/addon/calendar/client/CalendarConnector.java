@@ -31,7 +31,6 @@ import com.vaadin.client.ui.ActionOwner;
 import com.vaadin.client.ui.SimpleManagedLayout;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
-import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.shared.util.SharedUtil;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 import org.vaadin.addon.calendar.client.ui.schedule.*;
@@ -400,7 +399,7 @@ public class CalendarConnector extends AbstractComponentConnector
 
         if (w instanceof HasTooltipKey) {
             String title = tooltips.get(((HasTooltipKey) w).getTooltipKey());
-            tooltipInfo = new TooltipInfo(title != null ? title : "", ContentMode.HTML,null, this);
+            tooltipInfo = new TooltipInfo(title != null ? title : "", getState().descriptionContentMode,null, this);
         }
 
         if (tooltipInfo == null) {
