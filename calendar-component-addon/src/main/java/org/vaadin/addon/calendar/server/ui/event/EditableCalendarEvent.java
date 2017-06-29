@@ -19,9 +19,9 @@ import java.util.Date;
 
 /**
  * <p>
- * Extension to the basic {@link com.vaadin.addon.calendar.event.CalendarEvent
+ * Extension to the basic {@link org.vaadin.addon.calendar.server.ui.event.CalendarEvent
  * CalendarEvent}. This interface provides setters (and thus editing
- * capabilities) for all {@link com.vaadin.addon.calendar.event.CalendarEvent
+ * capabilities) for all {@link org.vaadin.addon.calendar.server.ui.event.CalendarEvent
  * CalendarEvent} fields. For descriptions on the fields, refer to the extended
  * interface.
  * </p>

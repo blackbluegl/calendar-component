@@ -169,11 +169,6 @@ public interface CalendarComponentEvents extends Serializable {
         private Date end;
 
         /**
-         * Defines the event's view mode.
-         */
-        private boolean monthlyMode;
-
-        /**
          * RangeSelectEvent needs a start and end date.
          *
          * @param source
@@ -182,15 +177,11 @@ public interface CalendarComponentEvents extends Serializable {
          *            Start date.
          * @param end
          *            End date.
-         * @param monthlyMode
-         *            Calendar view mode.
          */
-        public RangeSelectEvent(Calendar source, Date start, Date end,
-                boolean monthlyMode) {
+        public RangeSelectEvent(Calendar source, Date start, Date end) {
             super(source);
             this.start = start;
             this.end = end;
-            this.monthlyMode = monthlyMode;
         }
 
         /**
@@ -211,18 +202,6 @@ public interface CalendarComponentEvents extends Serializable {
             return end;
         }
 
-        /**
-         * Gets the event's view mode. Calendar can be be either in monthly or
-         * weekly mode, depending on the active date range.
-         *
-         * @deprecated User {@link Calendar#isMonthlyMode()} instead
-         *
-         * @return Returns true when monthly view is active.
-         */
-        @Deprecated
-        public boolean isMonthlyMode() {
-            return monthlyMode;
-        }
     }
 
     /** RangeSelectHandler handles RangeSelectEvent. */

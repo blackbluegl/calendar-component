@@ -4,6 +4,12 @@ Calendar-component is a UI component add-on for Vaadin 8.
  
 ## Release notes
 
+### Version 1.0-ALPHA2
+- deprecated API partial removed
+- getters for daily mode and weekly mode added
+- BasicDateClickHandler now cycles between daily, weekly and monthly mode by default
+- more interactive demo added
+
 ### Version 1.0-ALPHA1
 - extracted calendar component from current v7 compatibility package
 - container based event providers removed

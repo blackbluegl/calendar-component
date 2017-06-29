@@ -7,7 +7,7 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import org.vaadin.addon.calendar.Calendar;
+import org.vaadin.addon.calendar.demo.meetings.MeetingCalendar;
 
 import javax.servlet.annotation.WebServlet;
 
@@ -26,7 +26,7 @@ public class DemoUI extends UI
     protected void init(VaadinRequest request) {
 
         // Initialize our new UI component
-        Calendar calendar = new Calendar();
+        MeetingCalendar calendar = new MeetingCalendar();
         calendar.setSizeFull();
 
 
@@ -39,5 +39,6 @@ public class DemoUI extends UI
         layout.setSpacing(false);
         layout.addComponent(calendar);
         setContent(layout);
+
     }
 }

@@ -90,16 +90,14 @@ public class Calendar extends AbstractComponent
      */
     @Deprecated
     public enum TimeFormat {
-
-        Format12H(), Format24H();
+        Format12H(), Format24H()
     }
 
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
 
     /** Internal calendar data source. */
-    protected java.util.Calendar currentCalendar = java.util.Calendar
-            .getInstance();
+    protected java.util.Calendar currentCalendar = java.util.Calendar.getInstance();
 
     /** Defines the component's active time zone. */
     protected TimeZone timezone;
@@ -117,7 +115,7 @@ public class Calendar extends AbstractComponent
      * Internal buffer for the events that are retrieved from the event
      * provider.
      */
-    protected List<CalendarEvent> events;
+    protected List<? extends CalendarEvent> events;
 
     /** Date format that will be used in the UIDL for dates. */
     protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
@@ -261,7 +259,7 @@ public class Calendar extends AbstractComponent
     public Calendar(String caption, CalendarEventProvider eventProvider) {
         registerRpc(rpc);
         setCaption(caption);
-        handlers = new HashMap<String, EventListener>();
+        handlers = new HashMap<>();
         setDefaultHandlers();
         currentCalendar.setTime(new Date());
         setEventProvider(eventProvider);
@@ -320,8 +318,7 @@ public class Calendar extends AbstractComponent
             currentCalendar.set(java.util.Calendar.SECOND, 0);
             currentCalendar.set(java.util.Calendar.MINUTE, 0);
             currentCalendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
-            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK,
-                    currentCalendar.getFirstDayOfWeek());
+            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK, currentCalendar.getFirstDayOfWeek());
             return currentCalendar.getTime();
         }
         return startDate;
@@ -353,8 +350,7 @@ public class Calendar extends AbstractComponent
             currentCalendar.set(java.util.Calendar.SECOND, 59);
             currentCalendar.set(java.util.Calendar.MINUTE, 59);
             currentCalendar.set(java.util.Calendar.HOUR_OF_DAY, 23);
-            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK,
-                    currentCalendar.getFirstDayOfWeek() + 6);
+            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK, currentCalendar.getFirstDayOfWeek() + 6);
             return currentCalendar.getTime();
         }
         return endDate;
@@ -397,8 +393,7 @@ public class Calendar extends AbstractComponent
      */
     private void initCalendarWithLocale() {
         if (timezone != null) {
-            currentCalendar = java.util.Calendar.getInstance(timezone,
-                    getLocale());
+            currentCalendar = java.util.Calendar.getInstance(timezone, getLocale());
 
         } else {
             currentCalendar = java.util.Calendar.getInstance(getLocale());
@@ -453,7 +448,7 @@ public class Calendar extends AbstractComponent
      * @param events
      *            A list of calendar events. Can be <code>null</code>.
      */
-    private void cacheMinMaxTimeOfDay(List<CalendarEvent> events) {
+    private void cacheMinMaxTimeOfDay(List<? extends CalendarEvent> events) {
         minTimeInMinutes = null;
         maxTimeInMinutes = null;
         if (events != null) {
@@ -1017,24 +1012,9 @@ public class Calendar extends AbstractComponent
      * Is the user allowed to trigger events which alters the events
      *
      * @return true if the client is allowed to send changes to server
-     * @see #isEventClickAllowed()
      */
     protected boolean isClientChangeAllowed() {
         return isEnabled();
-    }
-
-    /**
-     * Is the user allowed to trigger click events. Returns {@code true} by
-     * default. Subclass can override this method to disallow firing event
-     * clicks got from the client side.
-     *
-     * @return true if the client is allowed to click events
-     * @see #isClientChangeAllowed()
-     * @deprecated As of 7.4, override {@link #fireEventClick(Integer)} instead.
-     */
-    @Deprecated
-    protected boolean isEventClickAllowed() {
-        return true;
     }
 
     /**
@@ -1117,11 +1097,9 @@ public class Calendar extends AbstractComponent
      *            The start date and time of the highlighted area
      * @param to
      *            The end date and time of the highlighted area
-     * @param monthlyMode
-     *            Is the calendar in monthly mode
      */
-    protected void fireRangeSelect(Date from, Date to, boolean monthlyMode) {
-        fireEvent(new CalendarComponentEvents.RangeSelectEvent(this, from, to, monthlyMode));
+    protected void fireRangeSelect(Date from, Date to) {
+        fireEvent(new CalendarComponentEvents.RangeSelectEvent(this, from, to));
     }
 
     /**
@@ -1597,6 +1575,31 @@ public class Calendar extends AbstractComponent
         }
     }
 
+    /**
+     * Is the calendar in a mode where one day of the month is shown
+     *
+     * @return Returns true if calendar is in day mode and false if it is in
+     *         weekly mode
+     */
+    public boolean isDayMode() {
+        CalendarState state = getState(false);
+        if (state.days != null) {
+            return state.days.size() == 1;
+        } else {
+            // Default mode
+            return true;
+        }
+    }
+
+    /**
+     * Is the calendar in a mode where two day or max 7 days of the month is shown
+     *
+     * @return Returns true if calendar is in weekly mode and false if not
+     */
+    public boolean isWeeklyMode() {
+        return !isDayMode() && !isMonthlyMode();
+    }
+
     @Override
     public void removeActionHandler(Handler actionHandler) {
         if (actionHandlers != null && actionHandlers.contains(actionHandler)) {
@@ -1613,9 +1616,11 @@ public class Calendar extends AbstractComponent
 
         @Override
         public void eventMove(int eventIndex, String newDate) {
+
             if (!isClientChangeAllowed()) {
                 return;
             }
+
             if (newDate != null) {
                 try {
                     Date d = df_date_time.parse(newDate);
@@ -1631,40 +1636,48 @@ public class Calendar extends AbstractComponent
 
         @Override
         public void rangeSelect(String range) {
+
             if (!isClientChangeAllowed()) {
                 return;
             }
 
+            // two dates transmitted
             if (range != null && range.length() > 14 && range.contains("TO")) {
+
                 String[] dates = range.split("TO");
                 try {
-                    Date d1 = df_date.parse(dates[0]);
-                    Date d2 = df_date.parse(dates[1]);
 
-                    fireRangeSelect(d1, d2, true);
+                    fireRangeSelect(
+                            df_date.parse(dates[0]),
+                            df_date.parse(dates[1]));
 
                 } catch (ParseException e) {
                     // NOP
                 }
-            } else if (range != null && range.length() > 12
-                    && range.contains(":")) {
+
+            } else
+
+                // A date with start time and end time transmitted
+                if (range != null && range.length() > 12 && range.contains(":")) {
+
                 String[] dates = range.split(":");
                 if (dates.length == 3) {
                     try {
-                        Date d = df_date.parse(dates[0]);
-                        currentCalendar.setTime(d);
+
+                        currentCalendar.setTime(df_date.parse(dates[0]));
+
                         int startMinutes = Integer.parseInt(dates[1]);
                         int endMinutes = Integer.parseInt(dates[2]);
-                        currentCalendar.add(java.util.Calendar.MINUTE,
-                                startMinutes);
+
+                        currentCalendar.add(java.util.Calendar.MINUTE, startMinutes);
                         Date start = currentCalendar.getTime();
-                        currentCalendar.add(java.util.Calendar.MINUTE,
-                                endMinutes - startMinutes);
+
+                        currentCalendar.add(java.util.Calendar.MINUTE, endMinutes - startMinutes);
                         Date end = currentCalendar.getTime();
-                        fireRangeSelect(start, end, false);
-                    } catch (ParseException e) {
-                        // NOP
-                    } catch (NumberFormatException e) {
+
+                        fireRangeSelect(start, end);
+
+                    } catch (ParseException | NumberFormatException e) {
                         // NOP
                     }
                 }
@@ -1685,9 +1698,9 @@ public class Calendar extends AbstractComponent
         public void dateClick(String date) {
             if (date != null && date.length() > 6) {
                 try {
-                    Date d = df_date.parse(date);
-                    fireDateClick(d);
+                    fireDateClick(df_date.parse(date));
                 } catch (ParseException e) {
+                    // NOP
                 }
             }
         }
@@ -1710,9 +1723,6 @@ public class Calendar extends AbstractComponent
 
         @Override
         public void eventClick(int eventIndex) {
-            if (!isEventClickAllowed()) {
-                return;
-            }
             if (eventIndex >= 0 && eventIndex < events.size()
                     && events.get(eventIndex) != null) {
                 fireEventClick(eventIndex);

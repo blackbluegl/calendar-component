@@ -41,14 +41,60 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
      */
     @Override
     public void dateClick(CalendarComponentEvents.DateClickEvent event) {
+
+        org.vaadin.addon.calendar.Calendar comp = event.getComponent();
+
         Date clickedDate = event.getDate();
 
-        Calendar javaCalendar = event.getComponent().getInternalCalendar();
-        javaCalendar.setTime(clickedDate);
+        java.util.Calendar cal = comp.getInternalCalendar();
 
-        // as times are expanded, this is all that is needed to show one day
-        Date start = javaCalendar.getTime();
-        Date end = javaCalendar.getTime();
+        Date start, end;
+
+        if (comp.isDayMode()) {
+
+            // switch to weekly mode
+
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
+            cal.clear(java.util.Calendar.MINUTE);
+            cal.clear(java.util.Calendar.SECOND);
+            cal.clear(java.util.Calendar.MILLISECOND);
+            cal.setTime(clickedDate);
+            cal.set(java.util.Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+
+            cal.add(java.util.Calendar.DAY_OF_WEEK, comp.getFirstVisibleDayOfWeek() -1);
+
+            start = cal.getTime();
+
+            cal.add(java.util.Calendar.DAY_OF_WEEK, comp.getLastVisibleDayOfWeek() -1);
+
+            end = cal.getTime();
+
+            setDates(event, start, end);
+
+        } else if (comp.isWeeklyMode()) {
+
+            // switch to monthly mode
+
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
+            cal.clear(java.util.Calendar.MINUTE);
+            cal.clear(java.util.Calendar.SECOND);
+            cal.clear(java.util.Calendar.MILLISECOND);
+            cal.setTime(clickedDate);
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+
+            start = cal.getTime();
+
+            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+            end = cal.getTime();
+
+        } else {
+
+            // switch to daily mode
+            cal.setTime(clickedDate);
+
+            start = end = cal.getTime();
+        }
 
         setDates(event, start, end);
     }
