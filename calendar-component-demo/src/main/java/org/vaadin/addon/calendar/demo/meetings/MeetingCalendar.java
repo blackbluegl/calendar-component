@@ -22,7 +22,7 @@ public class MeetingCalendar extends CustomComponent {
 
     private MeetingDataProvider eventProvider;
 
-    private Calendar calendar;
+    private Calendar<MeetingItem> calendar;
 
     public MeetingCalendar() {
 
@@ -83,7 +83,7 @@ public class MeetingCalendar extends CustomComponent {
 
         eventProvider = new MeetingDataProvider();
 
-        calendar = new Calendar(eventProvider);
+        calendar = new Calendar<>(eventProvider);
 
         calendar.addStyleName("noselect");
         calendar.setLocale(Locale.getDefault());
@@ -179,7 +179,7 @@ public class MeetingCalendar extends CustomComponent {
         }
     }
 
-    private final class MeetingDataProvider extends BasicEventProvider {
+    private final class MeetingDataProvider extends BasicEventProvider<MeetingItem> {
 
         void removeAllEvents() {
             this.eventList.clear();

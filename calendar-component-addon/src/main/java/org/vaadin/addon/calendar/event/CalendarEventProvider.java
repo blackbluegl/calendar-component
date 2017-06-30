@@ -27,7 +27,8 @@ import java.util.List;
  * @author Vaadin Ltd.
  */
 
-public interface CalendarEventProvider<V extends CalendarEvent> extends Serializable {
+public interface CalendarEventProvider<EVENT extends CalendarEvent> extends Serializable {
+
     /**
      * <p>
      * Gets all available events in the target date range between startDate and
@@ -49,7 +50,7 @@ public interface CalendarEventProvider<V extends CalendarEvent> extends Serializ
      *            End date
      * @return List of events
      */
-    public List<V> getEvents(Date startDate, Date endDate);
+    public List<EVENT> getEvents(Date startDate, Date endDate);
 
     /**
      * Event to signal that the set of events has changed and the calendar
@@ -57,18 +58,18 @@ public interface CalendarEventProvider<V extends CalendarEvent> extends Serializ
      *
      */
     @SuppressWarnings("serial")
-    public class EventSetChangeEvent implements Serializable {
+    public class EventSetChangeEvent<EVENT extends CalendarEvent> implements Serializable {
 
-        private CalendarEventProvider source;
+        private CalendarEventProvider<EVENT> source;
 
-        public EventSetChangeEvent(CalendarEventProvider source) {
+        public EventSetChangeEvent(CalendarEventProvider<EVENT> source) {
             this.source = source;
         }
 
         /**
          * @return the CalendarEventProvider that has changed
          */
-        public CalendarEventProvider getProvider() {
+        public CalendarEventProvider<EVENT> getProvider() {
             return source;
         }
     }

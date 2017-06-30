@@ -34,9 +34,9 @@ public class BasicForwardHandler implements CalendarComponentEvents.ForwardHandl
     /*
      * (non-Javadoc)
      *
-     * @see com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler#
+     * @see org.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardHandler#
      * forward
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent)
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.ForwardEvent)
      */
     @Override
     public void forward(CalendarComponentEvents.ForwardEvent event) {

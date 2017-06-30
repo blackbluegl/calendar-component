@@ -35,9 +35,9 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler#
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardHandler#
      * backward
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent)
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.BackwardEvent)
      */
     @Override
     public void backward(CalendarComponentEvents.BackwardEvent event) {

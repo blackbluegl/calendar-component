@@ -35,9 +35,9 @@ public class BasicEventResizeHandler implements CalendarComponentEvents.EventRes
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
      * #eventResize
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize)
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize)
      */
     @Override
     public void eventResize(CalendarComponentEvents.EventResize event) {

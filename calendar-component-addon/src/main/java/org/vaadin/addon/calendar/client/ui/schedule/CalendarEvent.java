@@ -41,21 +41,21 @@ public class CalendarEvent {
     private boolean allDay;
 
     /**
-     * @see com.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
+     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
      */
     public String getStyleName() {
         return styleName;
     }
 
     /**
-     * @see com.vaadin.addon.calendar.event.CalendarEvent#getStart()
+     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStart()
      */
     public Date getStart() {
         return start;
     }
 
     /**
-     * @see com.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
+     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
      * @param style
      */
     public void setStyleName(String style) {
@@ -63,7 +63,7 @@ public class CalendarEvent {
     }
 
     /**
-     * @see com.vaadin.addon.calendar.event.CalendarEvent#getStart()
+     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStart()
      * @param start
      */
     public void setStart(Date start) {
@@ -71,7 +71,7 @@ public class CalendarEvent {
     }
 
     /**
-     * @see com.vaadin.addon.calendar.event.CalendarEvent#getEnd()
+     * @see org.vaadin.addon.calendar.event.CalendarEvent#getEnd()
      * @return
      */
     public Date getEnd() {
@@ -79,7 +79,7 @@ public class CalendarEvent {
     }
 
     /**
-     * @see com.vaadin.addon.calendar.event.CalendarEvent#getEnd()
+     * @see org.vaadin.addon.calendar.event.CalendarEvent#getEnd()
      * @param end
      */
     public void setEnd(Date end) {

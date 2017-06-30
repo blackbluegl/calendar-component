@@ -15,6 +15,7 @@
  */
 package org.vaadin.addon.calendar.event;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -28,7 +29,7 @@ import java.util.Date;
  *
  * <p>
  * This interface is used by some of the basic Calendar event handlers in the
- * <code>com.vaadin.addon.calendar.ui.handler</code> package to determine
+ * <code>org.vaadin.addon.calendar.ui.handler</code> package to determine
  * whether an event can be edited.
  * </p>
  *
@@ -88,5 +89,67 @@ public interface EditableCalendarEvent extends CalendarEvent {
      *            and end times are ignored.
      */
     void setAllDay(boolean isAllDay);
+
+    /**
+     * Get a Notifier
+     * @return Returns the Notifier for upadates
+     */
+    EventChangeNotifier getNotifier();
+
+    /**
+     * Event to signal that an event has changed.
+     */
+
+    public class EventChangeEvent<EVENT extends EditableCalendarEvent> implements Serializable {
+
+        private EVENT source;
+
+        public EventChangeEvent(EVENT source) {
+            this.source = source;
+        }
+
+        /**
+         * @return the CalendarEvent that has changed
+         */
+        public EVENT getCalendarEvent() {
+            return source;
+        }
+    }
+
+    /**
+     * Listener for EventSetChange events.
+     */
+
+    public interface EventChangeListener extends Serializable {
+
+        /**
+         * Called when an Event has changed.
+         */
+        public void eventChange(EventChangeEvent eventChangeEvent);
+    }
+
+    /**
+     * Notifier interface for EventChange events.
+     */
+
+    public interface EventChangeNotifier extends Serializable {
+
+        /**
+         * Add a listener to listen for EventChangeEvents. These events are
+         * fired when a events properties are changed.
+         *
+         * @param listener
+         *            The listener to add
+         */
+        void addListener(EventChangeListener listener);
+
+        /**
+         * Remove a listener from the event provider.
+         *
+         * @param listener
+         *            The listener to remove
+         */
+        void removeListener(EventChangeListener listener);
+    }
 
 }

@@ -21,16 +21,9 @@ import java.util.List;
 
 /**
  * <p>
- * Simple implementation of
- * {@link com.vaadin.addon.calendar.event.CalendarEventProvider
- * CalendarEventProvider}. Use {@link #addEvent(CalendarEvent)} and
- * {@link #removeEvent(CalendarEvent)} to add / remove events.
- * </p>
- *
- * <p>
- * {@link com.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier
+ * {@link org.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier
  * EventSetChangeNotifier} and
- * {@link com.vaadin.addon.calendar.event.CalendarEvent.EventChangeListener
+ * {@link org.vaadin.addon.calendar.event.EditableCalendarEvent.EventChangeListener
  * EventChangeListener} are also implemented, so the Calendar is notified when
  * an event is added, changed or removed.
  * </p>
@@ -40,25 +33,27 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 
-public class BasicEventProvider implements CalendarEditableEventProvider,
-        CalendarEventProvider.EventSetChangeNotifier, CalendarEvent.EventChangeListener {
+public class BasicEventProvider<EVENT extends BasicEvent> implements
+        CalendarEditableEventProvider<EVENT>,
+        CalendarEventProvider.EventSetChangeNotifier,
+        EditableCalendarEvent.EventChangeListener {
 
-    protected List<CalendarEvent> eventList = new ArrayList<CalendarEvent>();
+    protected List<EVENT> eventList = new ArrayList<>();
 
-    private List<EventSetChangeListener> listeners = new ArrayList<EventSetChangeListener>();
+    private List<EventSetChangeListener> listeners = new ArrayList<>();
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.event.CalendarEventProvider#getEvents(java.
+     * org.vaadin.addon.calendar.event.CalendarEventProvider#getEvents(java.
      * util.Date, java.util.Date)
      */
     @Override
-    public List<CalendarEvent> getEvents(Date startDate, Date endDate) {
-        ArrayList<CalendarEvent> activeEvents = new ArrayList<CalendarEvent>();
+    public List<EVENT> getEvents(Date startDate, Date endDate) {
+        ArrayList<EVENT> activeEvents = new ArrayList<>();
 
-        for (CalendarEvent ev : eventList) {
+        for (EVENT ev : eventList) {
             long from = startDate.getTime();
             long to = endDate.getTime();
 
@@ -84,16 +79,17 @@ public class BasicEventProvider implements CalendarEditableEventProvider,
      *            The event to check for
      * @return If this provider has the event then true is returned, else false
      */
-    public boolean containsEvent(BasicEvent event) {
+    @SuppressWarnings("unused")
+    public boolean containsEvent(EVENT event) {
         return eventList.contains(event);
     }
 
     /*
      * (non-Javadoc)
      *
-     * @see com.vaadin.addon.calendar.ui.CalendarComponentEvents.
+     * @see org.vaadin.addon.calendar.ui.CalendarComponentEvents.
      * EventSetChangeNotifier #addListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.
      * EventSetChangeListener )
      */
     @Override
@@ -105,9 +101,9 @@ public class BasicEventProvider implements CalendarEditableEventProvider,
     /*
      * (non-Javadoc)
      *
-     * @see com.vaadin.addon.calendar.ui.CalendarComponentEvents.
+     * @see org.vaadin.addon.calendar.ui.CalendarComponentEvents.
      * EventSetChangeNotifier #removeListener
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.
      * EventSetChangeListener )
      */
     @Override
@@ -120,8 +116,7 @@ public class BasicEventProvider implements CalendarEditableEventProvider,
      * added or removed to the event provider
      */
     protected void fireEventSetChange() {
-        EventSetChangeEvent event = new EventSetChangeEvent(this);
-
+        EventSetChangeEvent<EVENT> event = new EventSetChangeEvent<>(this);
         for (EventSetChangeListener listener : listeners) {
             listener.eventSetChange(event);
         }
@@ -131,12 +126,12 @@ public class BasicEventProvider implements CalendarEditableEventProvider,
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener
      * #eventChange
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.EventSetChange)
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventSetChange)
      */
     @Override
-    public void eventChange(CalendarEvent.EventChangeEvent changeEvent) {
+    public void eventChange(EditableCalendarEvent.EventChangeEvent changeEvent) {
         // naive implementation
         fireEventSetChange();
     }
@@ -145,31 +140,31 @@ public class BasicEventProvider implements CalendarEditableEventProvider,
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#addEvent
-     * (com.vaadin.addon.calendar.event.CalendarEvent)
+     * org.vaadin.addon.calendar.event.CalendarEditableEventProvider#addEvent
+     * (org.vaadin.addon.calendar.event.CalendarEvent)
      */
     @Override
-    public void addEvent(CalendarEvent event) {
+    public void addEvent(EVENT event) {
         eventList.add(event);
-        if (event instanceof BasicEvent) {
-            ((BasicEvent) event).addEventChangeListener(this);
-        }
+
+        event.getNotifier().addListener(this);
+
         fireEventSetChange();
     }
 
     /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.vaadin.addon.calendar.event.CalendarEditableEventProvider#removeEvent
-     * (com.vaadin.addon.calendar.event.CalendarEvent)
-     */
+         * (non-Javadoc)
+         *
+         * @see
+         * org.vaadin.addon.calendar.event.CalendarEditableEventProvider#removeEvent
+         * (org.vaadin.addon.calendar.event.CalendarEvent)
+         */
     @Override
-    public void removeEvent(CalendarEvent event) {
+    public void removeEvent(EVENT event) {
         eventList.remove(event);
-        if (event instanceof BasicEvent) {
-            ((BasicEvent) event).removeEventChangeListener(this);
-        }
+
+        event.getNotifier().removeListener(this);
+
         fireEventSetChange();
     }
 }

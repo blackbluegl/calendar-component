@@ -35,10 +35,8 @@ public class BasicWeekClickHandler implements CalendarComponentEvents.WeekClickH
     /*
      * (non-Javadoc)
      *
-     * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler
-     * #weekClick
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick)
+     * @see org.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClickHandler
+     * #weekClick(org.vaadin.addon.calendar.ui.CalendarComponentEvents.WeekClick)
      */
     @Override
     public void weekClick(CalendarComponentEvents.WeekClick event) {

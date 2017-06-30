@@ -35,9 +35,9 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
      * (non-Javadoc)
      *
      * @see
-     * com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
      * #dateClick
-     * (com.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
      */
     @Override
     public void dateClick(CalendarComponentEvents.DateClickEvent event) {

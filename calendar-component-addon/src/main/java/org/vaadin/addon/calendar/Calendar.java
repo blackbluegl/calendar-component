@@ -34,10 +34,7 @@ import org.vaadin.addon.calendar.client.CalendarEventId;
 import org.vaadin.addon.calendar.client.CalendarServerRpc;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.event.BasicEventProvider;
-import org.vaadin.addon.calendar.event.CalendarEditableEventProvider;
-import org.vaadin.addon.calendar.event.CalendarEvent;
-import org.vaadin.addon.calendar.event.CalendarEventProvider;
+import org.vaadin.addon.calendar.event.*;
 import org.vaadin.addon.calendar.handler.*;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvent;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
@@ -78,13 +75,16 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("serial")
 
-public class Calendar extends AbstractComponent
-        implements CalendarComponentEvents.NavigationNotifier,
+public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractComponent implements
+        CalendarComponentEvents.NavigationNotifier,
         CalendarComponentEvents.EventMoveNotifier,
         CalendarComponentEvents.RangeSelectNotifier,
         CalendarComponentEvents.EventResizeNotifier,
-        CalendarEventProvider.EventSetChangeListener, DropTarget,
-        CalendarEditableEventProvider, Action.Container, LegacyComponent {
+        CalendarEventProvider.EventSetChangeListener,
+        DropTarget,
+        Action.Container,
+        LegacyComponent,
+        CalendarEditableEventProvider<EVENT> {
 
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
@@ -110,7 +110,7 @@ public class Calendar extends AbstractComponent
     protected Date endDate = null;
 
     /** Event provider. */
-    private CalendarEventProvider calendarEventProvider;
+    private CalendarEventProvider<EVENT> calendarEventProvider;
 
     /**
      * Internal buffer for the events that are retrieved from the event
@@ -236,7 +236,7 @@ public class Calendar extends AbstractComponent
      * @param eventProvider
      *            Event provider, cannot be null.
      */
-    public Calendar(CalendarEventProvider eventProvider) {
+    public Calendar(CalendarEventProvider<EVENT> eventProvider) {
         this(null, eventProvider);
     }
 
@@ -257,7 +257,7 @@ public class Calendar extends AbstractComponent
      *            Event provider, cannot be null.
      */
     // this is the constructor every other constructor calls
-    public Calendar(String caption, CalendarEventProvider eventProvider) {
+    public Calendar(String caption, CalendarEventProvider<EVENT> eventProvider) {
         registerRpc(rpc);
         setCaption(caption);
         handlers = new HashMap<>();
@@ -307,7 +307,7 @@ public class Calendar extends AbstractComponent
      * @return The content mode
      */
     public ContentMode getContentMode() {
-        return getState().descriptionContentMode;
+        return getState(false).descriptionContentMode;
     }
 
     /**
@@ -422,9 +422,10 @@ public class Calendar extends AbstractComponent
     }
 
     private void setupCalendarEvents() {
-        int durationInDays = (int) ((endDate.getTime() - startDate.getTime())
-                / DateConstants.DAYINMILLIS);
+
+        int durationInDays = (int) ((endDate.getTime() - startDate.getTime()) / DateConstants.DAYINMILLIS);
         durationInDays++;
+
         if (durationInDays > 60) {
             throw new RuntimeException(
                     "Daterange is too big (max 60) = " + durationInDays);
@@ -585,9 +586,9 @@ public class Calendar extends AbstractComponent
         DateFormat weeklyCaptionFormatter = getWeeklyCaptionFormatter();
         weeklyCaptionFormatter.setTimeZone(currentCalendar.getTimeZone());
 
-        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<CalendarDateRange, Set<Action>>();
+        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<>();
 
-        List<CalendarState.Day> days = new ArrayList<CalendarState.Day>();
+        List<CalendarState.Day> days = new ArrayList<>();
 
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't
@@ -660,21 +661,23 @@ public class Calendar extends AbstractComponent
         return year;
     }
 
-    private void setActionsForEachHalfHour(
-            Map<CalendarDateRange, Set<Action>> actionMap, Date start, Date end,
-            Action.Handler actionHandler) {
-        GregorianCalendar cal = new GregorianCalendar(getTimeZone(),
-                getLocale());
+    private void setActionsForEachHalfHour(Map<CalendarDateRange, Set<Action>> actionMap,
+                                           Date start, Date end, Action.Handler actionHandler) {
+
+        GregorianCalendar cal = new GregorianCalendar(getTimeZone(),  getLocale());
         cal.setTime(start);
+
         while (cal.getTime().before(end)) {
+
             Date s = cal.getTime();
             cal.add(java.util.Calendar.MINUTE, 30);
+
             Date e = cal.getTime();
-            CalendarDateRange range = new CalendarDateRange(s, e,
-                    getTimeZone());
+            CalendarDateRange range = new CalendarDateRange(s, e, getTimeZone());
+
             Action[] actions = actionHandler.getActions(range, this);
             if (actions != null) {
-                Set<Action> actionSet = new LinkedHashSet<Action>(
+                Set<Action> actionSet = new LinkedHashSet<>(
                         Arrays.asList(actions));
                 actionMap.put(range, actionSet);
             }
@@ -682,13 +685,12 @@ public class Calendar extends AbstractComponent
     }
 
     private void setActionsForDay(Map<CalendarDateRange, Set<Action>> actionMap,
-            Date start, Date end, Action.Handler actionHandler) {
-        CalendarDateRange range = new CalendarDateRange(start, end,
-                getTimeZone());
+                                  Date start, Date end, Action.Handler actionHandler) {
+
+        CalendarDateRange range = new CalendarDateRange(start, end, getTimeZone());
         Action[] actions = actionHandler.getActions(range, this);
         if (actions != null) {
-            Set<Action> actionSet = new LinkedHashSet<Action>(
-                    Arrays.asList(actions));
+            Set<Action> actionSet = new LinkedHashSet<>(Arrays.asList(actions));
             actionMap.put(range, actionSet);
         }
     }
@@ -699,7 +701,7 @@ public class Calendar extends AbstractComponent
             return null;
         }
 
-        List<CalendarState.Action> calendarActions = new ArrayList<CalendarState.Action>();
+        List<CalendarState.Action> calendarActions = new ArrayList<>();
 
         SimpleDateFormat formatter = new SimpleDateFormat(
                 DateConstants.ACTION_DATE_FORMAT_PATTERN);
@@ -742,7 +744,7 @@ public class Calendar extends AbstractComponent
                         .getTimeInstance(SimpleDateFormat.SHORT, getLocale());
             }
             String p = f.toPattern();
-            if (p.indexOf("HH") != -1 || p.indexOf("H") != -1) {
+            if (p.contains("H")) {
                 return TimeFormat.Format24H;
             }
             return TimeFormat.Format12H;
@@ -821,8 +823,7 @@ public class Calendar extends AbstractComponent
      *            the first day of the week to show, between 1 and 7
      */
     public void setFirstVisibleDayOfWeek(int firstDay) {
-        if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7
-                && getLastVisibleDayOfWeek() >= firstDay) {
+        if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7 && getLastVisibleDayOfWeek() >= firstDay) {
             this.firstDay = firstDay;
             getState().firstVisibleDayOfWeek = firstDay;
         }
@@ -856,8 +857,7 @@ public class Calendar extends AbstractComponent
      *            the first day of the week to show, between 1 and 7
      */
     public void setLastVisibleDayOfWeek(int lastDay) {
-        if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7
-                && getFirstVisibleDayOfWeek() <= lastDay) {
+        if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7 && getFirstVisibleDayOfWeek() <= lastDay) {
             this.lastDay = lastDay;
             getState().lastVisibleDayOfWeek = lastDay;
         }
@@ -893,8 +893,7 @@ public class Calendar extends AbstractComponent
      * @see #autoScaleVisibleHoursOfDay()
      */
     public void setFirstVisibleHourOfDay(int firstHour) {
-        if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23
-                && firstHour <= getLastVisibleHourOfDay()) {
+        if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23  && firstHour <= getLastVisibleHourOfDay()) {
             this.firstHour = firstHour;
             getState().firstHourOfDay = firstHour;
         }
@@ -925,8 +924,7 @@ public class Calendar extends AbstractComponent
      * @see #autoScaleVisibleHoursOfDay()
      */
     public void setLastVisibleHourOfDay(int lastHour) {
-        if (this.lastHour != lastHour && lastHour >= 0 && lastHour <= 23
-                && lastHour >= getFirstVisibleHourOfDay()) {
+        if (this.lastHour != lastHour && lastHour >= 0 && lastHour <= 23 && lastHour >= getFirstVisibleHourOfDay()) {
             this.lastHour = lastHour;
             getState().lastHourOfDay = lastHour;
         }
@@ -959,8 +957,7 @@ public class Calendar extends AbstractComponent
      */
     public void setWeeklyCaptionFormat(String dateFormatPattern) {
         if (weeklyCaptionFormat == null && dateFormatPattern != null
-                || weeklyCaptionFormat != null
-                        && !weeklyCaptionFormat.equals(dateFormatPattern)) {
+                || weeklyCaptionFormat != null && !weeklyCaptionFormat.equals(dateFormatPattern)) {
             weeklyCaptionFormat = dateFormatPattern;
             markAsDirty();
         }
@@ -977,8 +974,7 @@ public class Calendar extends AbstractComponent
         if (order == null) {
             getState().eventSortOrder = CalendarState.EventSortOrder.DURATION_DESC;
         } else {
-            getState().eventSortOrder = CalendarState.EventSortOrder.values()[order
-                    .ordinal()];
+            getState().eventSortOrder = CalendarState.EventSortOrder.values()[order.ordinal()];
         }
     }
 
@@ -1000,8 +996,7 @@ public class Calendar extends AbstractComponent
         if (weeklyCaptionFormat != null) {
             return new SimpleDateFormat(weeklyCaptionFormat, getLocale());
         } else {
-            return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT,
-                    getLocale());
+            return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, getLocale());
         }
     }
 
@@ -1131,8 +1126,9 @@ public class Calendar extends AbstractComponent
      *            The new end date and time of the event
      */
     protected void fireEventResize(int index, Date startTime, Date endTime) {
-        CalendarComponentEvents.EventResize event = new CalendarComponentEvents.EventResize(this, events.get(index), startTime,
-                endTime);
+
+        CalendarComponentEvents.EventResize event =
+                new CalendarComponentEvents.EventResize(this, events.get(index), startTime, endTime);
 
         if (calendarEventProvider instanceof CalendarComponentEvents.EventResizeHandler) {
             // Notify event provider if it is an event resize handler
@@ -1176,11 +1172,12 @@ public class Calendar extends AbstractComponent
      */
     protected Date getFirstDateForWeek(Date date) {
         int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
+
         currentCalendar.setTime(date);
-        while (firstDayOfWeek != currentCalendar
-                .get(java.util.Calendar.DAY_OF_WEEK)) {
+        while (firstDayOfWeek != currentCalendar.get(java.util.Calendar.DAY_OF_WEEK)) {
             currentCalendar.add(java.util.Calendar.DATE, -1);
         }
+
         return currentCalendar.getTime();
     }
 
@@ -1193,16 +1190,20 @@ public class Calendar extends AbstractComponent
      * @return Date that is last date in same week that given date is.
      */
     protected Date getLastDateForWeek(Date date) {
+
         currentCalendar.setTime(date);
         currentCalendar.add(java.util.Calendar.DATE, 1);
+
         int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
+
         // Roll to weeks last day using firstdayofweek. Roll until FDofW is
         // found and then roll back one day.
-        while (firstDayOfWeek != currentCalendar
-                .get(java.util.Calendar.DAY_OF_WEEK)) {
+        while (firstDayOfWeek != currentCalendar.get(java.util.Calendar.DAY_OF_WEEK)) {
             currentCalendar.add(java.util.Calendar.DATE, 1);
         }
+
         currentCalendar.add(java.util.Calendar.DATE, -1);
+
         return currentCalendar.getTime();
     }
 
@@ -1216,8 +1217,7 @@ public class Calendar extends AbstractComponent
      * @return the given date, with time set to the end of the day
      */
     private static Date getEndOfDay(java.util.Calendar calendar, Date date) {
-        java.util.Calendar calendarClone = (java.util.Calendar) calendar
-                .clone();
+        java.util.Calendar calendarClone = (java.util.Calendar) calendar.clone();
 
         calendarClone.setTime(date);
         calendarClone.set(java.util.Calendar.MILLISECOND,
@@ -1244,8 +1244,7 @@ public class Calendar extends AbstractComponent
      * @return the given date, with time set to the end of the day
      */
     private static Date getStartOfDay(java.util.Calendar calendar, Date date) {
-        java.util.Calendar calendarClone = (java.util.Calendar) calendar
-                .clone();
+        java.util.Calendar calendarClone = (java.util.Calendar) calendar.clone();
 
         calendarClone.setTime(date);
         calendarClone.set(java.util.Calendar.MILLISECOND, 0);
@@ -1327,7 +1326,8 @@ public class Calendar extends AbstractComponent
      * @param calendarEventProvider
      *            the calendarEventProvider to set. Cannot be null.
      */
-    public void setEventProvider(CalendarEventProvider calendarEventProvider) {
+    public void setEventProvider(CalendarEventProvider<EVENT> calendarEventProvider) {
+
         if (calendarEventProvider == null) {
             throw new IllegalArgumentException(
                     "Calendar event provider cannot be null");
@@ -1335,23 +1335,21 @@ public class Calendar extends AbstractComponent
 
         // remove old listener
         if (getEventProvider() instanceof EventSetChangeNotifier) {
-            ((EventSetChangeNotifier) getEventProvider())
-                    .removeEventSetChangeListener(this);
+            ((EventSetChangeNotifier) getEventProvider()).removeEventSetChangeListener(this);
         }
 
         this.calendarEventProvider = calendarEventProvider;
 
         // add new listener
         if (calendarEventProvider instanceof EventSetChangeNotifier) {
-            ((EventSetChangeNotifier) calendarEventProvider)
-                    .addEventSetChangeListener(this);
+            ((EventSetChangeNotifier) calendarEventProvider).addEventSetChangeListener(this);
         }
     }
 
     /**
      * @return the {@link CalendarEventProvider} currently used
      */
-    public CalendarEventProvider getEventProvider() {
+    public CalendarEventProvider<EVENT> getEventProvider() {
         return calendarEventProvider;
     }
 
@@ -1432,7 +1430,6 @@ public class Calendar extends AbstractComponent
     public void setHandler(CalendarComponentEvents.RangeSelectHandler listener) {
         setHandler(CalendarComponentEvents.RangeSelectEvent.EVENT_ID, CalendarComponentEvents.RangeSelectEvent.class, listener,
                 CalendarComponentEvents.RangeSelectHandler.rangeSelectMethod);
-
     }
 
     @Override
@@ -1466,9 +1463,8 @@ public class Calendar extends AbstractComponent
     }
 
     @Override
-    public TargetDetails translateDropTargetDetails(
-            Map<String, Object> clientVariables) {
-        Map<String, Object> serverVariables = new HashMap<String, Object>();
+    public TargetDetails translateDropTargetDetails(Map<String, Object> clientVariables) {
+        Map<String, Object> serverVariables = new HashMap<>();
 
         if (clientVariables.containsKey("dropSlotIndex")) {
             int slotIndex = (Integer) clientVariables.get("dropSlotIndex");
@@ -1490,24 +1486,24 @@ public class Calendar extends AbstractComponent
         }
         serverVariables.put("mouseEvent", clientVariables.get("mouseEvent"));
 
-        CalendarTargetDetails td = new CalendarTargetDetails(serverVariables,
-                this);
+        CalendarTargetDetails td = new CalendarTargetDetails(serverVariables, this);
         td.setHasDropTime(clientVariables.containsKey("dropSlotIndex"));
 
         return td;
     }
 
     @Override
-    public List<CalendarEvent> getEvents(Date startDate, Date endDate) {
-        List<CalendarEvent> events = getEventProvider().getEvents(startDate, endDate);
+    public List<EVENT> getEvents(Date startDate, Date endDate) {
+        List<EVENT> events = getEventProvider().getEvents(startDate, endDate);
         cacheMinMaxTimeOfDay(events);
         return events;
     }
 
     @Override
-    public void addEvent(CalendarEvent event) {
+    public void addEvent(EditableCalendarEvent event) {
         if (getEventProvider() instanceof CalendarEditableEventProvider) {
-            CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
+            CalendarEditableEventProvider<EditableCalendarEvent> provider =
+                    (CalendarEditableEventProvider<EditableCalendarEvent>) getEventProvider();
             provider.addEvent(event);
             markAsDirty();
         } else {
@@ -1517,9 +1513,10 @@ public class Calendar extends AbstractComponent
     }
 
     @Override
-    public void removeEvent(CalendarEvent event) {
+    public void removeEvent(EditableCalendarEvent event) {
         if (getEventProvider() instanceof CalendarEditableEventProvider) {
-            CalendarEditableEventProvider provider = (CalendarEditableEventProvider) getEventProvider();
+            CalendarEditableEventProvider<EditableCalendarEvent> provider =
+                    (CalendarEditableEventProvider<EditableCalendarEvent>) getEventProvider();
             provider.removeEvent(event);
             markAsDirty();
         } else {
@@ -1745,13 +1742,15 @@ public class Calendar extends AbstractComponent
         }
 
         @Override
-        public void eventResize(int eventIndex, String newStartDate,
-                String newEndDate) {
+        public void eventResize(int eventIndex, String newStartDate, String newEndDate) {
+
             if (!isClientChangeAllowed()) {
                 return;
             }
+
             if (newStartDate != null && !"".equals(newStartDate)
                     && newEndDate != null && !"".equals(newEndDate)) {
+
                 try {
                     Date newStartTime = df_date_time.parse(newStartDate);
                     Date newEndTime = df_date_time.parse(newEndDate);
@@ -1770,12 +1769,12 @@ public class Calendar extends AbstractComponent
         }
 
         @Override
-        public void actionOnEmptyCell(String actionKey, String startDate,
-                String endDate) {
+        public void actionOnEmptyCell(String actionKey, String startDate, String endDate) {
+
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(
-                    DateConstants.ACTION_DATE_FORMAT_PATTERN);
+            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
             formatter.setTimeZone(getTimeZone());
+
             try {
                 Date start = formatter.parse(startDate);
                 for (Action.Handler ah : actionHandlers) {
@@ -1790,12 +1789,12 @@ public class Calendar extends AbstractComponent
         }
 
         @Override
-        public void actionOnEvent(String actionKey, String startDate,
-                String endDate, int eventIndex) {
+        public void actionOnEvent(String actionKey, String startDate, String endDate, int eventIndex) {
+
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(
-                    DateConstants.ACTION_DATE_FORMAT_PATTERN);
+            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
             formatter.setTimeZone(getTimeZone());
+
             for (Action.Handler ah : actionHandlers) {
                 ah.handleAction(action, Calendar.this, events.get(eventIndex));
             }
@@ -1904,14 +1903,16 @@ public class Calendar extends AbstractComponent
      *            or null to revert to default first day of week by locale
      */
     public void setFirstDayOfWeek(Integer dayOfWeek) {
+
         int minimalSupported = java.util.Calendar.SUNDAY;
         int maximalSupported = java.util.Calendar.SATURDAY;
-        if (dayOfWeek != null && (dayOfWeek < minimalSupported
-                || dayOfWeek > maximalSupported)) {
+
+        if (dayOfWeek != null && (dayOfWeek < minimalSupported || dayOfWeek > maximalSupported)) {
             throw new IllegalArgumentException(String.format(
                     "Day of week must be between %s and %s. Actually received: %s",
                     minimalSupported, maximalSupported, dayOfWeek));
         }
+
         customFirstDayOfWeek = dayOfWeek;
         markAsDirty();
     }

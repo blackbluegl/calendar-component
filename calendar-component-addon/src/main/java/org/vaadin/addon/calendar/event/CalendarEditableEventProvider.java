@@ -23,7 +23,7 @@ package org.vaadin.addon.calendar.event;
  * @author Vaadin Ltd.
  */
 
-public interface CalendarEditableEventProvider<V extends CalendarEvent> extends CalendarEventProvider<V> {
+public interface CalendarEditableEventProvider<EVENT extends EditableCalendarEvent> extends CalendarEventProvider<EVENT> {
 
     /**
      * Adds an event to the event provider
@@ -31,7 +31,7 @@ public interface CalendarEditableEventProvider<V extends CalendarEvent> extends 
      * @param event
      *            The event to add
      */
-    void addEvent(V event);
+    void addEvent(EVENT event);
 
     /**
      * Removes an event from the event provider
@@ -39,6 +39,6 @@ public interface CalendarEditableEventProvider<V extends CalendarEvent> extends 
      * @param event
      *            The event
      */
-    void removeEvent(V event);
+    void removeEvent(EVENT event);
 
 }
