@@ -16,9 +16,8 @@
 package org.vaadin.addon.calendar.client.ui.schedule;
 
 import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.user.client.ui.HTML;
-import com.vaadin.client.Util;
+import com.vaadin.client.WidgetUtil;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 import java.util.Date;
@@ -28,37 +27,33 @@ import java.util.Date;
  *
  * @since 7.1
  */
-public class MonthEventLabel extends HTML implements HasTooltipKey {
+public class MonthItemLabel extends HTML implements HasTooltipKey {
 
     private static final String STYLENAME = "v-calendar-event";
 
     private boolean timeSpecificEvent = false;
-    private Integer eventIndex;
+    private Integer itemIndex;
     private VCalendar calendar;
     private String caption;
     private Date time;
 
-    private CalendarEvent calendarEvent;
+    private CalendarItem calendarItem;
 
     /**
      * Default constructor
      */
-    public MonthEventLabel() {
+    public MonthItemLabel() {
         setStylePrimaryName(STYLENAME);
 
-        addDomHandler(new ContextMenuHandler() {
-            @Override
-            public void onContextMenu(ContextMenuEvent event) {
-                calendar.getMouseEventListener().contextMenu(event,
-                        MonthEventLabel.this);
-                event.stopPropagation();
-                event.preventDefault();
-            }
+        addDomHandler(contextMenuEvent -> {
+            calendar.getMouseEventListener().contextMenu(contextMenuEvent, MonthItemLabel.this);
+            contextMenuEvent.stopPropagation();
+            contextMenuEvent.preventDefault();
         }, ContextMenuEvent.getType());
     }
 
-    public void setCalendarEvent(CalendarEvent e) {
-        calendarEvent = e;
+    public void setCalendarItem(CalendarItem e) {
+        calendarItem = e;
     }
 
     /**
@@ -77,7 +72,7 @@ public class MonthEventLabel extends HTML implements HasTooltipKey {
      *
      * @param caption
      *            The caption string, can be HTML if
-     *            {@link VCalendar#isEventCaptionAsHtml()} is true
+     *            {@link VCalendar#isItemCaptionAsHtml()} is true
      */
     public void setCaption(String caption) {
         this.caption = caption;
@@ -90,10 +85,10 @@ public class MonthEventLabel extends HTML implements HasTooltipKey {
     private void renderCaption() {
         StringBuilder html = new StringBuilder();
         String textOrHtml;
-        if (calendar.isEventCaptionAsHtml()) {
+        if (calendar.isItemCaptionAsHtml()) {
             textOrHtml = caption;
         } else {
-            textOrHtml = Util.escapeHTML(caption);
+            textOrHtml = WidgetUtil.escapeHTML(caption);
         }
 
         if (caption != null && time != null) {
@@ -112,13 +107,13 @@ public class MonthEventLabel extends HTML implements HasTooltipKey {
     }
 
     /**
-     * Set the (server side) index of the event
+     * Set the (server side) index of the item
      *
      * @param index
      *            The integer index
      */
-    public void setEventIndex(int index) {
-        eventIndex = index;
+    public void setItemIndex(int index) {
+        itemIndex = index;
     }
 
     /**
@@ -132,16 +127,16 @@ public class MonthEventLabel extends HTML implements HasTooltipKey {
     }
 
     /**
-     * Is the event bound to a specific time
+     * Is the item bound to a specific time
      *
-     * @return
+     * @return true, if the item bound to a specific time
      */
     public boolean isTimeSpecificEvent() {
         return timeSpecificEvent;
     }
 
     /**
-     * Is the event bound to a specific time
+     * Is the item bound to a specific time
      *
      * @param timeSpecificEvent
      *            True if the event is bound to a time, false if it is only
@@ -164,10 +159,10 @@ public class MonthEventLabel extends HTML implements HasTooltipKey {
 
     @Override
     public Object getTooltipKey() {
-        return eventIndex;
+        return itemIndex;
     }
 
-    public CalendarEvent getCalendarEvent() {
-        return calendarEvent;
+    public CalendarItem getCalendarItem() {
+        return calendarItem;
     }
 }

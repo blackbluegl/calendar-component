@@ -38,8 +38,7 @@ public class CalendarTargetDetails extends TargetDetailsImpl {
 
     private boolean hasDropTime;
 
-    public CalendarTargetDetails(Map<String, Object> rawDropData,
-            DropTarget dropTarget) {
+    public CalendarTargetDetails(Map<String, Object> rawDropData, DropTarget dropTarget) {
         super(rawDropData, dropTarget);
     }
 

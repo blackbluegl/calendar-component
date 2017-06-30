@@ -18,7 +18,7 @@ package org.vaadin.addon.calendar.ui;
 import com.vaadin.util.ReflectTools;
 import org.vaadin.addon.calendar.Calendar;
 import org.vaadin.addon.calendar.client.CalendarEventId;
-import org.vaadin.addon.calendar.event.CalendarEvent;
+import org.vaadin.addon.calendar.event.CalendarItem;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.EventListener;
 
 /**
- * Interface for all Vaadin Calendar events.
+ * Interface for all Vaadin Calendar items.
  *
  * @since 7.1.0
  * @author Vaadin Ltd.
@@ -35,114 +35,24 @@ import java.util.EventListener;
 public interface CalendarComponentEvents extends Serializable {
 
     /**
-     * Notifier interface for notifying listener of calendar events
+     * Notifier interface for notifying listener of calendar items
      */
 
-    public interface CalendarEventNotifier extends Serializable {
+    interface CalendarEventNotifier extends Serializable {
         /**
          * Get the assigned event handler for the given eventId.
          *
          * @param eventId
          * @return the assigned eventHandler, or null if no handler is assigned
          */
-        public EventListener getHandler(String eventId);
-    }
-
-    /**
-     * Notifier interface for event drag & drops.
-     */
-
-    public interface EventMoveNotifier extends CalendarEventNotifier {
-
-        /**
-         * Set the EventMoveHandler.
-         *
-         * @param listener
-         *            EventMoveHandler to be added
-         */
-        public void setHandler(EventMoveHandler listener);
-
-    }
-
-    /**
-     * MoveEvent is sent when existing event is dragged to a new position.
-     */
-    @SuppressWarnings("serial")
-    public class MoveEvent extends CalendarComponentEvent {
-
-        public static final String EVENT_ID = CalendarEventId.EVENTMOVE;
-
-        /** Index for the moved Schedule.Event. */
-        private CalendarEvent calendarEvent;
-
-        /** New starting date for the moved Calendar.Event. */
-        private Date newStart;
-
-        /**
-         * MoveEvent needs the target event and new start date.
-         *
-         * @param source
-         *            Calendar component.
-         * @param calendarEvent
-         *            Target event.
-         * @param newStart
-         *            Target event's new start date.
-         */
-        public MoveEvent(Calendar source, CalendarEvent calendarEvent,
-                         Date newStart) {
-            super(source);
-
-            this.calendarEvent = calendarEvent;
-            this.newStart = newStart;
-        }
-
-        /**
-         * Get target event.
-         *
-         * @return Target event.
-         */
-        public CalendarEvent getCalendarEvent() {
-            return calendarEvent;
-        }
-
-        /**
-         * Get new start date.
-         *
-         * @return New start date.
-         */
-        public Date getNewStart() {
-            return newStart;
-        }
-    }
-
-    /**
-     * Handler interface for when events are being dragged on the calendar
-     *
-     */
-
-    public interface EventMoveHandler extends EventListener, Serializable {
-
-        /** Trigger method for the MoveEvent. */
-        public static final Method eventMoveMethod = ReflectTools.findMethod(
-                EventMoveHandler.class, "eventMove", MoveEvent.class);
-
-        /**
-         * This method will be called when event has been moved to a new
-         * position.
-         *
-         * @param event
-         *            MoveEvent containing specific information of the new
-         *            position and target event.
-         */
-        public void eventMove(MoveEvent event);
+        EventListener getHandler(String eventId);
     }
 
     /**
      * Handler interface for day or time cell drag-marking with mouse.
      */
 
-    public interface RangeSelectNotifier
-            extends Serializable, CalendarEventNotifier {
+    interface RangeSelectNotifier extends Serializable, CalendarEventNotifier {
 
         /**
          * Set the RangeSelectHandler that listens for drag-marking.
@@ -150,7 +60,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param listener
          *            RangeSelectHandler to be added.
          */
-        public void setHandler(RangeSelectHandler listener);
+        void setHandler(RangeSelectHandler listener);
     }
 
     /**
@@ -158,7 +68,7 @@ public interface CalendarComponentEvents extends Serializable {
      * mouse.
      */
     @SuppressWarnings("serial")
-    public class RangeSelectEvent extends CalendarComponentEvent {
+    class RangeSelectEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.RANGESELECT;
 
@@ -205,10 +115,10 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** RangeSelectHandler handles RangeSelectEvent. */
-    public interface RangeSelectHandler extends EventListener, Serializable {
+    interface RangeSelectHandler extends EventListener, Serializable {
 
         /** Trigger method for the RangeSelectEvent. */
-        public static final Method rangeSelectMethod = ReflectTools.findMethod(
+        Method rangeSelectMethod = ReflectTools.findMethod(
                 RangeSelectHandler.class, "rangeSelect",
                 RangeSelectEvent.class);
 
@@ -219,18 +129,18 @@ public interface CalendarComponentEvents extends Serializable {
          * @param event
          *            RangeSelectEvent that contains range start and end date.
          */
-        public void rangeSelect(RangeSelectEvent event);
+        void rangeSelect(RangeSelectEvent event);
     }
 
     /** Notifier interface for navigation listening. */
-    public interface NavigationNotifier extends Serializable {
+    interface NavigationNotifier extends Serializable {
         /**
          * Add a forward navigation listener.
          *
          * @param handler
          *            ForwardHandler to be added.
          */
-        public void setHandler(ForwardHandler handler);
+        void setHandler(ForwardHandler handler);
 
         /**
          * Add a backward navigation listener.
@@ -238,7 +148,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            BackwardHandler to be added.
          */
-        public void setHandler(BackwardHandler handler);
+        void setHandler(BackwardHandler handler);
 
         /**
          * Add a date click listener.
@@ -246,15 +156,15 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            DateClickHandler to be added.
          */
-        public void setHandler(DateClickHandler handler);
+        void setHandler(DateClickHandler handler);
 
         /**
-         * Add a event click listener.
+         * Add a item click listener.
          *
          * @param handler
-         *            EventClickHandler to be added.
+         *            ItemClickHandler to be added.
          */
-        public void setHandler(EventClickHandler handler);
+        void setHandler(ItemClickHandler handler);
 
         /**
          * Add a week click listener.
@@ -262,14 +172,14 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            WeekClickHandler to be added.
          */
-        public void setHandler(WeekClickHandler handler);
+        void setHandler(WeekClickHandler handler);
     }
 
     /**
      * ForwardEvent is sent when forward navigation button is clicked.
      */
     @SuppressWarnings("serial")
-    public class ForwardEvent extends CalendarComponentEvent {
+    class ForwardEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.FORWARD;
 
@@ -285,10 +195,10 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** ForwardHandler handles ForwardEvent. */
-    public interface ForwardHandler extends EventListener, Serializable {
+    interface ForwardHandler extends EventListener, Serializable {
 
         /** Trigger method for the ForwardEvent. */
-        public static final Method forwardMethod = ReflectTools.findMethod(
+        Method forwardMethod = ReflectTools.findMethod(
                 ForwardHandler.class, "forward", ForwardEvent.class);
 
         /**
@@ -297,14 +207,14 @@ public interface CalendarComponentEvents extends Serializable {
          * @param event
          *            ForwardEvent
          */
-        public void forward(ForwardEvent event);
+        void forward(ForwardEvent event);
     }
 
     /**
      * BackwardEvent is sent when backward navigation button is clicked.
      */
     @SuppressWarnings("serial")
-    public class BackwardEvent extends CalendarComponentEvent {
+    class BackwardEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.BACKWARD;
 
@@ -320,10 +230,10 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** BackwardHandler handles BackwardEvent. */
-    public interface BackwardHandler extends EventListener, Serializable {
+    interface BackwardHandler extends EventListener, Serializable {
 
         /** Trigger method for the BackwardEvent. */
-        public static final Method backwardMethod = ReflectTools.findMethod(
+        Method backwardMethod = ReflectTools.findMethod(
                 BackwardHandler.class, "backward", BackwardEvent.class);
 
         /**
@@ -332,14 +242,14 @@ public interface CalendarComponentEvents extends Serializable {
          * @param event
          *            BackwardEvent
          */
-        public void backward(BackwardEvent event);
+        void backward(BackwardEvent event);
     }
 
     /**
      * DateClickEvent is sent when a date is clicked.
      */
     @SuppressWarnings("serial")
-    public class DateClickEvent extends CalendarComponentEvent {
+    class DateClickEvent extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.DATECLICK;
 
@@ -363,10 +273,10 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** DateClickHandler handles DateClickEvent. */
-    public interface DateClickHandler extends EventListener, Serializable {
+    interface DateClickHandler extends EventListener, Serializable {
 
         /** Trigger method for the DateClickEvent. */
-        public static final Method dateClickMethod = ReflectTools.findMethod(
+        Method dateClickMethod = ReflectTools.findMethod(
                 DateClickHandler.class, "dateClick", DateClickEvent.class);
 
         /**
@@ -375,57 +285,14 @@ public interface CalendarComponentEvents extends Serializable {
          * @param event
          *            DateClickEvent containing the target date.
          */
-        public void dateClick(DateClickEvent event);
-    }
-
-    /**
-     * EventClick is sent when an event is clicked.
-     */
-    @SuppressWarnings("serial")
-    public class EventClick extends CalendarComponentEvent {
-
-        public static final String EVENT_ID = CalendarEventId.EVENTCLICK;
-
-        /** Clicked source event. */
-        private CalendarEvent calendarEvent;
-
-        /** Target source event is needed for the EventClick. */
-        public EventClick(Calendar source, CalendarEvent calendarEvent) {
-            super(source);
-            this.calendarEvent = calendarEvent;
-        }
-
-        /**
-         * Get the clicked event.
-         *
-         * @return Clicked event.
-         */
-        public CalendarEvent getCalendarEvent() {
-            return calendarEvent;
-        }
-    }
-
-    /** EventClickHandler handles EventClick. */
-    public interface EventClickHandler extends EventListener, Serializable {
-
-        /** Trigger method for the EventClick. */
-        public static final Method eventClickMethod = ReflectTools.findMethod(
-                EventClickHandler.class, "eventClick", EventClick.class);
-
-        /**
-         * This method will be called when an event is clicked.
-         *
-         * @param event
-         *            EventClick containing the target event.
-         */
-        public void eventClick(EventClick event);
+        void dateClick(DateClickEvent event);
     }
 
     /**
      * WeekClick is sent when week is clicked.
      */
     @SuppressWarnings("serial")
-    public class WeekClick extends CalendarComponentEvent {
+    class WeekClick extends CalendarComponentEvent {
 
         public static final String EVENT_ID = CalendarEventId.WEEKCLICK;
 
@@ -473,10 +340,10 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /** WeekClickHandler handles WeekClicks. */
-    public interface WeekClickHandler extends EventListener, Serializable {
+    interface WeekClickHandler extends EventListener, Serializable {
 
         /** Trigger method for the WeekClick. */
-        public static final Method weekClickMethod = ReflectTools.findMethod(
+        Method weekClickMethod = ReflectTools.findMethod(
                 WeekClickHandler.class, "weekClick", WeekClick.class);
 
         /**
@@ -485,27 +352,27 @@ public interface CalendarComponentEvents extends Serializable {
          * @param event
          *            WeekClick containing the target week and year.
          */
-        public void weekClick(WeekClick event);
+        void weekClick(WeekClick event);
     }
 
     /**
-     * EventResize is sent when an event is resized
+     * ItemResizeEvent is sent when an item is resized
      */
     @SuppressWarnings("serial")
-    public class EventResize extends CalendarComponentEvent {
+    class ItemResizeEvent extends CalendarComponentEvent {
 
-        public static final String EVENT_ID = CalendarEventId.EVENTRESIZE;
+        public static final String EVENT_ID = CalendarEventId.ITEM_RESIZE;
 
-        private CalendarEvent calendarEvent;
+        private CalendarItem calendarItem;
 
         private Date startTime;
 
         private Date endTime;
 
-        public EventResize(Calendar source, CalendarEvent calendarEvent,
-                Date startTime, Date endTime) {
+        public ItemResizeEvent(Calendar source, CalendarItem calendarItem,
+                               Date startTime, Date endTime) {
             super(source);
-            this.calendarEvent = calendarEvent;
+            this.calendarItem = calendarItem;
             this.startTime = startTime;
             this.endTime = endTime;
         }
@@ -515,8 +382,8 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return Target event.
          */
-        public CalendarEvent getCalendarEvent() {
-            return calendarEvent;
+        public CalendarItem getCalendarItem() {
+            return calendarItem;
         }
 
         /**
@@ -549,7 +416,7 @@ public interface CalendarComponentEvents extends Serializable {
         /**
          * Returns the updates end date/time of the event
          *
-         * @return The new date for the event
+         * @return The new date for the item
          */
         public Date getNewEnd() {
             return endTime;
@@ -557,29 +424,159 @@ public interface CalendarComponentEvents extends Serializable {
     }
 
     /**
-     * Notifier interface for event resizing.
+     * Notifier interface for item resizing.
      */
-    public interface EventResizeNotifier extends Serializable {
+    interface ItemResizeNotifier extends Serializable {
 
         /**
-         * Set a EventResizeHandler.
+         * Set a ItemResizeHandler.
          *
          * @param handler
-         *            EventResizeHandler to be set
+         *            ItemResizeHandler to be set
          */
-        public void setHandler(EventResizeHandler handler);
+        void setHandler(EventResizeHandler handler);
     }
 
     /**
-     * Handler for EventResize event.
+     * Handler for ItemResizeEvent event.
      */
-    public interface EventResizeHandler extends EventListener, Serializable {
+    interface EventResizeHandler extends EventListener, Serializable {
 
-        /** Trigger method for the EventResize. */
-        public static final Method eventResizeMethod = ReflectTools.findMethod(
-                EventResizeHandler.class, "eventResize", EventResize.class);
+        /** Trigger method for the ItemResizeEvent. */
+        Method itemResizeMethod = ReflectTools.findMethod(
+                EventResizeHandler.class, "itemResize", ItemResizeEvent.class);
 
-        void eventResize(EventResize event);
+        void itemResize(ItemResizeEvent event);
     }
 
+    /**
+     * Notifier interface for item drag & drops.
+     */
+    interface ItemMoveNotifier extends CalendarEventNotifier {
+
+        /**
+         * Set the ItemMoveHandler.
+         *
+         * @param listener
+         *            ItemMoveHandler to be added
+         */
+        void setHandler(ItemMoveHandler listener);
+
+    }
+
+    /**
+     * ItemMoveEvent is sent when existing item is dragged to a new position.
+     */
+    @SuppressWarnings("serial")
+    class ItemMoveEvent extends CalendarComponentEvent {
+
+        public static final String EVENT_ID = CalendarEventId.ITEM_MOVE;
+
+        /** Index for the moved Schedule.Item. */
+        private CalendarItem calendarItem;
+
+        /** New starting date for the moved Calendar.Item. */
+        private Date newStart;
+
+        /**
+         * ItemMoveEvent needs the target event and new start date.
+         *
+         * @param source
+         *            Calendar component.
+         * @param calendarItem
+         *            Target event.
+         * @param newStart
+         *            Target event's new start date.
+         */
+        public ItemMoveEvent(Calendar source, CalendarItem calendarItem,
+                             Date newStart) {
+            super(source);
+
+            this.calendarItem = calendarItem;
+            this.newStart = newStart;
+        }
+
+        /**
+         * Get target event.
+         *
+         * @return Target event.
+         */
+        public CalendarItem getCalendarItem() {
+            return calendarItem;
+        }
+
+        /**
+         * Get new start date.
+         *
+         * @return New start date.
+         */
+        public Date getNewStart() {
+            return newStart;
+        }
+    }
+
+    /**
+     * Handler interface for when items are being dragged on the calendar     *
+     */
+    interface ItemMoveHandler extends EventListener, Serializable {
+
+        /** Trigger method for the ItemMoveEvent. */
+        Method itemMoveMethod = ReflectTools.findMethod(
+                ItemMoveHandler.class, "itemMove", ItemMoveEvent.class);
+
+        /**
+         * This method will be called when item has been moved to a new
+         * position.
+         *
+         * @param event
+         *            ItemMoveEvent containing specific information of the new
+         *            position and target event.
+         */
+        void itemMove(ItemMoveEvent event);
+    }
+
+    /**
+     * ItemClickEvent is sent when an item is clicked.
+     */
+    @SuppressWarnings("serial")
+    class ItemClickEvent extends CalendarComponentEvent {
+
+        public static final String EVENT_ID = CalendarEventId.ITEM_CLICK;
+
+        /** Clicked source event. */
+        private CalendarItem calendarItem;
+
+        /** Target source event is needed for the ItemClickEvent. */
+        public ItemClickEvent(Calendar source, CalendarItem calendarItem) {
+            super(source);
+            this.calendarItem = calendarItem;
+        }
+
+        /**
+         * Get the clicked event.
+         *
+         * @return Clicked event.
+         */
+        public CalendarItem getCalendarItem() {
+            return calendarItem;
+        }
+    }
+
+    /**
+     * ItemClickHandler handles ItemClickEvent.
+     */
+    interface ItemClickHandler extends EventListener, Serializable {
+
+        /** Trigger method for the ItemClickEvent. */
+        Method itemClickMethod = ReflectTools.findMethod(
+                ItemClickHandler.class, "itemClick", ItemClickEvent.class);
+
+        /**
+         * This method will be called when an item is clicked.
+         *
+         * @param event
+         *            ItemClickEvent containing the target item.
+         */
+        void itemClick(ItemClickEvent event);
+    }
 }

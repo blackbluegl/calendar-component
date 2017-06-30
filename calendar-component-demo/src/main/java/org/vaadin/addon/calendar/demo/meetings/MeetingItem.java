@@ -1,6 +1,6 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
-import org.vaadin.addon.calendar.event.BasicEvent;
+import org.vaadin.addon.calendar.event.BasicItem;
 
 import java.util.Date;
 
@@ -8,7 +8,7 @@ import java.util.Date;
  * Meeting Pojo
  */
 
-public class MeetingItem extends BasicEvent {
+public class MeetingItem extends BasicItem {
 
 	private final Meeting meeting;
 

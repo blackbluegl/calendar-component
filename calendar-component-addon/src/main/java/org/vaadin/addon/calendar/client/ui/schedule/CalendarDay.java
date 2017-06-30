@@ -23,14 +23,14 @@ package org.vaadin.addon.calendar.client.ui.schedule;
  * @author Vaadin Ltd.
  */
 public class CalendarDay {
+
     private String date;
     private String localizedDateFormat;
     private int dayOfWeek;
     private int week;
     private int yearOfWeek;
 
-    public CalendarDay(String date, String localizedDateFormat, int dayOfWeek,
-            int week, int yearOfWeek) {
+    public CalendarDay(String date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek) {
         super();
         this.date = date;
         this.localizedDateFormat = localizedDateFormat;

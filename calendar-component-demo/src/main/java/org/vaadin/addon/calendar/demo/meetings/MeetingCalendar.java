@@ -6,19 +6,22 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.event.BasicEventProvider;
+import org.vaadin.addon.calendar.event.BasicItemProvider;
 import org.vaadin.addon.calendar.handler.BasicBackwardHandler;
-import org.vaadin.addon.calendar.handler.BasicEventMoveHandler;
-import org.vaadin.addon.calendar.handler.BasicEventResizeHandler;
+import org.vaadin.addon.calendar.handler.BasicItemMoveHandler;
+import org.vaadin.addon.calendar.handler.BasicItemResizeHandler;
 import org.vaadin.addon.calendar.handler.BasicForwardHandler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 
 
 public class MeetingCalendar extends CustomComponent {
+
+    private final Random R = new Random(0);
 
     private MeetingDataProvider eventProvider;
 
@@ -49,7 +52,7 @@ public class MeetingCalendar extends CustomComponent {
         // erstelle Kalendereinträge neu
         for (Meeting boo : meetings) {
             MeetingItem i = new MeetingItem(boo);
-            eventProvider.addEvent(i);
+            eventProvider.addItem(i);
         }
     }
 
@@ -62,12 +65,15 @@ public class MeetingCalendar extends CustomComponent {
         meeting.setName("A Name");
         meeting.setDetails("A Detail");
 
-        eventProvider.addEvent(new MeetingItem(meeting));
+        // Random state
+        meeting.setState(R.nextInt(2) == 1 ? Meeting.State.planned : Meeting.State.confirmed);
+
+        eventProvider.addItem(new MeetingItem(meeting));
 	}
 
-    private void onCalendarClick(CalendarComponentEvents.EventClick event) {
+    private void onCalendarClick(CalendarComponentEvents.ItemClickEvent event) {
 
-        MeetingItem item = (MeetingItem) event.getCalendarEvent();
+        MeetingItem item = (MeetingItem) event.getCalendarItem();
 
         final Meeting meeting = item.getMeeting();
 
@@ -85,11 +91,11 @@ public class MeetingCalendar extends CustomComponent {
 
         calendar = new Calendar<>(eventProvider);
 
-        calendar.addStyleName("noselect");
+        calendar.addStyleName("meetings");
         calendar.setLocale(Locale.getDefault());
         calendar.setWidth(100.0f, Unit.PERCENTAGE);
         calendar.setHeight(100.0f, Unit.PERCENTAGE);
-        calendar.setEventCaptionAsHtml(true);
+        calendar.setItemCaptionAsHtml(true);
         calendar.setResponsive(true);
 
         calendar.setContentMode(ContentMode.HTML);
@@ -104,18 +110,18 @@ public class MeetingCalendar extends CustomComponent {
     private void addCalendarEventListeners() {
         calendar.setHandler(new ExtendedForwardHandler());
         calendar.setHandler(new ExtendedBackwardHandler());
-        calendar.setHandler(new ExtendedBasicEventMoveHandler());
-        calendar.setHandler(new ExtendedEventResizeHandler());
+        calendar.setHandler(new ExtendedBasicItemMoveHandler());
+        calendar.setHandler(new ExtendedItemResizeHandler());
         calendar.setHandler(this::onCalendarClick);
         calendar.setHandler(this::onCalendarRangeSelect);
     }
 
-    private final class ExtendedBasicEventMoveHandler extends BasicEventMoveHandler {
+    private final class ExtendedBasicItemMoveHandler extends BasicItemMoveHandler {
 
         @Override
-        public void eventMove(CalendarComponentEvents.MoveEvent event) {
+        public void itemMove(CalendarComponentEvents.ItemMoveEvent event) {
 
-            MeetingItem item = (MeetingItem) event.getCalendarEvent();
+            MeetingItem item = (MeetingItem) event.getCalendarItem();
 
             Meeting meeting = item.getMeeting();
 
@@ -134,13 +140,13 @@ public class MeetingCalendar extends CustomComponent {
         }
     }
 
-    private final class ExtendedEventResizeHandler extends BasicEventResizeHandler {
+    private final class ExtendedItemResizeHandler extends BasicItemResizeHandler {
 
         @Override
-        public void eventResize(CalendarComponentEvents.EventResize event) {
+        public void itemResize(CalendarComponentEvents.ItemResizeEvent event) {
 
 
-            MeetingItem item = (MeetingItem) event.getCalendarEvent();
+            MeetingItem item = (MeetingItem) event.getCalendarItem();
             Meeting meeting = item.getMeeting();
 
             if (meeting.isEditable()) {
@@ -179,11 +185,11 @@ public class MeetingCalendar extends CustomComponent {
         }
     }
 
-    private final class MeetingDataProvider extends BasicEventProvider<MeetingItem> {
+    private final class MeetingDataProvider extends BasicItemProvider<MeetingItem> {
 
         void removeAllEvents() {
-            this.eventList.clear();
-            fireEventSetChange();
+            this.itemList.clear();
+            fireItemSetChanged();
         }
     }
 

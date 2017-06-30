@@ -279,7 +279,7 @@ public class WeekGrid extends SimplePanel {
         }
     }
 
-    public void addEvent(CalendarEvent e) {
+    public void addItem(CalendarItem e) {
         int dateCount = content.getWidgetCount();
         Date from = e.getStart();
         Date toTime = e.getEndTime();
@@ -294,7 +294,7 @@ public class WeekGrid extends SimplePanel {
                 // range floats over one day. It can't float over two days,
                 // because event which range is over 24 hours, will be handled
                 // as a "fullDay" event.
-                dc.addEvent(dcDate, e);
+                dc.addItem(dcDate, e);
             }
         }
     }
@@ -407,22 +407,32 @@ public class WeekGrid extends SimplePanel {
         return pixelsToTop;
     }
 
-    public void eventMoved(DateCellDayEvent dayEvent) {
-        Style s = dayEvent.getElement().getStyle();
-        int left = Integer
-                .parseInt(s.getLeft().substring(0, s.getLeft().length() - 2));
-        DateCell previousParent = (DateCell) dayEvent.getParent();
-        DateCell newParent = (DateCell) content
-                .getWidget((left / getDateCellWidth()) + 1);
-        CalendarEvent se = dayEvent.getCalendarEvent();
-        previousParent.removeEvent(dayEvent);
-        newParent.addEvent(dayEvent);
+    public void itemMoved(DateCellDayItem dayItem) {
+
+        Style s = dayItem.getElement().getStyle();
+
+        String si = s.getLeft().substring(0, s.getLeft().length() - 2);
+
+        // offset can be empty
+        if (si.isEmpty()) return;
+
+        int left =  Integer.parseInt(si);
+
+        DateCell previousParent = (DateCell) dayItem.getParent();
+        DateCell newParent = (DateCell) content.getWidget((left / getDateCellWidth()) + 1);
+
+        CalendarItem se = dayItem.getCalendarItem();
+        previousParent.removeEvent(dayItem);
+        newParent.addItem(dayItem);
+
         if (!previousParent.equals(newParent)) {
             previousParent.recalculateEventWidths();
         }
+
         newParent.recalculateEventWidths();
-        if (calendar.getEventMovedListener() != null) {
-            calendar.getEventMovedListener().eventMoved(se);
+
+        if (calendar.getItemMovedListener() != null) {
+            calendar.getItemMovedListener().itemMoved(se);
         }
     }
 

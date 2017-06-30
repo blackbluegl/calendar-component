@@ -64,7 +64,7 @@ public class CalendarConnector extends AbstractComponentConnector
      */
     public CalendarConnector() {
 
-        // Listen to events
+        // Listen to items
         registerListeners();
     }
 
@@ -95,7 +95,7 @@ public class CalendarConnector extends AbstractComponentConnector
 
     /**
      * Registers listeners on the calendar so server can be notified of the
-     * events
+     * items
      */
     protected void registerListeners() {
         getWidget().setListener(new VCalendar.DateClickListener() {
@@ -140,43 +140,43 @@ public class CalendarConnector extends AbstractComponentConnector
                 }
             }
         });
-        getWidget().setListener(new VCalendar.EventMovedListener() {
+        getWidget().setListener(new VCalendar.ItemMovedListener() {
             @Override
-            public void eventMoved(CalendarEvent event) {
-                if (hasEventListener(CalendarEventId.EVENTMOVE)) {
+            public void itemMoved(CalendarItem item) {
+                if (hasEventListener(CalendarEventId.ITEM_MOVE)) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(DateUtil.formatClientSideDate(event.getStart()));
+                    sb.append(DateUtil.formatClientSideDate(item.getStart()));
                     sb.append("-");
                     sb.append(DateUtil
-                            .formatClientSideTime(event.getStartTime()));
-                    rpc.eventMove(event.getIndex(), sb.toString());
+                            .formatClientSideTime(item.getStartTime()));
+                    rpc.itemMove(item.getIndex(), sb.toString());
                 }
             }
         });
-        getWidget().setListener(new VCalendar.EventResizeListener() {
+        getWidget().setListener(new VCalendar.ItemResizeListener() {
             @Override
-            public void eventResized(CalendarEvent event) {
-                if (hasEventListener(CalendarEventId.EVENTRESIZE)) {
+            public void itemResized(CalendarItem item) {
+                if (hasEventListener(CalendarEventId.ITEM_RESIZE)) {
                     StringBuilder buffer = new StringBuilder();
 
                     buffer.append(
-                            DateUtil.formatClientSideDate(event.getStart()));
+                            DateUtil.formatClientSideDate(item.getStart()));
                     buffer.append("-");
                     buffer.append(DateUtil
-                            .formatClientSideTime(event.getStartTime()));
+                            .formatClientSideTime(item.getStartTime()));
 
                     String newStartDate = buffer.toString();
 
                     buffer = new StringBuilder();
                     buffer.append(
-                            DateUtil.formatClientSideDate(event.getEnd()));
+                            DateUtil.formatClientSideDate(item.getEnd()));
                     buffer.append("-");
                     buffer.append(
-                            DateUtil.formatClientSideTime(event.getEndTime()));
+                            DateUtil.formatClientSideTime(item.getEndTime()));
 
                     String newEndDate = buffer.toString();
 
-                    rpc.eventResize(event.getIndex(), newStartDate, newEndDate);
+                    rpc.itemResize(item.getIndex(), newStartDate, newEndDate);
                 }
             }
         });
@@ -187,11 +187,11 @@ public class CalendarConnector extends AbstractComponentConnector
                 rpc.scroll(scrollPosition);
             }
         });
-        getWidget().setListener(new VCalendar.EventClickListener() {
+        getWidget().setListener(new VCalendar.ItemClickListener() {
             @Override
-            public void eventClick(CalendarEvent event) {
-                if (hasEventListener(CalendarEventId.EVENTCLICK)) {
-                    rpc.eventClick(event.getIndex());
+            public void itemClick(CalendarItem item) {
+                if (hasEventListener(CalendarEventId.ITEM_CLICK)) {
+                    rpc.itemClick(item.getIndex());
                 }
             }
         });
@@ -234,9 +234,9 @@ public class CalendarConnector extends AbstractComponentConnector
                             return CalendarConnector.this
                                     .getActionsBetween(start, end);
 
-                        } else if (widget instanceof MonthEventLabel) {
-                            MonthEventLabel mel = (MonthEventLabel) widget;
-                            CalendarEvent event = mel.getCalendarEvent();
+                        } else if (widget instanceof MonthItemLabel) {
+                            MonthItemLabel mel = (MonthItemLabel) widget;
+                            CalendarItem event = mel.getCalendarItem();
                             Action[] actions = CalendarConnector.this
                                     .getActionsBetween(event.getStartTime(),
                                             event.getEndTime());
@@ -255,12 +255,12 @@ public class CalendarConnector extends AbstractComponentConnector
                             DateCell.DateCellSlot slot = cell.getSlot(slotIndex);
                             return CalendarConnector.this.getActionsBetween(
                                     slot.getFrom(), slot.getTo());
-                        } else if (widget instanceof DateCellDayEvent) {
+                        } else if (widget instanceof DateCellDayItem) {
                             /*
                              * Context menu on event
                              */
-                            DateCellDayEvent dayEvent = (DateCellDayEvent) widget;
-                            CalendarEvent event = dayEvent.getCalendarEvent();
+                            DateCellDayItem dayEvent = (DateCellDayItem) widget;
+                            CalendarItem event = dayEvent.getCalendarItem();
 
                             Action[] actions = CalendarConnector.this
                                     .getActionsBetween(event.getStartTime(),
@@ -330,31 +330,31 @@ public class CalendarConnector extends AbstractComponentConnector
         widget.setDisabled(!state.enabled);
 
         widget.setRangeSelectAllowed(hasEventListener(CalendarEventId.RANGESELECT));
-        widget.setRangeMoveAllowed(hasEventListener(CalendarEventId.EVENTMOVE));
-        widget.setEventMoveAllowed(hasEventListener(CalendarEventId.EVENTMOVE));
-        widget.setEventResizeAllowed(hasEventListener(CalendarEventId.EVENTRESIZE));
+        widget.setRangeMoveAllowed(hasEventListener(CalendarEventId.ITEM_MOVE));
+        widget.setItemMoveAllowed(hasEventListener(CalendarEventId.ITEM_MOVE));
+        widget.setItemResizeAllowed(hasEventListener(CalendarEventId.ITEM_RESIZE));
 
-        widget.setEventCaptionAsHtml(state.eventCaptionAsHtml);
+        widget.setItemCaptionAsHtml(state.itemCaptionAsHtml);
 
-        CalendarState.EventSortOrder oldOrder = getWidget().getSortOrder();
-        if (!SharedUtil.equals(oldOrder, getState().eventSortOrder)) {
-            getWidget().setSortOrder(getState().eventSortOrder);
+        CalendarState.ItemSortOrder oldOrder = getWidget().getSortOrder();
+        if (!SharedUtil.equals(oldOrder, getState().itemSortOrder)) {
+            getWidget().setSortOrder(getState().itemSortOrder);
         }
 
         updateEventsInView();
 
         List<CalendarState.Day> days = state.days;
-        List<CalendarState.Event> events = state.events;
+        List<CalendarState.Item> items = state.items;
 
         CalendarDropHandler dropHandler = getWidget().getDropHandler();
         if (showingMonthView()) {
-            updateMonthView(days, events);
+            updateMonthView(days, items);
             if (dropHandler != null
                     && !(dropHandler instanceof CalendarMonthDropHandler)) {
                 getWidget().setDropHandler(new CalendarMonthDropHandler(this));
             }
         } else {
-            updateWeekView(days, events);
+            updateWeekView(days, items);
             if (dropHandler != null
                     && !(dropHandler instanceof CalendarWeekDropHandler)) {
                 getWidget().setDropHandler(new CalendarWeekDropHandler(this));
@@ -363,7 +363,7 @@ public class CalendarConnector extends AbstractComponentConnector
 
         updateSizes();
 
-        registerEventToolTips(state.events);
+        registerEventToolTips(state.items);
         updateActionMap(state.actions);
     }
 
@@ -376,12 +376,12 @@ public class CalendarConnector extends AbstractComponentConnector
     }
 
     /**
-     * Register the description of the events as tooltips. This way, any event
+     * Register the description of the items as tooltips. This way, any event
      * displaying widget can use the event index as a key to display the
      * tooltip.
      */
-    private void registerEventToolTips(List<CalendarState.Event> events) {
-        for (CalendarState.Event e : events) {
+    private void registerEventToolTips(List<CalendarState.Item> items) {
+        for (CalendarState.Item e : items) {
             if (e.description != null && !"".equals(e.description)) {
                 tooltips.put(e.index, e.description);
             } else {
@@ -395,7 +395,7 @@ public class CalendarConnector extends AbstractComponentConnector
 
         TooltipInfo tooltipInfo = null;
 
-        Widget w = WidgetUtil.findWidget(element, DateCellDayEvent.class);
+        Widget w = WidgetUtil.findWidget(element, DateCellDayItem.class);
 
         if (w instanceof HasTooltipKey) {
             String title = tooltips.get(((HasTooltipKey) w).getTooltipKey());
@@ -421,17 +421,17 @@ public class CalendarConnector extends AbstractComponentConnector
     private void updateEventsInView() {
         CalendarState state = getState();
         List<CalendarState.Day> days = state.days;
-        List<CalendarState.Event> events = state.events;
+        List<CalendarState.Item> items = state.items;
 
         CalendarDropHandler dropHandler = getWidget().getDropHandler();
         if (showingMonthView()) {
-            updateMonthView(days, events);
+            updateMonthView(days, items);
             if (dropHandler != null
                     && !(dropHandler instanceof CalendarMonthDropHandler)) {
                 getWidget().setDropHandler(new CalendarMonthDropHandler(this));
             }
         } else {
-            updateWeekView(days, events);
+            updateWeekView(days, items);
             if (dropHandler != null
                     && !(dropHandler instanceof CalendarWeekDropHandler)) {
                 getWidget().setDropHandler(new CalendarWeekDropHandler(this));
@@ -440,21 +440,21 @@ public class CalendarConnector extends AbstractComponentConnector
     }
 
     private void updateMonthView(List<CalendarState.Day> days,
-                                 List<CalendarState.Event> events) {
+                                 List<CalendarState.Item> items) {
         CalendarState state = getState();
         getWidget().updateMonthView(state.firstDayOfWeek,
                 getWidget().getDateTimeFormat().parse(state.now), days.size(),
-                calendarEventListOf(events, state.format24H),
+                calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days));
     }
 
     private void updateWeekView(List<CalendarState.Day> days,
-                                List<CalendarState.Event> events) {
+                                List<CalendarState.Item> items) {
         CalendarState state = getState();
         getWidget().updateWeekView(state.scroll,
                 getWidget().getDateTimeFormat().parse(state.now), days.size(),
                 state.firstDayOfWeek,
-                calendarEventListOf(events, state.format24H),
+                calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days));
     }
 
@@ -601,7 +601,7 @@ public class CalendarConnector extends AbstractComponentConnector
     }
 
     /**
-     * Returns ALL currently registered events.
+     * Returns ALL currently registered items.
      */
 
     @Override
@@ -635,28 +635,28 @@ public class CalendarConnector extends AbstractComponentConnector
         return getConnectorId();
     }
 
-    private List<CalendarEvent> calendarEventListOf(
-            List<CalendarState.Event> events, boolean format24h) {
-        List<CalendarEvent> list = new ArrayList<CalendarEvent>(events.size());
-        for (CalendarState.Event event : events) {
-            final String dateFrom = event.dateFrom;
-            final String dateTo = event.dateTo;
-            final String timeFrom = event.timeFrom;
-            final String timeTo = event.timeTo;
-            CalendarEvent calendarEvent = new CalendarEvent();
-            calendarEvent.setAllDay(event.allDay);
-            calendarEvent.setCaption(event.caption);
-            calendarEvent.setDescription(event.description);
-            calendarEvent.setStart(getWidget().getDateFormat().parse(dateFrom));
-            calendarEvent.setEnd(getWidget().getDateFormat().parse(dateTo));
-            calendarEvent.setFormat24h(format24h);
-            calendarEvent.setStartTime(getWidget().getDateTimeFormat()
+    private List<CalendarItem> calendarEventListOf(
+            List<CalendarState.Item> items, boolean format24h) {
+        List<CalendarItem> list = new ArrayList<CalendarItem>(items.size());
+        for (CalendarState.Item item : items) {
+            final String dateFrom = item.dateFrom;
+            final String dateTo = item.dateTo;
+            final String timeFrom = item.timeFrom;
+            final String timeTo = item.timeTo;
+            CalendarItem calendarItem = new CalendarItem();
+            calendarItem.setAllDay(item.allDay);
+            calendarItem.setCaption(item.caption);
+            calendarItem.setDescription(item.description);
+            calendarItem.setStart(getWidget().getDateFormat().parse(dateFrom));
+            calendarItem.setEnd(getWidget().getDateFormat().parse(dateTo));
+            calendarItem.setFormat24h(format24h);
+            calendarItem.setStartTime(getWidget().getDateTimeFormat()
                     .parse(dateFrom + " " + timeFrom));
-            calendarEvent.setEndTime(getWidget().getDateTimeFormat()
+            calendarItem.setEndTime(getWidget().getDateTimeFormat()
                     .parse(dateTo + " " + timeTo));
-            calendarEvent.setStyleName(event.styleName);
-            calendarEvent.setIndex(event.index);
-            list.add(calendarEvent);
+            calendarItem.setStyleName(item.styleName);
+            calendarItem.setIndex(item.index);
+            list.add(calendarItem);
         }
         return list;
     }

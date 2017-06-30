@@ -53,7 +53,7 @@ import java.util.logging.Logger;
 
 /**
  * <p>
- * Vaadin Calendar is for visualizing events in a calendar. Calendar events can
+ * Vaadin Calendar is for visualizing items in a calendar. Calendar items can
  * be visualized in the variable length view depending on the start and end
  * dates.
  * </p>
@@ -66,8 +66,8 @@ import java.util.logging.Logger;
  *
  * <li>If date range is seven days or shorter, the weekly view is used.</li>
  *
- * <li>Calendar queries its events by using a {@link CalendarEventProvider}. By
- * default, a {@link BasicEventProvider} is used.</li>
+ * <li>Calendar queries its items by using a {@link CalendarItemProvider}. By
+ * default, a {@link BasicItemProvider} is used.</li>
  *
  * @since 7.1
  * @author Vaadin Ltd.
@@ -75,16 +75,16 @@ import java.util.logging.Logger;
  */
 @SuppressWarnings("serial")
 
-public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractComponent implements
+public class Calendar<ITEM extends EditableCalendarItem> extends AbstractComponent implements
         CalendarComponentEvents.NavigationNotifier,
-        CalendarComponentEvents.EventMoveNotifier,
+        CalendarComponentEvents.ItemMoveNotifier,
         CalendarComponentEvents.RangeSelectNotifier,
-        CalendarComponentEvents.EventResizeNotifier,
-        CalendarEventProvider.EventSetChangeListener,
+        CalendarComponentEvents.ItemResizeNotifier,
+        CalendarItemProvider.ItemSetChangedListener,
         DropTarget,
         Action.Container,
         LegacyComponent,
-        CalendarEditableEventProvider<EVENT> {
+        CalendarItemProvider<ITEM> {
 
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
@@ -109,14 +109,13 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     /** Defines the calendar's date range ending point. */
     protected Date endDate = null;
 
-    /** Event provider. */
-    private CalendarEventProvider<EVENT> calendarEventProvider;
+    /** Item provider. */
+    private CalendarItemProvider<ITEM> calendarItemProvider;
 
     /**
-     * Internal buffer for the events that are retrieved from the event
-     * provider.
+     * Internal buffer for the items that are retrieved from the item provider.
      */
-    protected List<? extends CalendarEvent> events;
+    protected List<? extends CalendarItem> items;
 
     /** Date format that will be used in the UIDL for dates. */
     protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
@@ -203,27 +202,27 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Construct a Vaadin Calendar with a BasicEventProvider and no caption.
+     * Construct a Vaadin Calendar with a BasicItemProvider and no caption.
      * Default date range is one week.
      */
     public Calendar() {
-        this(null, new BasicEventProvider());
+        this(null, new BasicItemProvider());
     }
 
     /**
-     * Construct a Vaadin Calendar with a BasicEventProvider and the provided
+     * Construct a Vaadin Calendar with a BasicItemProvider and the provided
      * caption. Default date range is one week.
      *
      * @param caption
      */
     public Calendar(String caption) {
-        this(caption, new BasicEventProvider());
+        this(caption, new BasicItemProvider());
     }
 
     /**
      * <p>
-     * Construct a Vaadin Calendar with event provider. Event provider is
-     * obligatory, because calendar component will query active events through
+     * Construct a Vaadin Calendar with event provider. Item provider is
+     * obligatory, because calendar component will query active items through
      * it.
      * </p>
      *
@@ -233,18 +232,18 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * {@link #setEndDate(Date)} to change this.
      * </p>
      *
-     * @param eventProvider
-     *            Event provider, cannot be null.
+     * @param dataProvider
+     *            Item provider, cannot be null.
      */
-    public Calendar(CalendarEventProvider<EVENT> eventProvider) {
-        this(null, eventProvider);
+    public Calendar(CalendarItemProvider<ITEM> dataProvider) {
+        this(null, dataProvider);
     }
 
     /**
      * <p>
-     * Construct a Vaadin Calendar with event provider and a caption. Event
+     * Construct a Vaadin Calendar with item provider and a caption. Item
      * provider is obligatory, because calendar component will query active
-     * events through it.
+     * items through it.
      * </p>
      *
      * <p>
@@ -253,23 +252,22 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * {@link #setEndDate(Date)} to change this.
      * </p>
      *
-     * @param eventProvider
-     *            Event provider, cannot be null.
+     * @param dataProvider
+     *            Item provider, cannot be null.
      */
     // this is the constructor every other constructor calls
-    public Calendar(String caption, CalendarEventProvider<EVENT> eventProvider) {
+    public Calendar(String caption, CalendarItemProvider<ITEM> dataProvider) {
         registerRpc(rpc);
         setCaption(caption);
         handlers = new HashMap<>();
         setDefaultHandlers();
         currentCalendar.setTime(new Date());
-        setEventProvider(eventProvider);
+        setDataProvider(dataProvider);
         getState().firstDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
         getState().firstHourOfDay = firstHour;
         getState().lastHourOfDay = lastHour;
         setTimeFormat(null);
-
     }
 
     @Override
@@ -290,7 +288,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
 
         getState().format24H = TimeFormat.Format24H == getTimeFormat();
         setupDaysAndActions();
-        setupCalendarEvents();
+        setupCalendarItems();
         rpc.scroll(scrollTop);
     }
 
@@ -312,7 +310,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
 
     /**
      * Set all the wanted default handlers here. This is always called after
-     * constructing this object. All other events have default handlers except
+     * constructing this object. All other items have default handlers except
      * range and event click.
      */
     protected void setDefaultHandlers() {
@@ -320,8 +318,8 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
         setHandler(new BasicForwardHandler());
         setHandler(new BasicWeekClickHandler());
         setHandler(new BasicDateClickHandler());
-        setHandler(new BasicEventMoveHandler());
-        setHandler(new BasicEventResizeHandler());
+        setHandler(new BasicItemMoveHandler());
+        setHandler(new BasicItemResizeHandler());
     }
 
     /**
@@ -421,7 +419,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
         }
     }
 
-    private void setupCalendarEvents() {
+    private void setupCalendarItems() {
 
         int durationInDays = (int) ((endDate.getTime() - startDate.getTime()) / DateConstants.DAYINMILLIS);
         durationInDays++;
@@ -435,42 +433,42 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
         Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
 
         currentCalendar.setTime(firstDateToShow);
-        events = getEventProvider().getEvents(firstDateToShow, lastDateToShow);
-        cacheMinMaxTimeOfDay(events);
+        items = getDataProvider().getItems(firstDateToShow, lastDateToShow);
+        cacheMinMaxTimeOfDay(items);
 
-        List<CalendarState.Event> calendarStateEvents = new ArrayList<>();
-        if (events != null) {
-            for (int i = 0; i < events.size(); i++) {
-                CalendarEvent e = events.get(i);
-                CalendarState.Event event = new CalendarState.Event();
-                event.index = i;
-                event.caption = e.getCaption() == null ? "" : e.getCaption();
-                event.dateFrom = df_date.format(e.getStart());
-                event.dateTo = df_date.format(e.getEnd());
-                event.timeFrom = df_time.format(e.getStart());
-                event.timeTo = df_time.format(e.getEnd());
-                event.description = e.getDescription() == null ? "" : e.getDescription();
-                event.styleName = e.getStyleName() == null ? "" : e.getStyleName();
-                event.allDay = e.isAllDay();
-                calendarStateEvents.add(event);
+        List<CalendarState.Item> calendarStateItems = new ArrayList<>();
+        if (items != null) {
+            for (int i = 0; i < items.size(); i++) {
+                CalendarItem e = items.get(i);
+                CalendarState.Item item = new CalendarState.Item();
+                item.index = i;
+                item.caption = e.getCaption() == null ? "" : e.getCaption();
+                item.dateFrom = df_date.format(e.getStart());
+                item.dateTo = df_date.format(e.getEnd());
+                item.timeFrom = df_time.format(e.getStart());
+                item.timeTo = df_time.format(e.getEnd());
+                item.description = e.getDescription() == null ? "" : e.getDescription();
+                item.styleName = e.getStyleName() == null ? "" : e.getStyleName();
+                item.allDay = e.isAllDay();
+                calendarStateItems.add(item);
             }
         }
-        getState().events = calendarStateEvents;
+        getState().items = calendarStateItems;
     }
 
     /**
-     * Stores the minimum and maximum time-of-day in minutes for the events.
+     * Stores the minimum and maximum time-of-day in minutes for the items.
      *
-     * @param events
-     *            A list of calendar events. Can be <code>null</code>.
+     * @param items
+     *            A list of calendar items. Can be <code>null</code>.
      */
-    private void cacheMinMaxTimeOfDay(List<? extends CalendarEvent> events) {
+    private void cacheMinMaxTimeOfDay(List<? extends CalendarItem> items) {
         minTimeInMinutes = null;
         maxTimeInMinutes = null;
-        if (events != null) {
-            for (CalendarEvent event : events) {
-                int minuteOfDayStart = getMinuteOfDay(event.getStart());
-                int minuteOfDayEnd = getMinuteOfDay(event.getEnd());
+        if (items != null) {
+            for (CalendarItem item : items) {
+                int minuteOfDayStart = getMinuteOfDay(item.getStart());
+                int minuteOfDayEnd = getMinuteOfDay(item.getEnd());
                 if (minTimeInMinutes == null) {
                     minTimeInMinutes = minuteOfDayStart;
                     maxTimeInMinutes = minuteOfDayEnd;
@@ -494,13 +492,13 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Sets the displayed start and end time to fit all current events that were
-     * retrieved from the last call to getEvents().
+     * Sets the displayed start and end time to fit all current items that were
+     * retrieved from the last call to getItems().
      * <p>
-     * If no events exist, nothing happens.
+     * If no items exist, nothing happens.
      * <p>
      * <b>NOTE: triggering this method only does this once for the current
-     * events - events that are not in the current visible range, are
+     * items - items that are not in the current visible range, are
      * ignored!</b>
      *
      * @see #setFirstVisibleHourOfDay(int)
@@ -549,7 +547,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
                         + "You must set an end date using setEndDate(Date).");
             }
 
-        } else if (startDate == null && endDate == null) {
+        } else if (startDate == null) {
             // set defaults
             startDate = getStartDate();
             endDate = getEndDate();
@@ -814,7 +812,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * </p>
      *
      * <p>
-     * Note that this only affects the rendering process. Events are still
+     * Note that this only affects the rendering process. Items are still
      * requested by the dates set by {@link #setStartDate(Date)} and
      * {@link #setEndDate(Date)}.
      * </p>
@@ -848,7 +846,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * </p>
      *
      * <p>
-     * Note that this only affects the rendering process. Events are still
+     * Note that this only affects the rendering process. Items are still
      * requested by the dates set by {@link #setStartDate(Date)} and
      * {@link #setEndDate(Date)}.
      * </p>
@@ -881,12 +879,12 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * </p>
      *
      * <p>
-     * Note that this only affects the rendering process. Events are still
+     * Note that this only affects the rendering process. Items are still
      * requested by the dates set by {@link #setStartDate(Date)} and
      * {@link #setEndDate(Date)}.
      * </p>
      * You can use {@link #autoScaleVisibleHoursOfDay()} for automatic scaling
-     * of the visible hours based on current events.
+     * of the visible hours based on current items.
      *
      * @param firstHour
      *            the first hour of the day to show, between 0 and 23
@@ -912,12 +910,12 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * This method restricts the hours that are shown per day. This affects the
      * weekly view. The general contract is that <b>firstHour < lastHour</b>.
      * <p>
-     * Note that this only affects the rendering process. Events are still
+     * Note that this only affects the rendering process. Items are still
      * requested by the dates set by {@link #setStartDate(Date)} and
      * {@link #setEndDate(Date)}.
      * <p>
      * You can use {@link #autoScaleVisibleHoursOfDay()} for automatic scaling
-     * of the visible hours based on current events.
+     * of the visible hours based on current items.
      *
      * @param lastHour
      *            the first hour of the day to show, between 0 and 23
@@ -964,29 +962,29 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Sets sort order for events. By default sort order is
-     * {@link CalendarState.EventSortOrder#DURATION_DESC}.
+     * Sets sort order for items. By default sort order is
+     * {@link CalendarState.ItemSortOrder#DURATION_DESC}.
      *
      * @param order
-     *            sort strategy for events
+     *            sort strategy for items
      */
-    public void setEventSortOrder(CalendarState.EventSortOrder order) {
+    public void setItemSortOrder(CalendarState.ItemSortOrder order) {
         if (order == null) {
-            getState().eventSortOrder = CalendarState.EventSortOrder.DURATION_DESC;
+            getState().itemSortOrder = CalendarState.ItemSortOrder.DURATION_DESC;
         } else {
-            getState().eventSortOrder = CalendarState.EventSortOrder.values()[order.ordinal()];
+            getState().itemSortOrder = CalendarState.ItemSortOrder.values()[order.ordinal()];
         }
     }
 
     /**
-     * Returns sort order for events.
+     * Returns sort order for items.
      *
      * @return currently active sort strategy
      */
-    public CalendarState.EventSortOrder getEventSortOrder() {
-        CalendarState.EventSortOrder order = getState(false).eventSortOrder;
+    public CalendarState.ItemSortOrder getItemSortOrder() {
+        CalendarState.ItemSortOrder order = getState(false).itemSortOrder;
         if (order == null) {
-            return CalendarState.EventSortOrder.DURATION_DESC;
+            return CalendarState.ItemSortOrder.DURATION_DESC;
         } else {
             return order;
         }
@@ -1019,7 +1017,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Is the user allowed to trigger events which alters the events
+     * Is the user allowed to trigger items which alters the items
      *
      * @return true if the client is allowed to send changes to server
      */
@@ -1043,24 +1041,24 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Fires an event move event to all server side move listerners
+     * Fires an item move event to all server side move listerners
      *
      * @param index
-     *            The index of the event in the events list
+     *            The index of the item in the items list
      * @param newFromDatetime
      *            The changed from date time
      */
-    protected void fireEventMove(int index, Date newFromDatetime) {
-        CalendarComponentEvents.MoveEvent event = new CalendarComponentEvents.MoveEvent(this, events.get(index),
+    protected void fireItemMove(int index, Date newFromDatetime) {
+        CalendarComponentEvents.ItemMoveEvent event = new CalendarComponentEvents.ItemMoveEvent(this, items.get(index),
                 newFromDatetime);
 
-        if (calendarEventProvider instanceof CalendarComponentEvents.EventMoveHandler) {
+        if (calendarItemProvider instanceof CalendarComponentEvents.ItemMoveHandler) {
             // Notify event provider if it is an event move handler
-            ((CalendarComponentEvents.EventMoveHandler) calendarEventProvider).eventMove(event);
+            ((CalendarComponentEvents.ItemMoveHandler) calendarItemProvider).itemMove(event);
         }
 
         // Notify event move handler attached by using the
-        // setHandler(EventMoveHandler) method
+        // setHandler(ItemMoveHandler) method
         fireEvent(event);
     }
 
@@ -1083,8 +1081,8 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * @param index
      *            The index of the event in the event cache.
      */
-    protected void fireEventClick(Integer index) {
-        fireEvent(new CalendarComponentEvents.EventClick(this, events.get(index)));
+    protected void fireItemClick(Integer index) {
+        fireEvent(new CalendarComponentEvents.ItemClickEvent(this, items.get(index)));
     }
 
     /**
@@ -1113,30 +1111,30 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Fires an event resize event. The event is fired when a user resizes the
-     * event in the calendar causing the time range of the event to increase or
+     * Fires an item resize event. The event is fired when a user resizes the
+     * item in the calendar causing the time range of the item to increase or
      * decrease. The new start and end times are returned as arguments to this
      * method.
      *
      * @param index
-     *            The index of the event in the event cache
+     *            The index of the item in the item cache
      * @param startTime
-     *            The new start date and time of the event
+     *            The new start date and time of the item
      * @param endTime
-     *            The new end date and time of the event
+     *            The new end date and time of the item
      */
-    protected void fireEventResize(int index, Date startTime, Date endTime) {
+    protected void fireItemResize(int index, Date startTime, Date endTime) {
 
-        CalendarComponentEvents.EventResize event =
-                new CalendarComponentEvents.EventResize(this, events.get(index), startTime, endTime);
+        CalendarComponentEvents.ItemResizeEvent event =
+                new CalendarComponentEvents.ItemResizeEvent(this, items.get(index), startTime, endTime);
 
-        if (calendarEventProvider instanceof CalendarComponentEvents.EventResizeHandler) {
+        if (calendarItemProvider instanceof CalendarComponentEvents.EventResizeHandler) {
             // Notify event provider if it is an event resize handler
-            ((CalendarComponentEvents.EventResizeHandler) calendarEventProvider).eventResize(event);
+            ((CalendarComponentEvents.EventResizeHandler) calendarItemProvider).itemResize(event);
         }
 
         // Notify event resize handler attached by using the
-        // setHandler(EventMoveHandler) method
+        // setHandler(ItemMoveHandler) method
         fireEvent(event);
     }
 
@@ -1319,44 +1317,44 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Set the {@link CalendarEventProvider} to be used with this calendar. The
-     * EventProvider is used to query for events to show, and must be non-null.
-     * By default a {@link BasicEventProvider} is used.
+     * Set the {@link CalendarItemProvider} to be used with this calendar. The
+     * DataProvider is used to query for items to show, and must be non-null.
+     * By default a {@link BasicItemProvider} is used.
      *
-     * @param calendarEventProvider
-     *            the calendarEventProvider to set. Cannot be null.
+     * @param calendarItemProvider
+     *            the calendarItemProvider to set. Cannot be null.
      */
-    public void setEventProvider(CalendarEventProvider<EVENT> calendarEventProvider) {
+    public void setDataProvider(CalendarItemProvider<ITEM> calendarItemProvider) {
 
-        if (calendarEventProvider == null) {
+        if (calendarItemProvider == null) {
             throw new IllegalArgumentException(
                     "Calendar event provider cannot be null");
         }
 
         // remove old listener
-        if (getEventProvider() instanceof EventSetChangeNotifier) {
-            ((EventSetChangeNotifier) getEventProvider()).removeEventSetChangeListener(this);
+        if (getDataProvider() instanceof CalendarItemProvider.ItemSetChangedNotifier) {
+            ((ItemSetChangedNotifier) getDataProvider()).removeItemSetChangedListener(this);
         }
 
-        this.calendarEventProvider = calendarEventProvider;
+        this.calendarItemProvider = calendarItemProvider;
 
         // add new listener
-        if (calendarEventProvider instanceof EventSetChangeNotifier) {
-            ((EventSetChangeNotifier) calendarEventProvider).addEventSetChangeListener(this);
+        if (calendarItemProvider instanceof CalendarItemProvider.ItemSetChangedNotifier) {
+            ((ItemSetChangedNotifier) calendarItemProvider).addItemSetChangedListener(this);
         }
     }
 
     /**
-     * @return the {@link CalendarEventProvider} currently used
+     * @return the {@link CalendarItemProvider} currently used
      */
-    public CalendarEventProvider<EVENT> getEventProvider() {
-        return calendarEventProvider;
+    public CalendarItemProvider<ITEM> getDataProvider() {
+        return calendarItemProvider;
     }
 
     @Override
-    public void eventSetChange(EventSetChangeEvent changeEvent) {
+    public void itemSetChanged(ItemSetChangedEvent changeEvent) {
         // sanity check
-        if (calendarEventProvider == changeEvent.getProvider()) {
+        if (calendarItemProvider == changeEvent.getProvider()) {
             markAsDirty();
         }
     }
@@ -1409,9 +1407,9 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.EventClickHandler listener) {
-        setHandler(CalendarComponentEvents.EventClick.EVENT_ID, CalendarComponentEvents.EventClick.class, listener,
-                CalendarComponentEvents.EventClickHandler.eventClickMethod);
+    public void setHandler(CalendarComponentEvents.ItemClickHandler listener) {
+        setHandler(CalendarComponentEvents.ItemClickEvent.EVENT_ID, CalendarComponentEvents.ItemClickEvent.class, listener,
+                CalendarComponentEvents.ItemClickHandler.itemClickMethod);
     }
 
     @Override
@@ -1422,8 +1420,8 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
 
     @Override
     public void setHandler(CalendarComponentEvents.EventResizeHandler listener) {
-        setHandler(CalendarComponentEvents.EventResize.EVENT_ID, CalendarComponentEvents.EventResize.class, listener,
-                CalendarComponentEvents.EventResizeHandler.eventResizeMethod);
+        setHandler(CalendarComponentEvents.ItemResizeEvent.EVENT_ID, CalendarComponentEvents.ItemResizeEvent.class, listener,
+                CalendarComponentEvents.EventResizeHandler.itemResizeMethod);
     }
 
     @Override
@@ -1433,9 +1431,9 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.EventMoveHandler listener) {
-        setHandler(CalendarComponentEvents.MoveEvent.EVENT_ID, CalendarComponentEvents.MoveEvent.class, listener,
-                CalendarComponentEvents.EventMoveHandler.eventMoveMethod);
+    public void setHandler(CalendarComponentEvents.ItemMoveHandler listener) {
+        setHandler(CalendarComponentEvents.ItemMoveEvent.EVENT_ID, CalendarComponentEvents.ItemMoveEvent.class, listener,
+                CalendarComponentEvents.ItemMoveHandler.itemMoveMethod);
     }
 
     @Override
@@ -1493,36 +1491,10 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     @Override
-    public List<EVENT> getEvents(Date startDate, Date endDate) {
-        List<EVENT> events = getEventProvider().getEvents(startDate, endDate);
+    public List<ITEM> getItems(Date startDate, Date endDate) {
+        List<ITEM> events = getDataProvider().getItems(startDate, endDate);
         cacheMinMaxTimeOfDay(events);
         return events;
-    }
-
-    @Override
-    public void addEvent(EditableCalendarEvent event) {
-        if (getEventProvider() instanceof CalendarEditableEventProvider) {
-            CalendarEditableEventProvider<EditableCalendarEvent> provider =
-                    (CalendarEditableEventProvider<EditableCalendarEvent>) getEventProvider();
-            provider.addEvent(event);
-            markAsDirty();
-        } else {
-            throw new UnsupportedOperationException(
-                    "Event provider does not support adding events");
-        }
-    }
-
-    @Override
-    public void removeEvent(EditableCalendarEvent event) {
-        if (getEventProvider() instanceof CalendarEditableEventProvider) {
-            CalendarEditableEventProvider<EditableCalendarEvent> provider =
-                    (CalendarEditableEventProvider<EditableCalendarEvent>) getEventProvider();
-            provider.removeEvent(event);
-            markAsDirty();
-        } else {
-            throw new UnsupportedOperationException(
-                    "Event provider does not support removing events");
-        }
     }
 
     /**
@@ -1550,8 +1522,8 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * The {@link Handler#handleAction(Action, Object, Object)} parameters
      * depend on what the context menu is called upon:
      * <ul>
-     * <li>If the context menu is called upon an event then the target parameter
-     * is the event, i.e. instanceof {@link CalendarEvent}</li>
+     * <li>If the context menu is called upon an item then the target parameter
+     * is the item, i.e. instanceof {@link CalendarItem}</li>
      * <li>If the context menu is called upon an empty slot then the target is a
      * {@link Date} representing that slot
      * </ul>
@@ -1561,9 +1533,10 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     public void addActionHandler(Handler actionHandler) {
         if (actionHandler != null) {
             if (actionHandlers == null) {
-                actionHandlers = new LinkedList<Handler>();
-                actionMapper = new KeyMapper<Action>();
+                actionHandlers = new LinkedList<>();
+                actionMapper = new KeyMapper<>();
             }
+
             if (!actionHandlers.contains(actionHandler)) {
                 actionHandlers.add(actionHandler);
                 markAsDirty();
@@ -1579,12 +1552,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      */
     public boolean isMonthlyMode() {
         CalendarState state = getState(false);
-        if (state.days != null) {
-            return state.days.size() > 7;
-        } else {
-            // Default mode
-            return true;
-        }
+        return state.days == null || state.days.size() > 7;
     }
 
     /**
@@ -1595,12 +1563,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      */
     public boolean isDayMode() {
         CalendarState state = getState(false);
-        if (state.days != null) {
-            return state.days.size() == 1;
-        } else {
-            // Default mode
-            return true;
-        }
+        return state.days == null || state.days.size() == 1;
     }
 
     /**
@@ -1627,7 +1590,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     private class CalendarServerRpcImpl implements CalendarServerRpc {
 
         @Override
-        public void eventMove(int eventIndex, String newDate) {
+        public void itemMove(int itemIndex, String newDate) {
 
             if (!isClientChangeAllowed()) {
                 return;
@@ -1636,9 +1599,9 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
             if (newDate != null) {
                 try {
                     Date d = df_date_time.parse(newDate);
-                    if (eventIndex >= 0 && eventIndex < events.size()
-                            && events.get(eventIndex) != null) {
-                        fireEventMove(eventIndex, d);
+                    if (itemIndex >= 0 && itemIndex < items.size()
+                            && items.get(itemIndex) != null) {
+                        fireItemMove(itemIndex, d);
                     }
                 } catch (ParseException e) {
                     getLogger().log(Level.WARNING, e.getMessage());
@@ -1718,9 +1681,9 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
         }
 
         @Override
-        public void weekClick(String event) {
-            if (event.length() > 0 && event.contains("w")) {
-                String[] splitted = event.split("w");
+        public void weekClick(String eventValue) {
+            if (eventValue.length() > 0 && eventValue.contains("w")) {
+                String[] splitted = eventValue.split("w");
                 if (splitted.length == 2) {
                     try {
                         int yr = Integer.parseInt(splitted[0]);
@@ -1734,15 +1697,15 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
         }
 
         @Override
-        public void eventClick(int eventIndex) {
-            if (eventIndex >= 0 && eventIndex < events.size()
-                    && events.get(eventIndex) != null) {
-                fireEventClick(eventIndex);
+        public void itemClick(int itemIndex) {
+            if (itemIndex >= 0 && itemIndex < items.size()
+                    && items.get(itemIndex) != null) {
+                fireItemClick(itemIndex);
             }
         }
 
         @Override
-        public void eventResize(int eventIndex, String newStartDate, String newEndDate) {
+        public void itemResize(int itemIndex, String newStartDate, String newEndDate) {
 
             if (!isClientChangeAllowed()) {
                 return;
@@ -1755,7 +1718,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
                     Date newStartTime = df_date_time.parse(newStartDate);
                     Date newEndTime = df_date_time.parse(newEndDate);
 
-                    fireEventResize(eventIndex, newStartTime, newEndTime);
+                    fireItemResize(itemIndex, newStartTime, newEndTime);
                 } catch (ParseException e) {
                     // NOOP
                 }
@@ -1789,14 +1752,14 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
         }
 
         @Override
-        public void actionOnEvent(String actionKey, String startDate, String endDate, int eventIndex) {
+        public void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex) {
 
             Action action = actionMapper.get(actionKey);
             SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
             formatter.setTimeZone(getTimeZone());
 
             for (Action.Handler ah : actionHandlers) {
-                ah.handleAction(action, Calendar.this, events.get(eventIndex));
+                ah.handleAction(action, Calendar.this, items.get(itemIndex));
             }
         }
     }
@@ -1817,7 +1780,7 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
     }
 
     /**
-     * Sets whether the event captions are rendered as HTML.
+     * Sets whether the item captions are rendered as HTML.
      * <p>
      * If set to true, the captions are rendered in the browser as HTML and the
      * developer is responsible for ensuring no harmful HTML is used. If set to
@@ -1825,12 +1788,12 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * <p>
      * The default is false, i.e. to render that caption as plain text.
      *
-     * @param eventCaptionAsHtml
+     * @param itemCaptionAsHtml
      *            true if the captions are rendered as HTML, false if rendered
      *            as plain text
      */
-    public void setEventCaptionAsHtml(boolean eventCaptionAsHtml) {
-        getState().eventCaptionAsHtml = eventCaptionAsHtml;
+    public void setItemCaptionAsHtml(boolean itemCaptionAsHtml) {
+        getState().itemCaptionAsHtml = itemCaptionAsHtml;
     }
 
     /**
@@ -1841,8 +1804,8 @@ public class Calendar<EVENT extends EditableCalendarEvent> extends AbstractCompo
      * @return true if the captions are rendered as HTML, false if rendered as
      *         plain text
      */
-    public boolean isEventCaptionAsHtml() {
-        return getState(false).eventCaptionAsHtml;
+    public boolean isItemCaptionAsHtml() {
+        return getState(false).itemCaptionAsHtml;
     }
 
     @Override

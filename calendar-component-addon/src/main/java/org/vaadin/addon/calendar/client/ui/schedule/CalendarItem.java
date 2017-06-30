@@ -26,7 +26,8 @@ import java.util.Date;
  * @since 7.1
  * @author Vaadin Ltd.
  */
-public class CalendarEvent {
+public class CalendarItem {
+
     private int index;
     private String caption;
     private Date start, end;
@@ -41,21 +42,21 @@ public class CalendarEvent {
     private boolean allDay;
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getStyleName()
      */
     public String getStyleName() {
         return styleName;
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStart()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getStart()
      */
     public Date getStart() {
         return start;
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getStyleName()
      * @param style
      */
     public void setStyleName(String style) {
@@ -63,7 +64,7 @@ public class CalendarEvent {
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStart()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getStart()
      * @param start
      */
     public void setStart(Date start) {
@@ -71,7 +72,7 @@ public class CalendarEvent {
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getEnd()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getEnd()
      * @return
      */
     public Date getEnd() {
@@ -79,7 +80,7 @@ public class CalendarEvent {
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getEnd()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getEnd()
      * @param end
      */
     public void setEnd(Date end) {

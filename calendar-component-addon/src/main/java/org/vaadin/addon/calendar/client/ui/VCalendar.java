@@ -28,6 +28,8 @@ import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.schedule.*;
 import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarDropHandler;
+import org.vaadin.addon.calendar.client.ui.util.ItemDurationComparator;
+import org.vaadin.addon.calendar.client.ui.util.StartDateComparator;
 
 import java.util.*;
 
@@ -38,6 +40,8 @@ import java.util.*;
  * @author Vaadin Ltd.
  */
 public class VCalendar extends Composite implements VHasDropHandler {
+
+    public static final String PRIMARY_STYLE = "v-calendar";
 
     public static final String ATTR_FIRSTDAYOFWEEK = "firstDay";
     public static final String ATTR_LASTDAYOFWEEK = "lastDay";
@@ -53,14 +57,14 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
     private boolean rangeSelectAllowed = true;
     private boolean rangeMoveAllowed = true;
-    private boolean eventResizeAllowed = true;
-    private boolean eventMoveAllowed = true;
+    private boolean itemResizeAllowed = true;
+    private boolean itemMoveAllowed = true;
 
     private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
 
     private final DayToolbar dayToolbar = new DayToolbar(this);
     private final SimpleWeekToolbar weekToolbar;
-    private WeeklyLongEvents weeklyLongEvents;
+    private WeeklyLongItems weeklyLongEvents;
     private MonthGrid monthGrid;
     private WeekGrid weekGrid;
     private int intWidth = 0;
@@ -76,24 +80,22 @@ public class VCalendar extends Composite implements VHasDropHandler {
             .getFormat("HH:mm");
 
     private boolean disabled = false;
-
     private boolean isHeightUndefined = false;
-
     private boolean isWidthUndefined = false;
+
     private int firstDay;
     private int lastDay;
     private int firstHour;
     private int lastHour;
 
-    private CalendarState.EventSortOrder eventSortOrder = CalendarState.EventSortOrder.DURATION_DESC;
+    private CalendarState.ItemSortOrder itemSortOrder = CalendarState.ItemSortOrder.DURATION_DESC;
 
-    private static EventDurationComparator DEFAULT_COMPARATOR = new EventDurationComparator(
-            false);
+    private static ItemDurationComparator DEFAULT_COMPARATOR = new ItemDurationComparator(false);
 
     private CalendarDropHandler dropHandler;
 
     /**
-     * Listener interface for listening to event click events
+     * Listener interface for listening to event click items
      */
     public interface DateClickListener {
         /**
@@ -106,7 +108,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Listener interface for listening to week number click events
+     * Listener interface for listening to week number click items
      */
     public interface WeekClickListener {
         /**
@@ -119,7 +121,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Listener interface for listening to forward events
+     * Listener interface for listening to forward items
      */
     public interface ForwardListener {
 
@@ -130,7 +132,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Listener interface for listening to backward events
+     * Listener interface for listening to backward items
      */
     public interface BackwardListener {
 
@@ -141,12 +143,12 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Listener interface for listening to selection events
+     * Listener interface for listening to selection items
      */
     public interface RangeSelectListener {
 
         /**
-         * Called when a user selected a new event by highlighting an area of
+         * Called when a user selected a new item by highlighting an area of
          * the calendar.
          *
          * FIXME Fix the value nonsense.
@@ -161,50 +163,50 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Listener interface for listening to click events
+     * Listener interface for listening to click items
      */
-    public interface EventClickListener {
+    public interface ItemClickListener {
         /**
-         * Called when an event was clicked
+         * Called when an item was clicked
          *
-         * @param event
-         *            The event that was clicked
+         * @param item
+         *            The item that was clicked
          */
-        void eventClick(CalendarEvent event);
+        void itemClick(CalendarItem item);
     }
 
     /**
-     * Listener interface for listening to event moved events. Occurs when a
-     * user drags an event to a new position
+     * Listener interface for listening to item moved items. Occurs when a
+     * user drags an item to a new position
      */
-    public interface EventMovedListener {
+    public interface ItemMovedListener {
         /**
-         * Triggered when an event was dragged to a new position and the start
+         * Triggered when an item was dragged to a new position and the start
          * and end dates was changed
          *
-         * @param event
-         *            The event that was moved
+         * @param item
+         *            The item that was moved
          */
-        void eventMoved(CalendarEvent event);
+        void itemMoved(CalendarItem item);
     }
 
     /**
-     * Listener interface for when an event gets resized (its start or end date
+     * Listener interface for when an item gets resized (its start or end date
      * changes)
      */
-    public interface EventResizeListener {
+    public interface ItemResizeListener {
         /**
-         * Triggers when the time limits for the event was changed.
+         * Triggers when the time limits for the item was changed.
          *
-         * @param event
-         *            The event that was changed. The new time limits have been
-         *            updated in the event before calling this method
+         * @param item
+         *            The item that was changed. The new time limits have been
+         *            updated in the item before calling this method
          */
-        void eventResized(CalendarEvent event);
+        void itemResized(CalendarItem item);
     }
 
     /**
-     * Listener interface for listening to scroll events.
+     * Listener interface for listening to scroll items.
      */
     public interface ScrollListener {
         /**
@@ -218,7 +220,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Listener interface for listening to mouse events.
+     * Listener interface for listening to mouse items.
      */
     public interface MouseEventListener {
         /**
@@ -233,113 +235,13 @@ public class VCalendar extends Composite implements VHasDropHandler {
         void contextMenu(ContextMenuEvent event, Widget widget);
     }
 
-    private static abstract class AbstractEventComparator
-            implements Comparator<CalendarEvent> {
-
-        @Override
-        public int compare(CalendarEvent e1, CalendarEvent e2) {
-            if (e1.isAllDay() != e2.isAllDay()) {
-                if (e2.isAllDay()) {
-                    return 1;
-                }
-                return -1;
-            }
-            int result = doCompare(e1, e2);
-            if (result == 0) {
-                return indexCompare(e1, e2);
-            }
-            return result;
-        }
-
-        protected int indexCompare(CalendarEvent e1, CalendarEvent e2) {
-            return ((Integer) e2.getIndex()).compareTo(e1.getIndex());
-        }
-
-        protected abstract int doCompare(CalendarEvent o1, CalendarEvent o2);
-    }
-
-    private static class EventDurationComparator
-            extends AbstractEventComparator {
-
-        EventDurationComparator(boolean ascending) {
-            isAscending = ascending;
-        }
-
-        @Override
-        public int doCompare(CalendarEvent e1, CalendarEvent e2) {
-            int result = durationCompare(e1, e2, isAscending);
-            if (result == 0) {
-                return StartDateComparator.startDateCompare(e1, e2,
-                        isAscending);
-            }
-            return result;
-        }
-
-        static int durationCompare(CalendarEvent e1, CalendarEvent e2,
-                boolean ascending) {
-            int result = doDurationCompare(e1, e2);
-            return ascending ? -result : result;
-        }
-
-        private static int doDurationCompare(CalendarEvent e1,
-                CalendarEvent e2) {
-            Long d1 = e1.getRangeInMilliseconds();
-            Long d2 = e2.getRangeInMilliseconds();
-            if (!d1.equals(0L) && !d2.equals(0L)) {
-                return d2.compareTo(d1);
-            }
-
-            if (d2.equals(0L) && d1.equals(0L)) {
-                return 0;
-            } else if (d2.equals(0L) && d1 >= DateConstants.DAYINMILLIS) {
-                return -1;
-            } else if (d2.equals(0L) && d1 < DateConstants.DAYINMILLIS) {
-                return 1;
-            } else if (d1.equals(0L) && d2 >= DateConstants.DAYINMILLIS) {
-                return 1;
-            } else if (d1.equals(0L) && d2 < DateConstants.DAYINMILLIS) {
-                return -1;
-            }
-            return d2.compareTo(d1);
-        }
-
-        private boolean isAscending;
-
-    }
-
-    private static class StartDateComparator extends AbstractEventComparator {
-
-        StartDateComparator(boolean ascending) {
-            isAscending = ascending;
-        }
-
-        @Override
-        public int doCompare(CalendarEvent e1, CalendarEvent e2) {
-            int result = startDateCompare(e1, e2, isAscending);
-            if (result == 0) {
-                // show a longer event after a shorter event
-                return EventDurationComparator.durationCompare(e1, e2,
-                        isAscending);
-            }
-            return result;
-        }
-
-        static int startDateCompare(CalendarEvent e1, CalendarEvent e2,
-                boolean ascending) {
-            int result = e1.getStartTime().compareTo(e2.getStartTime());
-            return ascending ? -result : result;
-        }
-
-        private boolean isAscending;
-    }
-
     /**
      * Default constructor
      */
     public VCalendar() {
         weekToolbar = new SimpleWeekToolbar(this);
         initWidget(outer);
-        setStylePrimaryName("v-calendar");
+        setStylePrimaryName(PRIMARY_STYLE);
         blockSelect(getElement());
     }
 
@@ -360,68 +262,74 @@ public class VCalendar extends Composite implements VHasDropHandler {
     	}
     }-*/;
 
-    private void updateEventsToWeekGrid(CalendarEvent[] events) {
-        List<CalendarEvent> allDayLong = new ArrayList<CalendarEvent>();
-        List<CalendarEvent> belowDayLong = new ArrayList<CalendarEvent>();
+    private void updateItemsToWeekGrid(CalendarItem[] items) {
 
-        for (CalendarEvent e : events) {
-            if (e.isAllDay()) {
-                // Event is set on one "allDay" event or more than one.
-                allDayLong.add(e);
+        List<CalendarItem> allDayLong = new ArrayList<>();
+        List<CalendarItem> belowDayLong = new ArrayList<>();
+
+        for (CalendarItem item : items) {
+            if (item.isAllDay()) {
+                // Item is set on one "allDay" event or more than one.
+                allDayLong.add(item);
 
             } else {
-                // Event is set only on one day.
-                belowDayLong.add(e);
+                // Item is set only on one day.
+                belowDayLong.add(item);
             }
         }
 
-        weeklyLongEvents.addEvents(allDayLong);
+        weeklyLongEvents.addItems(allDayLong);
 
-        for (CalendarEvent e : belowDayLong) {
-            weekGrid.addEvent(e);
+        for (CalendarItem item : belowDayLong) {
+            weekGrid.addItem(item);
         }
     }
 
     /**
-     * Adds events to the month grid
+     * Adds items to the month grid
      *
      * @param events
-     *            The events to add
+     *            The items to add
      * @param drawImmediately
      *            Should the grid be rendered immediately. (currently not in
      *            use)
      *
      */
-    public void updateEventsToMonthGrid(Collection<CalendarEvent> events,
-            boolean drawImmediately) {
-        for (CalendarEvent e : sortEvents(events)) {
+    public void updateItemsToMonthGrid(Collection<CalendarItem> events, boolean drawImmediately) {
+        for (CalendarItem e : sortItems(events)) {
             // FIXME Why is drawImmediately not used ?????
-            addEventToMonthGrid(e, false);
+            addItemToMonthGrid(e, false);
         }
     }
 
-    private void addEventToMonthGrid(CalendarEvent e,
-            boolean renderImmediately) {
+    private void addItemToMonthGrid(CalendarItem e, boolean renderImmediately) {
+
         Date when = e.getStart();
         Date to = e.getEnd();
-        boolean eventAdded = false;
-        boolean inProgress = false; // Event adding has started
-        boolean eventMoving = false;
-        List<SimpleDayCell> dayCells = new ArrayList<SimpleDayCell>();
-        List<SimpleDayCell> timeCells = new ArrayList<SimpleDayCell>();
+
+        boolean itemAdded = false;
+        boolean inProgress = false; // Item adding has started
+        boolean itemMoving = false;
+
+        List<SimpleDayCell> dayCells = new ArrayList<>();
+        List<SimpleDayCell> timeCells = new ArrayList<>();
         for (int row = 0; row < monthGrid.getRowCount(); row++) {
-            if (eventAdded) {
+
+            if (itemAdded) {
                 break;
             }
+
             for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
-                SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
-                        cell);
-                if (isEventInDay(when, to, sdc.getDate())
-                        && isEventInDayWithTime(when, to, sdc.getDate(),
-                                e.getEndTime(), e.isAllDay())) {
-                    if (!eventMoving) {
-                        eventMoving = sdc.getMoveEvent() != null;
+
+                SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row, cell);
+
+                if (isItemInDay(when, to, sdc.getDate())
+                        && isItemInDayWithTime(when, to, sdc.getDate(), e.getEndTime(), e.isAllDay())) {
+
+                    if (!itemMoving) {
+                        itemMoving = sdc.getMoveItem() != null;
                     }
+
                     long d = e.getRangeInMilliseconds();
                     if ((d > 0 && d <= DateConstants.DAYINMILLIS)
                             && !e.isAllDay()) {
@@ -429,28 +337,29 @@ public class VCalendar extends Composite implements VHasDropHandler {
                     } else {
                         dayCells.add(sdc);
                     }
+
                     inProgress = true;
-                    continue;
+
                 } else if (inProgress) {
-                    eventAdded = true;
+                    itemAdded = true;
                     inProgress = false;
                     break;
                 }
             }
         }
 
-        updateEventSlotIndex(e, dayCells);
-        updateEventSlotIndex(e, timeCells);
+        updateItemSlotIndex(e, dayCells);
+        updateItemSlotIndex(e, timeCells);
 
         for (SimpleDayCell sdc : dayCells) {
-            sdc.addCalendarEvent(e);
+            sdc.addItem(e);
         }
         for (SimpleDayCell sdc : timeCells) {
-            sdc.addCalendarEvent(e);
+            sdc.addItem(e);
         }
 
         if (renderImmediately) {
-            reDrawAllMonthEvents(!eventMoving);
+            reDrawAllMonthItems(!itemMoving);
         }
     }
 
@@ -461,23 +370,21 @@ public class VCalendar extends Composite implements VHasDropHandler {
      */
     @SuppressWarnings("deprecation")
     // Date methods are not deprecated in GWT
-    private boolean isEventInDayWithTime(Date from, Date to, Date date,
-            Date endTime, boolean isAllDay) {
+    private boolean isItemInDayWithTime(Date from, Date to, Date date, Date endTime, boolean isAllDay) {
         return (isAllDay || !(to.getDay() == date.getDay()
                 && from.getDay() != to.getDay() && isMidnight(endTime)));
     }
 
-    private void updateEventSlotIndex(CalendarEvent e,
-            List<SimpleDayCell> cells) {
+    private void updateItemSlotIndex(CalendarItem item, List<SimpleDayCell> cells) {
         if (cells.isEmpty()) {
             return;
         }
 
-        if (e.getSlotIndex() == -1) {
+        if (item.getSlotIndex() == -1) {
             // Update slot index
             int newSlot = -1;
             for (SimpleDayCell sdc : cells) {
-                int slot = sdc.getEventCount();
+                int slot = sdc.getItemCount();
                 if (slot > newSlot) {
                     newSlot = slot;
                 }
@@ -486,30 +393,28 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
             for (int i = 0; i < newSlot; i++) {
                 // check for empty slot
-                if (isSlotEmpty(e, i, cells)) {
+                if (isSlotEmpty(item, i, cells)) {
                     newSlot = i;
                     break;
                 }
             }
-            e.setSlotIndex(newSlot);
+            item.setSlotIndex(newSlot);
         }
     }
 
-    private void reDrawAllMonthEvents(boolean clearCells) {
+    private void reDrawAllMonthItems(boolean clearCells) {
         for (int row = 0; row < monthGrid.getRowCount(); row++) {
             for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
-                SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
-                        cell);
+                SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row, cell);
                 sdc.reDraw(clearCells);
             }
         }
     }
 
-    private boolean isSlotEmpty(CalendarEvent addedEvent, int slotIndex,
-            List<SimpleDayCell> cells) {
+    private boolean isSlotEmpty(CalendarItem addedEvent, int slotIndex, List<SimpleDayCell> cells) {
         for (SimpleDayCell sdc : cells) {
-            CalendarEvent e = sdc.getCalendarEvent(slotIndex);
-            if (e != null && !e.equals(addedEvent)) {
+            CalendarItem item = sdc.getCalendarItem(slotIndex);
+            if (item != null && !item.equals(addedEvent)) {
                 return false;
             }
         }
@@ -525,18 +430,17 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * @param repaintImmediately
      *            Should we repaint after the event was removed?
      */
-    public void removeMonthEvent(CalendarEvent target,
-            boolean repaintImmediately) {
+    public void removeMonthItem(CalendarItem target, boolean repaintImmediately) {
         if (target != null && target.getSlotIndex() >= 0) {
             // Remove event
             for (int row = 0; row < monthGrid.getRowCount(); row++) {
                 for (int cell = 0; cell < monthGrid.getCellCount(row); cell++) {
-                    SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row,
-                            cell);
-                    if (sdc == null) {
-                        return;
-                    }
-                    sdc.removeEvent(target, repaintImmediately);
+
+                    SimpleDayCell sdc = (SimpleDayCell) monthGrid.getWidget(row, cell);
+
+                    if (sdc == null) return;
+
+                    sdc.removeItem(target, repaintImmediately);
                 }
             }
         }
@@ -545,31 +449,32 @@ public class VCalendar extends Composite implements VHasDropHandler {
     /**
      * Updates an event in the month grid
      *
-     * @param changedEvent
+     * @param changedItem
      *            The event that has changed
      */
-    public void updateEventToMonthGrid(CalendarEvent changedEvent) {
-        removeMonthEvent(changedEvent, true);
-        changedEvent.setSlotIndex(-1);
-        addEventToMonthGrid(changedEvent, true);
+    public void updateItemToMonthGrid(CalendarItem changedItem) {
+        removeMonthItem(changedItem, true);
+        changedItem.setSlotIndex(-1);
+        addItemToMonthGrid(changedItem, true);
     }
 
     /**
-     * Sort the events by current sort order
+     * Sort the items by current sort order
      *
-     * @param events
-     *            The events to sort
-     * @return An array where the events has been sorted
+     * @param items
+     *            The items to sort
+     * @return An array where the items has been sorted
      */
-    public CalendarEvent[] sortEvents(Collection<CalendarEvent> events) {
-        if (CalendarState.EventSortOrder.DURATION_DESC.equals(eventSortOrder)) {
-            return sortEventsByDuration(events);
-        } else if (!CalendarState.EventSortOrder.UNSORTED.equals(eventSortOrder)) {
-            CalendarEvent[] sorted = events
-                    .toArray(new CalendarEvent[events.size()]);
-            switch (eventSortOrder) {
+    public CalendarItem[] sortItems(Collection<CalendarItem> items) {
+        if (CalendarState.ItemSortOrder.DURATION_DESC.equals(itemSortOrder)) {
+            return sortItemsByDuration(items);
+
+        } else if (!CalendarState.ItemSortOrder.UNSORTED.equals(itemSortOrder)) {
+            CalendarItem[] sorted = items
+                    .toArray(new CalendarItem[items.size()]);
+            switch (itemSortOrder) {
             case DURATION_ASC:
-                Arrays.sort(sorted, new EventDurationComparator(true));
+                Arrays.sort(sorted, new ItemDurationComparator(true));
                 break;
             case START_DATE_ASC:
                 Arrays.sort(sorted, new StartDateComparator(true));
@@ -580,45 +485,36 @@ public class VCalendar extends Composite implements VHasDropHandler {
             }
             return sorted;
         }
-        return events.toArray(new CalendarEvent[events.size()]);
+        return items.toArray(new CalendarItem[items.size()]);
     }
 
     /**
      * Sort the event by how long they are
      *
-     * @param events
-     *            The events to sort
-     * @return An array where the events has been sorted
-     * @deprecated use {@link #sortEvents(Collection)} method which shorts
-     *             events by current sort order.
+     * @param items
+     *            The items to sort
+     * @return An array where the items has been sorted
+     * @deprecated use {@link #sortItems(Collection)} method which shorts
+     *             items by current sort order.
      */
     @Deprecated
-    public CalendarEvent[] sortEventsByDuration(
-            Collection<CalendarEvent> events) {
-        CalendarEvent[] sorted = events
-                .toArray(new CalendarEvent[events.size()]);
-        Arrays.sort(sorted, getEventComparator());
+    public CalendarItem[] sortItemsByDuration(Collection<CalendarItem> items) {
+        CalendarItem[] sorted = items
+                .toArray(new CalendarItem[items.size()]);
+        Arrays.sort(sorted, getItemComparator());
         return sorted;
     }
 
     /*
      * Check if the given event occurs at the given date.
      */
-    private boolean isEventInDay(Date eventWhen, Date eventTo, Date gridDate) {
-        if (eventWhen.compareTo(gridDate) <= 0
-                && eventTo.compareTo(gridDate) >= 0) {
-
-            return true;
-        }
-
-        return false;
+    private boolean isItemInDay(Date when, Date to, Date gridDate) {
+        return when.compareTo(gridDate) <= 0 && to.compareTo(gridDate) >= 0;
     }
 
     /**
      * Re-render the week grid
      *
-     * @param daysCount
-     *            The amount of days to include in the week
      * @param days
      *            The days
      * @param today
@@ -627,8 +523,8 @@ public class VCalendar extends Composite implements VHasDropHandler {
      *            The names of the dates
      */
     @SuppressWarnings("deprecation")
-    public void updateWeekGrid(int daysCount, List<CalendarDay> days,
-            Date today, String[] realDayNames) {
+    public void updateWeekGrid(List<CalendarDay> days, Date today, String[] realDayNames) {
+
         weekGrid.setFirstHour(getFirstHourOfTheDay());
         weekGrid.setLastHour(getLastHourOfTheDay());
         weekGrid.getTimeBar().updateTimeBar(is24HFormat());
@@ -637,6 +533,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
         dayToolbar.addBackButton();
         dayToolbar.setVerticalSized(isHeightUndefined);
         dayToolbar.setHorizontalSized(isWidthUndefined);
+
         weekGrid.clearDates();
         weekGrid.setDisabled(isDisabled());
 
@@ -645,40 +542,43 @@ public class VCalendar extends Composite implements VHasDropHandler {
             String localized_date_format = day.getLocalizedDateFormat();
             Date d = dateformat_date.parse(date);
             int dayOfWeek = day.getDayOfWeek();
-            if (dayOfWeek < getFirstDayNumber()
-                    || dayOfWeek > getLastDayNumber()) {
+            if (dayOfWeek < getFirstDayNumber() || dayOfWeek > getLastDayNumber()) {
                 continue;
             }
+
             boolean isToday = false;
             int dayOfMonth = d.getDate();
-            if (today.getDate() == dayOfMonth && today.getYear() == d.getYear()
+            if (today.getDate() == dayOfMonth
+                    && today.getYear() == d.getYear()
                     && today.getMonth() == d.getMonth()) {
                 isToday = true;
             }
-            dayToolbar.add(realDayNames[dayOfWeek - 1], date,
-                    localized_date_format, isToday ? "today" : null);
+
+            dayToolbar.add(realDayNames[dayOfWeek - 1], date, localized_date_format, isToday ? "today" : null);
             weeklyLongEvents.addDate(d);
             weekGrid.addDate(d);
+
             if (isToday) {
                 weekGrid.setToday(d, today);
             }
         }
+
         dayToolbar.addNextButton();
     }
 
     /**
-     * Updates the events in the Month view
+     * Updates the items in the Month view
      *
      * @param daysCount
      *            How many days there are
      * @param days
-     *
+     *            The days
      * @param today
      *            Todays date
      */
     @SuppressWarnings("deprecation")
-    public void updateMonthGrid(int daysCount, List<CalendarDay> days,
-            Date today) {
+    public void updateMonthGrid(int daysCount, List<CalendarDay> days, Date today) {
+
         int columns = getLastDayNumber() - getFirstDayNumber() + 1;
         rows = (int) Math.ceil(daysCount / (double) 7);
 
@@ -926,17 +826,17 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Returns the default comparator which can compare calendar events by
+     * Returns the default comparator which can compare calendar items by
      * duration.
      *
      * @deprecated this returns just one default comparator, but there are
-     *             number of comparators that are used to sort events depending
+     *             number of comparators that are used to sort items depending
      *             on order.
      *
      * @return
      */
     @Deprecated
-    public static Comparator<CalendarEvent> getEventComparator() {
+    public static Comparator<CalendarItem> getItemComparator() {
         return DEFAULT_COMPARATOR;
     }
 
@@ -979,7 +879,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
      *            The event to check
      * @return
      */
-    public static boolean isZeroLengthMidnightEvent(CalendarEvent event) {
+    public static boolean isZeroLengthMidnightEvent(CalendarItem event) {
         return areDatesEqualToSecond(event.getStartTime(), event.getEndTime())
                 && isMidnight(event.getEndTime());
     }
@@ -1122,11 +1022,10 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * @param firstDayOfWeek
      *            The first day of the week
      * @param events
-     *            The events to render
+     *            The items to render
      */
-    public void updateWeekView(int scroll, Date today, int daysInMonth,
-            int firstDayOfWeek, Collection<CalendarEvent> events,
-            List<CalendarDay> days) {
+    public void updateWeekView(int scroll, Date today, int daysInMonth, int firstDayOfWeek,
+                               Collection<CalendarItem> events, List<CalendarDay> days) {
 
         while (outer.getWidgetCount() > 0) {
             outer.remove(0);
@@ -1148,12 +1047,14 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
         }
 
-        weeklyLongEvents = new WeeklyLongEvents(this);
+        weeklyLongEvents = new WeeklyLongItems(this);
         if (weekGrid == null) {
             weekGrid = new WeekGrid(this, is24HFormat());
         }
-        updateWeekGrid(daysInMonth, days, today, realDayNames);
-        updateEventsToWeekGrid(sortEvents(events));
+
+        updateWeekGrid(days, today, realDayNames);
+        updateItemsToWeekGrid(sortItems(events));
+
         outer.add(dayToolbar, DockPanel.NORTH);
         outer.add(weeklyLongEvents, DockPanel.NORTH);
         outer.add(weekGrid, DockPanel.SOUTH);
@@ -1170,12 +1071,12 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * @param daysInMonth
      *            Amount of days in the month
      * @param events
-     *            The events to render
+     *            The items to render
      * @param days
      *            The day information
      */
     public void updateMonthView(int firstDayOfWeek, Date today, int daysInMonth,
-            Collection<CalendarEvent> events, List<CalendarDay> days) {
+                                Collection<CalendarItem> events, List<CalendarDay> days) {
 
         // Remove all week numbers from bar
         while (outer.getWidgetCount() > 0) {
@@ -1216,7 +1117,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
         weekToolbar.updateCellHeights();
         outer.add(monthGrid, DockPanel.CENTER);
 
-        updateEventsToMonthGrid(events, false);
+        updateItemsToMonthGrid(events, false);
     }
 
     private DateClickListener dateClickListener;
@@ -1243,7 +1144,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     private ForwardListener forwardListener;
 
     /**
-     * Set the listener which listens to forward events from the calendar
+     * Set the listener which listens to forward items from the calendar
      *
      * @param listener
      *            The listener to use
@@ -1253,7 +1154,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Get the listener which listens to forward events from the calendar
+     * Get the listener which listens to forward items from the calendar
      *
      * @return
      */
@@ -1264,7 +1165,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     private BackwardListener backwardListener;
 
     /**
-     * Set the listener which listens to backward events from the calendar
+     * Set the listener which listens to backward items from the calendar
      *
      * @param listener
      *            The listener to use
@@ -1274,7 +1175,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Set the listener which listens to backward events from the calendar
+     * Set the listener which listens to backward items from the calendar
      *
      * @return
      */
@@ -1326,44 +1227,44 @@ public class VCalendar extends Composite implements VHasDropHandler {
         return rangeSelectListener;
     }
 
-    private EventClickListener eventClickListener;
+    private ItemClickListener itemClickListener;
 
     /**
-     * Get the listener that listens to the user clicking on the events
+     * Get the listener that listens to the user clicking on the items
      */
-    public EventClickListener getEventClickListener() {
-        return eventClickListener;
+    public ItemClickListener getItemClickListener() {
+        return itemClickListener;
     }
 
     /**
-     * Set the listener that listens to the user clicking on the events
+     * Set the listener that listens to the user clicking on the items
      *
      * @param listener
      *            The listener to use
      */
-    public void setListener(EventClickListener listener) {
-        eventClickListener = listener;
+    public void setListener(ItemClickListener listener) {
+        itemClickListener = listener;
     }
 
-    private EventMovedListener eventMovedListener;
+    private ItemMovedListener itemMovedListener;
 
     /**
      * Get the listener that listens to when event is dragged to a new location
      *
      * @return
      */
-    public EventMovedListener getEventMovedListener() {
-        return eventMovedListener;
+    public ItemMovedListener getItemMovedListener() {
+        return itemMovedListener;
     }
 
     /**
      * Set the listener that listens to when event is dragged to a new location
      *
-     * @param eventMovedListener
+     * @param itemMovedListener
      *            The listener to use
      */
-    public void setListener(EventMovedListener eventMovedListener) {
-        this.eventMovedListener = eventMovedListener;
+    public void setListener(ItemMovedListener itemMovedListener) {
+        this.itemMovedListener = itemMovedListener;
     }
 
     private ScrollListener scrollListener;
@@ -1387,36 +1288,36 @@ public class VCalendar extends Composite implements VHasDropHandler {
         this.scrollListener = scrollListener;
     }
 
-    private EventResizeListener eventResizeListener;
+    private ItemResizeListener itemResizeListener;
 
     /**
-     * Get the listener that listens to when an events time limits are being
+     * Get the listener that listens to when an items time limits are being
      * adjusted
      *
      * @return
      */
-    public EventResizeListener getEventResizeListener() {
-        return eventResizeListener;
+    public ItemResizeListener getItemResizeListener() {
+        return itemResizeListener;
     }
 
     /**
-     * Set the listener that listens to when an events time limits are being
+     * Set the listener that listens to when an items time limits are being
      * adjusted
      *
-     * @param eventResizeListener
+     * @param itemResizeListener
      *            The listener to use
      */
-    public void setListener(EventResizeListener eventResizeListener) {
-        this.eventResizeListener = eventResizeListener;
+    public void setListener(ItemResizeListener itemResizeListener) {
+        this.itemResizeListener = itemResizeListener;
     }
 
     private MouseEventListener mouseEventListener;
     private boolean forwardNavigationEnabled = true;
     private boolean backwardNavigationEnabled = true;
-    private boolean eventCaptionAsHtml = false;
+    private boolean itemCaptionAsHtml = false;
 
     /**
-     * Get the listener that listen to mouse events
+     * Get the listener that listen to mouse items
      *
      * @return
      */
@@ -1425,7 +1326,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Set the listener that listen to mouse events
+     * Set the listener that listen to mouse items
      *
      * @param mouseEventListener
      *            The listener to use
@@ -1473,35 +1374,35 @@ public class VCalendar extends Composite implements VHasDropHandler {
     /**
      * Is resizing an event allowed
      */
-    public boolean isEventResizeAllowed() {
-        return eventResizeAllowed;
+    public boolean isItemResizeAllowed() {
+        return itemResizeAllowed;
     }
 
     /**
      * Is resizing an event allowed
      *
-     * @param eventResizeAllowed
+     * @param itemResizeAllowed
      *            True if allowed false if not
      */
-    public void setEventResizeAllowed(boolean eventResizeAllowed) {
-        this.eventResizeAllowed = eventResizeAllowed;
+    public void setItemResizeAllowed(boolean itemResizeAllowed) {
+        this.itemResizeAllowed = itemResizeAllowed;
     }
 
     /**
      * Is moving an event allowed
      */
-    public boolean isEventMoveAllowed() {
-        return eventMoveAllowed;
+    public boolean isItemMoveAllowed() {
+        return itemMoveAllowed;
     }
 
     /**
      * Is moving an event allowed
      *
-     * @param eventMoveAllowed
+     * @param itemMoveAllowed
      *            True if moving is allowed, false if not
      */
-    public void setEventMoveAllowed(boolean eventMoveAllowed) {
-        this.eventMoveAllowed = eventMoveAllowed;
+    public void setItemMoveAllowed(boolean itemMoveAllowed) {
+        this.itemMoveAllowed = itemMoveAllowed;
     }
 
     public boolean isBackwardNavigationEnabled() {
@@ -1549,12 +1450,12 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * <p>
      * The default is false, i.e. to render that caption as plain text.
      *
-     * @param eventCaptionAsHtml
+     * @param itemCaptionAsHtml
      *            true if the captions are rendered as HTML, false if rendered
      *            as plain text
      */
-    public void setEventCaptionAsHtml(boolean eventCaptionAsHtml) {
-        this.eventCaptionAsHtml = eventCaptionAsHtml;
+    public void setItemCaptionAsHtml(boolean itemCaptionAsHtml) {
+        this.itemCaptionAsHtml = itemCaptionAsHtml;
     }
 
     /**
@@ -1565,21 +1466,21 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * @return true if the captions are rendered as HTML, false if rendered as
      *         plain text
      */
-    public boolean isEventCaptionAsHtml() {
-        return eventCaptionAsHtml;
+    public boolean isItemCaptionAsHtml() {
+        return itemCaptionAsHtml;
     }
 
     /**
-     * Set sort strategy for events.
+     * Set sort strategy for items.
      *
      * @param order
      *            sort order
      */
-    public void setSortOrder(CalendarState.EventSortOrder order) {
+    public void setSortOrder(CalendarState.ItemSortOrder order) {
         if (order == null) {
-            eventSortOrder = CalendarState.EventSortOrder.DURATION_DESC;
+            itemSortOrder = CalendarState.ItemSortOrder.DURATION_DESC;
         } else {
-            eventSortOrder = order;
+            itemSortOrder = order;
         }
     }
 
@@ -1588,8 +1489,8 @@ public class VCalendar extends Composite implements VHasDropHandler {
      *
      * @return current sort order
      */
-    public CalendarState.EventSortOrder getSortOrder() {
-        return eventSortOrder;
+    public CalendarState.ItemSortOrder getSortOrder() {
+        return itemSortOrder;
     }
 
 }

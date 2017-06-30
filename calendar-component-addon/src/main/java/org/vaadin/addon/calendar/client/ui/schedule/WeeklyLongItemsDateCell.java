@@ -21,16 +21,17 @@ import org.vaadin.addon.calendar.client.ui.VCalendar;
 import java.util.Date;
 
 /**
- * Represents a cell used in {@link WeeklyLongEvents}
+ * Represents a cell used in {@link WeeklyLongItems}
  *
  * @since 7.1
  */
-public class WeeklyLongEventsDateCell extends HTML implements HasTooltipKey {
+public class WeeklyLongItemsDateCell extends HTML implements HasTooltipKey {
+
     private Date date;
-    private CalendarEvent calendarEvent;
+    private CalendarItem calendarItem;
     private VCalendar calendar;
 
-    public WeeklyLongEventsDateCell() {
+    public WeeklyLongItemsDateCell() {
     }
 
     public void setDate(Date date) {
@@ -41,12 +42,12 @@ public class WeeklyLongEventsDateCell extends HTML implements HasTooltipKey {
         return date;
     }
 
-    public void setEvent(CalendarEvent event) {
-        calendarEvent = event;
+    public void setItem(CalendarItem event) {
+        calendarItem = event;
     }
 
-    public CalendarEvent getEvent() {
-        return calendarEvent;
+    public CalendarItem getItem() {
+        return calendarItem;
     }
 
     public void setCalendar(VCalendar calendar) {
@@ -59,8 +60,8 @@ public class WeeklyLongEventsDateCell extends HTML implements HasTooltipKey {
 
     @Override
     public Object getTooltipKey() {
-        if (calendarEvent != null) {
-            return calendarEvent.getIndex();
+        if (calendarItem != null) {
+            return calendarItem.getIndex();
         }
         return null;
     }

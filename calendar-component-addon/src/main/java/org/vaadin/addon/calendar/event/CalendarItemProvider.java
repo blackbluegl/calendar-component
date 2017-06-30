@@ -20,26 +20,27 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Interface for querying events. The Vaadin Calendar always has a
- * CalendarEventProvider set.
+ * Interface for querying items. The Vaadin Calendar always has a
+ * CalendarItemProvider set.
  *
  * @since 7.1.0
  * @author Vaadin Ltd.
  */
 
-public interface CalendarEventProvider<EVENT extends CalendarEvent> extends Serializable {
+@FunctionalInterface
+public interface CalendarItemProvider<ITEM extends CalendarItem> extends Serializable {
 
     /**
      * <p>
-     * Gets all available events in the target date range between startDate and
-     * endDate. The Vaadin Calendar queries the events from the range that is
+     * Gets all available items in the target date range between startDate and
+     * endDate. The Vaadin Calendar queries the items from the range that is
      * shown, which is not guaranteed to be the same as the date range that is
      * set.
      * </p>
      *
      * <p>
      * For example, if you set the date range to be monday 22.2.2010 - wednesday
-     * 24.2.2010, the used Event Provider will be queried for events between
+     * 24.2.2010, the used Item Provider will be queried for items between
      * monday 22.2.2010 00:00 and sunday 28.2.2010 23:59. Generally you can
      * expect the date range to be expanded to whole days and whole weeks.
      * </p>
@@ -48,65 +49,67 @@ public interface CalendarEventProvider<EVENT extends CalendarEvent> extends Seri
      *            Start date
      * @param endDate
      *            End date
-     * @return List of events
+     * @return List of items
      */
-    public List<EVENT> getEvents(Date startDate, Date endDate);
+    List<ITEM> getItems(Date startDate, Date endDate);
 
     /**
-     * Event to signal that the set of events has changed and the calendar
-     * should refresh its view from the CalendarEventProvider.
+     * Item to signal that the set of items has changed and the calendar
+     * should refresh its view from the CalendarItemProvider.
      *
      */
     @SuppressWarnings("serial")
-    public class EventSetChangeEvent<EVENT extends CalendarEvent> implements Serializable {
+    class ItemSetChangedEvent<EVENT extends CalendarItem> implements Serializable {
 
-        private CalendarEventProvider<EVENT> source;
+        private CalendarItemProvider<EVENT> source;
 
-        public EventSetChangeEvent(CalendarEventProvider<EVENT> source) {
+        public ItemSetChangedEvent(CalendarItemProvider<EVENT> source) {
             this.source = source;
         }
 
         /**
-         * @return the CalendarEventProvider that has changed
+         * @return the CalendarItemProvider that has changed
          */
-        public CalendarEventProvider<EVENT> getProvider() {
+        public CalendarItemProvider<EVENT> getProvider() {
             return source;
         }
     }
 
     /**
-     * Listener for EventSetChange events.
+     * Listener for EventSetChange items.
      */
 
-    public interface EventSetChangeListener extends Serializable {
+    @FunctionalInterface
+    interface ItemSetChangedListener extends Serializable {
 
         /**
          * Called when the set of Events has changed.
          */
-        public void eventSetChange(EventSetChangeEvent changeEvent);
+
+        void itemSetChanged(ItemSetChangedEvent changeEvent);
     }
 
     /**
-     * Notifier interface for EventSetChange events.
+     * Notifier interface for EventSetChange items.
      */
 
-    public interface EventSetChangeNotifier extends Serializable {
+    interface ItemSetChangedNotifier extends Serializable {
 
         /**
-         * Add a listener for listening to when new events are adding or removed
+         * Add a listener for listening to when new items are adding or removed
          * from the event provider.
          *
          * @param listener
          *            The listener to add
          */
-        void addEventSetChangeListener(EventSetChangeListener listener);
+        void addItemSetChangedListener(ItemSetChangedListener listener);
 
         /**
-         * Remove a listener which listens to {@link EventSetChangeEvent}-events
+         * Remove a listener which listens to {@link ItemSetChangedEvent}-items
          *
          * @param listener
          *            The listener to remove
          */
-        void removeEventSetChangeListener(EventSetChangeListener listener);
+        void removeItemSetChangedListener(ItemSetChangedListener listener);
     }
 }

@@ -1,0 +1,45 @@
+@mixin meetings_calendar {
+
+.meetings {
+
+    .v-calendar-header-day {
+        font-size: 14px;
+    }
+
+    .v-calendar-header-day-today {
+        color: #2B9CE2;
+    }
+
+    .v-calendar-event-caption {
+
+      .target {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 2px;
+      }
+    }
+
+    .v-calendar-event.v-calendar-event-state-planned {
+        color: #222222;
+
+        .v-calendar-event-content {
+            border: 1px solid cadetblue;
+
+            background-color: rgba(200, 243, 243, 0.8);
+
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    .v-calendar-event.v-calendar-event-state-confirmed {
+        color: #095F3F;
+
+        .v-calendar-event-content {
+            background-color: rgba(190, 239, 190, 0.65);
+        }
+    }
+}
+}

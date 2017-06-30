@@ -68,10 +68,12 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     }
 
     private void updateSelection() {
+
         if (selectionStart == null) {
             return;
         }
-        if (selectionStart != null && selectionEnd != null) {
+
+        if (selectionEnd != null) {
             Date startDate = selectionStart.getDate();
             Date endDate = selectionEnd.getDate();
             for (int row = 0; row < getRowCount(); row++) {

@@ -1,5 +1,6 @@
 @import "../valo/valo.scss";
 @import "addons.scss";
+@import "_custom_calendar.scss";
 
 // Prefix all selectors in your theme with .demo
 .demo {
@@ -8,4 +9,6 @@
 	@include valo;
 
     @include addons;
+
+    @include meetings_calendar;
 }

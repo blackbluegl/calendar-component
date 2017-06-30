@@ -67,19 +67,19 @@ public class DateCellContainer extends FlowPanel
 
     public boolean hasEvent(int slotIndex) {
         return hasDateCell(slotIndex)
-                && ((WeeklyLongEventsDateCell) getChildren().get(slotIndex))
-                        .getEvent() != null;
+                && ((WeeklyLongItemsDateCell) getChildren().get(slotIndex))
+                        .getItem() != null;
     }
 
     public boolean hasDateCell(int slotIndex) {
         return (getChildren().size() - 1) >= slotIndex;
     }
 
-    public WeeklyLongEventsDateCell getDateCell(int slotIndex) {
+    public WeeklyLongItemsDateCell getDateCell(int slotIndex) {
         if (!hasDateCell(slotIndex)) {
             addEmptyEventCells(slotIndex - (getChildren().size() - 1));
         }
-        return (WeeklyLongEventsDateCell) getChildren().get(slotIndex);
+        return (WeeklyLongItemsDateCell) getChildren().get(slotIndex);
     }
 
     public void addEmptyEventCells(int eventCount) {
@@ -89,7 +89,7 @@ public class DateCellContainer extends FlowPanel
     }
 
     public void addEmptyEventCell() {
-        WeeklyLongEventsDateCell dateCell = new WeeklyLongEventsDateCell();
+        WeeklyLongItemsDateCell dateCell = new WeeklyLongItemsDateCell();
         dateCell.addMouseDownHandler(this);
         dateCell.addMouseUpHandler(this);
         add(dateCell);
@@ -105,12 +105,12 @@ public class DateCellContainer extends FlowPanel
     @Override
     public void onMouseUp(MouseUpEvent event) {
         if (event.getSource() == clickTargetWidget
-                && clickTargetWidget instanceof WeeklyLongEventsDateCell
+                && clickTargetWidget instanceof WeeklyLongItemsDateCell
                 && !calendar.isDisabled()) {
-            CalendarEvent calendarEvent = ((WeeklyLongEventsDateCell) clickTargetWidget)
-                    .getEvent();
-            if (calendar.getEventClickListener() != null) {
-                calendar.getEventClickListener().eventClick(calendarEvent);
+            CalendarItem calendarItem = ((WeeklyLongItemsDateCell) clickTargetWidget)
+                    .getItem();
+            if (calendar.getItemClickListener() != null) {
+                calendar.getItemClickListener().itemClick(calendarItem);
             }
         }
     }

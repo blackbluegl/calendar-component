@@ -36,33 +36,33 @@ public class CalendarState extends AbstractComponentState {
     public int scroll;
     public String now;
     public List<Day> days;
-    public List<Event> events;
+    public List<Item> items;
     public List<Action> actions;
-    public boolean eventCaptionAsHtml;
+    public boolean itemCaptionAsHtml;
 
-    public EventSortOrder eventSortOrder = EventSortOrder.DURATION_DESC;
+    public ItemSortOrder itemSortOrder = ItemSortOrder.DURATION_DESC;
 
     /**
-     * Defines sort strategy for events in calendar month view and week view. In
-     * month view events will be sorted from top to bottom using the order in
-     * day cell. In week view events inside same day will be sorted from left to
+     * Defines sort strategy for items in calendar month view and week view. In
+     * month view items will be sorted from top to bottom using the order in
+     * day cell. In week view items inside same day will be sorted from left to
      * right using the order if their intervals are overlapping.
      * <p>
      * <ul>
      * <li>{@code UNSORTED} means no sort. Events will be in the order provided
-     * by com.vaadin.ui.components.calendar.event.CalendarEventProvider.
-     * <li>{@code START_DATE_DESC} means descending sort by events start date
+     * by com.vaadin.ui.components.calendar.event.CalendarItemProvider.
+     * <li>{@code START_DATE_DESC} means descending sort by items start date
      * (earlier event are shown first).
      * <li>{@code DURATION_DESC} means descending sort by duration (longer event
      * are shown first).
-     * <li>{@code START_DATE_ASC} means ascending sort by events start date
+     * <li>{@code START_DATE_ASC} means ascending sort by items start date
      * (later event are shown first).
      * <li>{@code DURATION_ASC} means ascending sort by duration (shorter event
      * are shown first).
      * 
      * </ul>
      */
-    public enum EventSortOrder {
+    public enum ItemSortOrder {
         UNSORTED, START_DATE_DESC, START_DATE_ASC, DURATION_DESC, DURATION_ASC;
     }
 
@@ -83,7 +83,7 @@ public class CalendarState extends AbstractComponentState {
         public String endDate;
     }
 
-    public static class Event implements java.io.Serializable {
+    public static class Item implements java.io.Serializable {
         public int index;
         public String caption;
         public String dateFrom;

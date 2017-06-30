@@ -22,7 +22,7 @@ import com.vaadin.client.ui.dd.VAcceptCallback;
 import com.vaadin.client.ui.dd.VDragEvent;
 import org.vaadin.addon.calendar.client.CalendarConnector;
 import org.vaadin.addon.calendar.client.ui.schedule.DateCell;
-import org.vaadin.addon.calendar.client.ui.schedule.DateCellDayEvent;
+import org.vaadin.addon.calendar.client.ui.schedule.DateCellDayItem;
 
 /**
  * Handles DD when the weekly view is showing in the Calendar. In the weekly
@@ -117,12 +117,12 @@ public class CalendarWeekDropHandler extends CalendarDropHandler {
         // - allday event list
         // - todaybar
         // - timebar
-        // - events
+        // - items
         return DOM.isOrHasChild(weekGridElement, elementOver)
                 && !DOM.isOrHasChild(timeBarElement, elementOver)
                 && todayBarElement != elementOver
                 && (WidgetUtil.findWidget(elementOver,
-                        DateCellDayEvent.class) == null);
+                        DateCellDayItem.class) == null);
     }
 
     /*

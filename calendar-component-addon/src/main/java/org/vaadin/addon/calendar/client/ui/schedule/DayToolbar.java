@@ -33,6 +33,7 @@ import java.util.Iterator;
  *
  */
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
+
     private int width = 0;
     protected static final int MARGINLEFT = 50;
     protected static final int MARGINRIGHT = 20;
@@ -106,12 +107,9 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
             l.addStyleDependentName("Hsized");
         }
 
-        l.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (calendar.getDateClickListener() != null) {
-                    calendar.getDateClickListener().dateClick(date);
-                }
+        l.addClickHandler(ce -> {
+            if (calendar.getDateClickListener() != null) {
+                calendar.getDateClickListener().dateClick(date);
             }
         });
 

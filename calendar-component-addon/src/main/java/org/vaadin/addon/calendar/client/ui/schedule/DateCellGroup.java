@@ -25,11 +25,12 @@ import java.util.List;
  * @since 7.1
  */
 public class DateCellGroup {
+
     private WeekGridMinuteTimeRange range;
     private final List<Integer> items;
 
     public DateCellGroup(Integer index) {
-        items = new ArrayList<Integer>();
+        items = new ArrayList<>();
         items.add(index);
     }
 

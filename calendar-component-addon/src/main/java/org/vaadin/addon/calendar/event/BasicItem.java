@@ -20,15 +20,15 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Simple implementation of {@link org.vaadin.addon.calendar.event.CalendarEvent
- * CalendarEvent}. Has setters for all required fields and fires events when
+ * Simple implementation of {@link CalendarItem
+ * CalendarItem}. Has setters for all required fields and fires items when
  * this event is changed.
  *
  * @since 7.1.0
  * @author Vaadin Ltd.
  */
 
-public class BasicEvent implements EditableCalendarEvent {
+public class BasicItem implements EditableCalendarItem {
 
     private String caption;
     private String description;
@@ -41,7 +41,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /**
      * Default constructor
      */
-    public BasicEvent() {}
+    public BasicItem() {}
 
     /**
      * Constructor for creating an event with the same start and end date
@@ -53,7 +53,7 @@ public class BasicEvent implements EditableCalendarEvent {
      * @param date
      *            The date the event occurred
      */
-    public BasicEvent(String caption, String description, Date date) {
+    public BasicItem(String caption, String description, Date date) {
         this.caption = caption;
         this.description = description;
         start = date;
@@ -73,8 +73,8 @@ public class BasicEvent implements EditableCalendarEvent {
      * @param endDate
      *            The end date of the event
      */
-    public BasicEvent(String caption, String description, Date startDate,
-            Date endDate) {
+    public BasicItem(String caption, String description, Date startDate,
+                     Date endDate) {
         this.caption = caption;
         this.description = description;
         start = startDate;
@@ -84,7 +84,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /*
      * (non-Javadoc)
      *
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getCaption()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getCaption()
      */
     @Override
     public String getCaption() {
@@ -94,7 +94,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /*
      * (non-Javadoc)
      *
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getDescription()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getDescription()
      */
     @Override
     public String getDescription() {
@@ -104,7 +104,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /*
      * (non-Javadoc)
      *
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getEnd()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getEnd()
      */
     @Override
     public Date getEnd() {
@@ -114,7 +114,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /*
      * (non-Javadoc)
      *
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStart()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getStart()
      */
     @Override
     public Date getStart() {
@@ -124,7 +124,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /*
      * (non-Javadoc)
      *
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#getStyleName()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#getStyleName()
      */
     @Override
     public String getStyleName() {
@@ -134,7 +134,7 @@ public class BasicEvent implements EditableCalendarEvent {
     /*
      * (non-Javadoc)
      *
-     * @see org.vaadin.addon.calendar.event.CalendarEvent#isAllDay()
+     * @see org.vaadin.addon.calendar.event.CalendarItem#isAllDay()
      */
     @Override
     public boolean isAllDay() {
@@ -223,25 +223,25 @@ public class BasicEvent implements EditableCalendarEvent {
      * some property of the event changes.
      */
     protected void fireEventChange() {
-        EventChangeEvent<EditableCalendarEvent> event = new EventChangeEvent<>(this);
+        ItemChangedEvent<EditableCalendarItem> event = new ItemChangedEvent<>(this);
 
-        for (EventChangeListener listener : notifier.getListeners()) {
-            listener.eventChange(event);
+        for (ItemChangeListener listener : notifier.getListeners()) {
+            listener.itemChanged(event);
         }
     }
 
     private Notify notifier = new Notify();
 
     @Override
-    public EventChangeNotifier getNotifier() {
+    public ItemChangeNotifier getNotifier() {
         return notifier;
     }
 
-    private class Notify implements EditableCalendarEvent.EventChangeNotifier {
+    private class Notify implements ItemChangeNotifier {
 
-        private transient List<EventChangeListener> listeners = new ArrayList<>();
+        private transient List<ItemChangeListener> listeners = new ArrayList<>();
 
-        public List<EventChangeListener> getListeners() {
+        public List<ItemChangeListener> getListeners() {
             return listeners;
         }
 
@@ -249,13 +249,13 @@ public class BasicEvent implements EditableCalendarEvent {
          * (non-Javadoc)
          *
          * @see
-         * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeNotifier
+         * org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemChangeNotifier
          * #addListener
-         * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener
+         * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemChangeListener
          * )
          */
         @Override
-        public void addListener(EventChangeListener listener) {
+        public void addListener(ItemChangeListener listener) {
             listeners.add(listener);
         }
 
@@ -263,13 +263,13 @@ public class BasicEvent implements EditableCalendarEvent {
          * (non-Javadoc)
          *
          * @see
-         * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeNotifier
+         * org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemChangeNotifier
          * #removeListener
-         * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener
+         * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemChangeListener
          * )
          */
         @Override
-        public void removeListener(EventChangeListener listener) {
+        public void removeListener(ItemChangeListener listener) {
             listeners.remove(listener);
         }
     }

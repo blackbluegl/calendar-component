@@ -15,41 +15,43 @@
  */
 package org.vaadin.addon.calendar.handler;
 
-import org.vaadin.addon.calendar.event.CalendarEvent;
-import org.vaadin.addon.calendar.event.EditableCalendarEvent;
+import org.vaadin.addon.calendar.event.CalendarItem;
+import org.vaadin.addon.calendar.event.EditableCalendarItem;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Date;
 
 /**
- * Implements basic functionality needed to enable event resizing.
+ * Implements basic functionality needed to enable moving items.
  *
  * @since 7.1
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
 
-public class BasicEventResizeHandler implements CalendarComponentEvents.EventResizeHandler {
+public class BasicItemMoveHandler implements CalendarComponentEvents.ItemMoveHandler {
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
-     * #eventResize
-     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResize)
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemMoveHandler
+     * #itemMove
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemMoveEvent)
      */
     @Override
-    public void eventResize(CalendarComponentEvents.EventResize event) {
-        CalendarEvent calendarEvent = event.getCalendarEvent();
+    public void itemMove(CalendarComponentEvents.ItemMoveEvent event) {
+        CalendarItem calendarItem = event.getCalendarItem();
 
-        if (calendarEvent instanceof EditableCalendarEvent) {
-            Date newStartTime = event.getNewStart();
-            Date newEndTime = event.getNewEnd();
+        if (calendarItem instanceof EditableCalendarItem) {
 
-            EditableCalendarEvent editableEvent = (EditableCalendarEvent) calendarEvent;
+            EditableCalendarItem editableItem = (EditableCalendarItem) calendarItem;
 
-            setDates(editableEvent, newStartTime, newEndTime);
+            Date newFromTime = event.getNewStart();
+
+            // Update event dates
+            long length = editableItem.getEnd().getTime() - editableItem.getStart().getTime();
+            setDates(editableItem, newFromTime, new Date(newFromTime.getTime() + length));
         }
     }
 
@@ -63,7 +65,7 @@ public class BasicEventResizeHandler implements CalendarComponentEvents.EventRes
      * @param end
      *            The end date
      */
-    protected void setDates(EditableCalendarEvent event, Date start, Date end) {
+    protected void setDates(EditableCalendarItem event, Date start, Date end) {
         event.setStart(start);
         event.setEnd(end);
     }

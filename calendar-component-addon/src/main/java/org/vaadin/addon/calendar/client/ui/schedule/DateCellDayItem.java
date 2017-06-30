@@ -40,7 +40,7 @@ import java.util.List;
  * @since 7.1
  */
 
-public class DateCellDayEvent extends FocusableHTML
+public class DateCellDayItem extends FocusableHTML
         implements MouseDownHandler, MouseUpHandler, MouseMoveHandler,
         KeyDownHandler, ContextMenuHandler, HasTooltipKey {
 
@@ -51,7 +51,7 @@ public class DateCellDayEvent extends FocusableHTML
     private final Integer eventIndex;
     private final List<HandlerRegistration> handlers;
     private Element caption = null;
-    private CalendarEvent calendarEvent = null;
+    private CalendarItem calendarItem = null;
     private HandlerRegistration moveRegistration;
     private int startY = -1;
     private int startX = -1;
@@ -69,7 +69,7 @@ public class DateCellDayEvent extends FocusableHTML
     private int slotHeight;
     private boolean mouseMoveCanceled;
 
-    public DateCellDayEvent(DateCell dateCell, WeekGrid parent, CalendarEvent calendarEvent) {
+    public DateCellDayItem(DateCell dateCell, WeekGrid parent, CalendarItem calendarItem) {
         super();
         this.dateCell = dateCell;
 
@@ -77,13 +77,13 @@ public class DateCellDayEvent extends FocusableHTML
 
         setStylePrimaryName("v-calendar-event");
 
-        setCalendarEvent(calendarEvent);
+        setCalendarItem(calendarItem);
 
         weekGrid = parent;
 
         Style s = getElement().getStyle();
-        if (calendarEvent.getStyleName().length() > 0) {
-            addStyleDependentName(calendarEvent.getStyleName());
+        if (calendarItem.getStyleName().length() > 0) {
+            addStyleDependentName(calendarItem.getStyleName());
         }
         s.setPosition(Position.ABSOLUTE);
 
@@ -95,7 +95,7 @@ public class DateCellDayEvent extends FocusableHTML
         eventContent.addClassName("v-calendar-event-content");
         getElement().appendChild(eventContent);
 
-        if (weekGrid.getCalendar().isEventResizeAllowed()) {
+        if (weekGrid.getCalendar().isItemResizeAllowed()) {
             topResizeBar = DOM.createDiv();
             bottomResizeBar = DOM.createDiv();
 
@@ -106,7 +106,7 @@ public class DateCellDayEvent extends FocusableHTML
             getElement().appendChild(bottomResizeBar);
         }
 
-        eventIndex = calendarEvent.getIndex();
+        eventIndex = calendarItem.getIndex();
 
     }
 
@@ -176,13 +176,13 @@ public class DateCellDayEvent extends FocusableHTML
      */
     private void updateCaptions(boolean bigMode) {
         String innerHtml;
-        String timeAsText = calendarEvent.getTimeAsText();
+        String timeAsText = calendarItem.getTimeAsText();
         String htmlOrText;
 
-        if (dateCell.weekgrid.getCalendar().isEventCaptionAsHtml()) {
-            htmlOrText = calendarEvent.getCaption();
+        if (dateCell.weekgrid.getCalendar().isItemCaptionAsHtml()) {
+            htmlOrText = calendarItem.getCaption();
         } else {
-            htmlOrText = WidgetUtil.escapeHTML(calendarEvent.getCaption());
+            htmlOrText = WidgetUtil.escapeHTML(calendarItem.getCaption());
         }
 
         if (bigMode) {
@@ -215,7 +215,7 @@ public class DateCellDayEvent extends FocusableHTML
         clickTarget = Element.as(event.getNativeEvent().getEventTarget());
         mouseMoveCanceled = false;
 
-        if (weekGrid.getCalendar().isEventMoveAllowed()
+        if (weekGrid.getCalendar().isItemMoveAllowed()
                 || clickTargetsResize()) {
             moveRegistration = addMouseMoveHandler(this);
             setFocus(true);
@@ -231,8 +231,8 @@ public class DateCellDayEvent extends FocusableHTML
             mouseMoveStarted = false;
             Style s = getElement().getStyle();
             s.setZIndex(1000);
-            startDatetimeFrom = (Date) calendarEvent.getStartTime().clone();
-            startDatetimeTo = (Date) calendarEvent.getEndTime().clone();
+            startDatetimeFrom = (Date) calendarItem.getStartTime().clone();
+            startDatetimeTo = (Date) calendarItem.getEndTime().clone();
             Event.setCapture(getElement());
         }
 
@@ -282,30 +282,30 @@ public class DateCellDayEvent extends FocusableHTML
                     || yDiff > 3);
 
             if (!weekGrid.getCalendar().isDisabled() && mouseMoved) {
-                // Event Move:
+                // Item Move:
                 // - calendar must be enabled
                 // - calendar must not be in read-only mode
-                weekGrid.eventMoved(this);
+                weekGrid.itemMoved(this);
             } else if (!weekGrid.getCalendar().isDisabled()) {
-                // Event Click:
+                // Item Click:
                 // - calendar must be enabled (read-only is allowed)
                 EventTarget et = event.getNativeEvent().getEventTarget();
                 Element e = Element.as(et);
                 if (e == caption || e == eventContent
                         || e.getParentElement() == caption) {
                     if (weekGrid.getCalendar()
-                            .getEventClickListener() != null) {
-                        weekGrid.getCalendar().getEventClickListener()
-                                .eventClick(calendarEvent);
+                            .getItemClickListener() != null) {
+                        weekGrid.getCalendar().getItemClickListener()
+                                .itemClick(calendarItem);
                     }
                 }
             }
 
         } else { // click targeted resize bar
             removeGlobalResizeStyle();
-            if (weekGrid.getCalendar().getEventResizeListener() != null) {
-                weekGrid.getCalendar().getEventResizeListener()
-                        .eventResized(calendarEvent);
+            if (weekGrid.getCalendar().getItemResizeListener() != null) {
+                weekGrid.getCalendar().getItemResizeListener()
+                        .itemResized(calendarItem);
             }
             dateCell.recalculateEventWidths();
         }
@@ -379,26 +379,26 @@ public class DateCellDayEvent extends FocusableHTML
 
         Style s = getElement().getStyle();
 
-        Date from = calendarEvent.getStartTime();
-        Date to = calendarEvent.getEndTime();
+        Date from = calendarItem.getStartTime();
+        Date to = calendarItem.getEndTime();
         long duration = to.getTime() - from.getTime();
 
         if (!clickTargetsResize()
-                && weekGrid.getCalendar().isEventMoveAllowed()) {
+                && weekGrid.getCalendar().isItemMoveAllowed()) {
             long daysMs = dayDiff * DateConstants.DAYINMILLIS;
             from.setTime(startDatetimeFrom.getTime() + daysMs);
             from.setTime(from.getTime()
                     + ((long) halfHourInMilliSeconds * halfHourDiff));
             to.setTime((from.getTime() + duration));
 
-            calendarEvent.setStartTime(from);
-            calendarEvent.setEndTime(to);
-            calendarEvent.setStart(new Date(from.getTime()));
-            calendarEvent.setEnd(new Date(to.getTime()));
+            calendarItem.setStartTime(from);
+            calendarItem.setEndTime(to);
+            calendarItem.setStart(new Date(from.getTime()));
+            calendarItem.setEnd(new Date(to.getTime()));
 
             // Set new position for the event
             long startFromMinutes = (from.getHours() * 60) + from.getMinutes();
-            long range = calendarEvent.getRangeInMinutes();
+            long range = calendarItem.getRangeInMinutes();
             startFromMinutes = calculateStartFromMinute(startFromMinutes, from,
                     to, dayOffsetPx);
             if (startFromMinutes < 0) {
@@ -425,12 +425,12 @@ public class DateCellDayEvent extends FocusableHTML
 
             from.setTime(newStartTime);
 
-            calendarEvent.setStartTime(from);
-            calendarEvent.setStart(new Date(from.getTime()));
+            calendarItem.setStartTime(from);
+            calendarItem.setStart(new Date(from.getTime()));
 
             // Set new position for the event
             long startFromMinutes = (from.getHours() * 60) + from.getMinutes();
-            long range = calendarEvent.getRangeInMinutes();
+            long range = calendarItem.getRangeInMinutes();
 
             updatePosition(startFromMinutes, range);
 
@@ -445,13 +445,13 @@ public class DateCellDayEvent extends FocusableHTML
 
             to.setTime(newEndTime);
 
-            calendarEvent.setEndTime(to);
-            calendarEvent.setEnd(new Date(to.getTime()));
+            calendarItem.setEndTime(to);
+            calendarItem.setEnd(new Date(to.getTime()));
 
             // Set new position for the event
             long startFromMinutes = (startDatetimeFrom.getHours() * 60)
                     + startDatetimeFrom.getMinutes();
-            long range = calendarEvent.getRangeInMinutes();
+            long range = calendarItem.getRangeInMinutes();
             startFromMinutes = calculateStartFromMinute(startFromMinutes, from,
                     to, dayOffsetPx);
             if (startFromMinutes < 0) {
@@ -484,12 +484,12 @@ public class DateCellDayEvent extends FocusableHTML
         int dayOffset = startXrelative / dateCellWidth;
         s.clearLeft();
 
-        calendarEvent.setStartTime(startDatetimeFrom);
-        calendarEvent.setEndTime(startDatetimeTo);
+        calendarItem.setStartTime(startDatetimeFrom);
+        calendarItem.setEndTime(startDatetimeTo);
 
         long startFromMinutes = (startDatetimeFrom.getHours() * 60)
                 + startDatetimeFrom.getMinutes();
-        long range = calendarEvent.getRangeInMinutes();
+        long range = calendarItem.getRangeInMinutes();
 
         startFromMinutes = calculateStartFromMinute(startFromMinutes,
                 startDatetimeFrom, startDatetimeTo, dayOffset);
@@ -540,13 +540,13 @@ public class DateCellDayEvent extends FocusableHTML
     }
 
     /**
-     * Check if the given time range is too small for events
+     * Check if the given time range is too small for items
      *
      * @param start
      *              Millies
      * @param end
      *              Millies
-     * @return true, if the given time range is too small for events
+     * @return true, if the given time range is too small for items
      */
     private boolean isTimeRangeTooSmall(long start, long end) {
         return (end - start) >= getMinTimeRange();
@@ -560,12 +560,12 @@ public class DateCellDayEvent extends FocusableHTML
     }
 
     /**
-     * Build the string for sending resize events to server
+     * Build the string for sending resize items to server
      *
      * @param event The calendar event
      * @return The string with resizeing information
      */
-    private String buildResizeString(CalendarEvent event) {
+    private String buildResizeString(CalendarItem event) {
 
         return String.valueOf(event.getIndex()) +
                 "," +
@@ -603,7 +603,7 @@ public class DateCellDayEvent extends FocusableHTML
      * @return true if the current mouse movement is resizing
      */
     private boolean clickTargetsResize() {
-        return weekGrid.getCalendar().isEventResizeAllowed()
+        return weekGrid.getCalendar().isItemResizeAllowed()
                 && (clickTarget == topResizeBar
                         || clickTarget == bottomResizeBar);
     }
@@ -621,12 +621,12 @@ public class DateCellDayEvent extends FocusableHTML
         weekGrid.getCalendar().removeStyleDependentName("sresize");
     }
 
-    public CalendarEvent getCalendarEvent() {
-        return calendarEvent;
+    public CalendarItem getCalendarItem() {
+        return calendarItem;
     }
 
-    public void setCalendarEvent(CalendarEvent calendarEvent) {
-        this.calendarEvent = calendarEvent;
+    public void setCalendarItem(CalendarItem calendarItem) {
+        this.calendarItem = calendarItem;
     }
 
     public boolean isDisabled() {

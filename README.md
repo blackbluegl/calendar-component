@@ -4,6 +4,15 @@ Calendar-component is a UI component add-on for Vaadin 8.
  
 ## Release notes
 
+Moved to BETA stage and testing for stable release. After that, a new feature-branch will be opened.  
+(see issues -> tag:enhancements)
+
+### Version 1.0-BETA1
+- JS-Errors fixed on moving items
+- Naming of events changed to items
+- Refactorings
+- custom styles in demo-app
+
 ### Version 1.0-ALPHA3
 - EventProvider generics
 - respect descriptionContentMode from state
@@ -18,7 +27,7 @@ Calendar-component is a UI component add-on for Vaadin 8.
 
 ### Version 1.0-ALPHA1
 - extracted calendar component from current v7 compatibility package
-- container based event providers removed
+- container based item providers removed
 
 ## Roadmap
 

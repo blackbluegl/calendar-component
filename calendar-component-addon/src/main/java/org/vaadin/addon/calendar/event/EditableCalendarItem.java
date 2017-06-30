@@ -20,10 +20,10 @@ import java.util.Date;
 
 /**
  * <p>
- * Extension to the basic {@link CalendarEvent
- * CalendarEvent}. This interface provides setters (and thus editing
- * capabilities) for all {@link CalendarEvent
- * CalendarEvent} fields. For descriptions on the fields, refer to the extended
+ * Extension to the basic {@link CalendarItem
+ * CalendarItem}. This interface provides setters (and thus editing
+ * capabilities) for all {@link CalendarItem
+ * CalendarItem} fields. For descriptions on the fields, refer to the extended
  * interface.
  * </p>
  *
@@ -37,7 +37,7 @@ import java.util.Date;
  * @author Vaadin Ltd.
  */
 
-public interface EditableCalendarEvent extends CalendarEvent {
+public interface EditableCalendarItem extends CalendarItem {
 
     /**
      * Set the visible text in the calendar for the event.
@@ -94,22 +94,22 @@ public interface EditableCalendarEvent extends CalendarEvent {
      * Get a Notifier
      * @return Returns the Notifier for upadates
      */
-    EventChangeNotifier getNotifier();
+    ItemChangeNotifier getNotifier();
 
     /**
-     * Event to signal that an event has changed.
+     * Item to signal that an event has changed.
      */
 
-    public class EventChangeEvent<EVENT extends EditableCalendarEvent> implements Serializable {
+    class ItemChangedEvent<EVENT extends EditableCalendarItem> implements Serializable {
 
         private EVENT source;
 
-        public EventChangeEvent(EVENT source) {
+        public ItemChangedEvent(EVENT source) {
             this.source = source;
         }
 
         /**
-         * @return the CalendarEvent that has changed
+         * @return the CalendarItem that has changed
          */
         public EVENT getCalendarEvent() {
             return source;
@@ -117,31 +117,31 @@ public interface EditableCalendarEvent extends CalendarEvent {
     }
 
     /**
-     * Listener for EventSetChange events.
+     * Listener for EventSetChange items.
      */
 
-    public interface EventChangeListener extends Serializable {
+    interface ItemChangeListener extends Serializable {
 
         /**
-         * Called when an Event has changed.
+         * Called when an Item has changed.
          */
-        public void eventChange(EventChangeEvent eventChangeEvent);
+        public void itemChanged(ItemChangedEvent itemChangedEvent);
     }
 
     /**
-     * Notifier interface for EventChange events.
+     * Notifier interface for EventChange items.
      */
 
-    public interface EventChangeNotifier extends Serializable {
+    interface ItemChangeNotifier extends Serializable {
 
         /**
-         * Add a listener to listen for EventChangeEvents. These events are
-         * fired when a events properties are changed.
+         * Add a listener to listen for EventChangeEvents. These items are
+         * fired when a items properties are changed.
          *
          * @param listener
          *            The listener to add
          */
-        void addListener(EventChangeListener listener);
+        void addListener(ItemChangeListener listener);
 
         /**
          * Remove a listener from the event provider.
@@ -149,7 +149,7 @@ public interface EditableCalendarEvent extends CalendarEvent {
          * @param listener
          *            The listener to remove
          */
-        void removeListener(EventChangeListener listener);
+        void removeListener(ItemChangeListener listener);
     }
 
 }

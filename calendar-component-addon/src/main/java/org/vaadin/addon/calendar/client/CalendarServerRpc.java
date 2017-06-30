@@ -23,7 +23,12 @@ import com.vaadin.shared.communication.ServerRpc;
  * @author Vaadin Ltd.
  */
 public interface CalendarServerRpc extends ServerRpc {
-    void eventMove(int eventIndex, String newDate);
+
+    void itemMove(int itemIndex, String newDate);
+
+    void itemClick(int itemIndex);
+
+    void itemResize(int itemIndex, String newStartDate, String newEndDate);
 
     void rangeSelect(String range);
 
@@ -33,16 +38,11 @@ public interface CalendarServerRpc extends ServerRpc {
 
     void dateClick(String date);
 
-    void weekClick(String event);
-
-    void eventClick(int eventIndex);
-
-    void eventResize(int eventIndex, String newStartDate, String newEndDate);
+    void weekClick(String eventValue);
 
     void actionOnEmptyCell(String actionKey, String startDate, String endDate);
 
-    void actionOnEvent(String actionKey, String startDate, String endDate,
-                       int eventIndex);
+    void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex);
 
     @Delayed(lastOnly = true)
     void scroll(int scrollPosition);

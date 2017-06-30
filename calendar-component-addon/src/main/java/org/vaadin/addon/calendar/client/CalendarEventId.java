@@ -18,7 +18,7 @@ package org.vaadin.addon.calendar.client;
 import java.io.Serializable;
 
 /**
- * CalendarEventId contains static String identifiers for all Calendar events.
+ * CalendarEventId contains static String identifiers for all Calendar items.
  * These are used both in the client and server side code.
  *
  * @since 7.1
@@ -26,13 +26,13 @@ import java.io.Serializable;
  */
 public class CalendarEventId implements Serializable {
 
-    public static final String EVENTMOVE = "eventMove";
+    public static final String ITEM_MOVE = "itemMove";
+    public static final String ITEM_RESIZE = "itemResize";
+    public static final String ITEM_CLICK = "itemClick";
     public static final String RANGESELECT = "rangeSelect";
     public static final String FORWARD = "forward";
     public static final String BACKWARD = "backward";
     public static final String DATECLICK = "dateClick";
     public static final String WEEKCLICK = "weekClick";
-    public static final String EVENTCLICK = "eventClick";
-    public static final String EVENTRESIZE = "eventResize";
     public static final String ACTION = "action";
 }

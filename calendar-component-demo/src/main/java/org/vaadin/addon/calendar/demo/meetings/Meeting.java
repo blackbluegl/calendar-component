@@ -13,7 +13,7 @@ public class Meeting {
     enum State {
         empty,
         planned,
-        confirmed;
+        confirmed
     }
 
     private Date start;

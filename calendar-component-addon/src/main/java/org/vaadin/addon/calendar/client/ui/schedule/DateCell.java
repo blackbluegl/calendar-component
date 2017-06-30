@@ -119,7 +119,7 @@ public class DateCell extends FocusableComplexPanel
             end = start + slotTime;
         }
 
-        // Sink events for tooltip handling
+        // Sink items for tooltip handling
         Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
     }
 
@@ -186,7 +186,7 @@ public class DateCell extends FocusableComplexPanel
 
             width = getOffsetWidth()
                     - WidgetUtil.measureHorizontalBorder(getElement());
-            // Update moveWidth for any DateCellDayEvent child
+            // Update moveWidth for any DateCellDayItem child
             updateEventCellsWidth();
             recalculateEventWidths();
         } else {
@@ -196,17 +196,16 @@ public class DateCell extends FocusableComplexPanel
 
     /**
      * @param isVerticalSized
-     *            if true, this DateCell is sized with CSS and not via
-     *            {@link #setHeightPX(int)}
+     *            if true, this DateCell is sized with CSS
      */
     public void setVerticalSized(boolean isVerticalSized) {
         if (isVerticalSized) {
             addStyleDependentName("Vsized");
 
-            // recalc heights&size for events. all other height sizes come
+            // recalc heights&size for items. all other height sizes come
             // from css
             startingSlotHeight = slotElements[0].getOffsetHeight();
-            // Update slotHeight for each DateCellDayEvent child
+            // Update slotHeight for each DateCellDayItem child
             updateEventCellsHeight();
             recalculateEventPositions();
 
@@ -256,8 +255,8 @@ public class DateCell extends FocusableComplexPanel
 
     private void recalculateEventPositions() {
         for (int i = 0; i < getWidgetCount(); i++) {
-            DateCellDayEvent dayEvent = (DateCellDayEvent) getWidget(i);
-            updatePositionFor(dayEvent, getDate(), dayEvent.getCalendarEvent());
+            DateCellDayItem dayEvent = (DateCellDayItem) getWidget(i);
+            updatePositionFor(dayEvent, getDate(), dayEvent.getCalendarItem());
         }
     }
 
@@ -268,7 +267,7 @@ public class DateCell extends FocusableComplexPanel
 
         List<Integer> handled = new ArrayList<Integer>();
 
-        // Iterate through all events and group them. Events that overlaps
+        // Iterate through all items and group them. Events that overlaps
         // with each other, are added to the same group.
         for (int i = 0; i < count; i++) {
             if (handled.contains(i)) {
@@ -332,13 +331,13 @@ public class DateCell extends FocusableComplexPanel
             List<Integer> order = new ArrayList<Integer>();
             Map<Integer, Integer> columns = new HashMap<Integer, Integer>();
             for (Integer eventIndex : g.getItems()) {
-                DateCellDayEvent d = (DateCellDayEvent) getWidget(eventIndex);
+                DateCellDayItem d = (DateCellDayItem) getWidget(eventIndex);
                 d.setMoveWidth(width);
 
                 int freeSpaceCol = findFreeColumnSpaceOnLeft(
                         new WeekGridMinuteTimeRange(
-                                d.getCalendarEvent().getStartTime(),
-                                d.getCalendarEvent().getEndTime()),
+                                d.getCalendarItem().getStartTime(),
+                                d.getCalendarItem().getEndTime()),
                         order, columns);
                 if (freeSpaceCol >= 0) {
                     col = freeSpaceCol;
@@ -362,7 +361,7 @@ public class DateCell extends FocusableComplexPanel
             // Update widths and left position
             int eventWidth = (width / colCount);
             for (Integer index : g.getItems()) {
-                DateCellDayEvent d = (DateCellDayEvent) getWidget(index);
+                DateCellDayItem d = (DateCellDayItem) getWidget(index);
                 d.getElement().getStyle().setMarginLeft(
                         (eventWidth * columns.get(index)), Unit.PX);
                 d.setWidth(eventWidth + "px");
@@ -386,10 +385,10 @@ public class DateCell extends FocusableComplexPanel
                 return freeSpot;
             }
 
-            DateCellDayEvent d = (DateCellDayEvent) getWidget(eventIndex);
+            DateCellDayItem d = (DateCellDayItem) getWidget(eventIndex);
             WeekGridMinuteTimeRange nextRange = new WeekGridMinuteTimeRange(
-                    d.getCalendarEvent().getStartTime(),
-                    d.getCalendarEvent().getEndTime());
+                    d.getCalendarItem().getStartTime(),
+                    d.getCalendarItem().getEndTime());
 
             if (WeekGridMinuteTimeRange.doesOverlap(dateRange, nextRange)) {
                 skipIndex = col;
@@ -434,10 +433,10 @@ public class DateCell extends FocusableComplexPanel
         DateCellGroup g = new DateCellGroup(targetIndex);
 
         int count = getWidgetCount();
-        DateCellDayEvent target = (DateCellDayEvent) getWidget(targetIndex);
+        DateCellDayItem target = (DateCellDayItem) getWidget(targetIndex);
         WeekGridMinuteTimeRange targetRange = new WeekGridMinuteTimeRange(
-                target.getCalendarEvent().getStartTime(),
-                target.getCalendarEvent().getEndTime());
+                target.getCalendarItem().getStartTime(),
+                target.getCalendarItem().getEndTime());
         Date groupStart = targetRange.getStart();
         Date groupEnd = targetRange.getEnd();
 
@@ -446,10 +445,10 @@ public class DateCell extends FocusableComplexPanel
                 continue;
             }
 
-            DateCellDayEvent d = (DateCellDayEvent) getWidget(i);
+            DateCellDayItem d = (DateCellDayItem) getWidget(i);
             WeekGridMinuteTimeRange nextRange = new WeekGridMinuteTimeRange(
-                    d.getCalendarEvent().getStartTime(),
-                    d.getCalendarEvent().getEndTime());
+                    d.getCalendarItem().getStartTime(),
+                    d.getCalendarItem().getEndTime());
             if (WeekGridMinuteTimeRange.doesOverlap(targetRange, nextRange)) {
                 g.add(i);
 
@@ -471,36 +470,36 @@ public class DateCell extends FocusableComplexPanel
         return date;
     }
 
-    public void addEvent(Date targetDay, CalendarEvent calendarEvent) {
+    public void addItem(Date targetDay, CalendarItem calendarItem) {
+
         Element main = getElement();
-        DateCellDayEvent dayEvent = new DateCellDayEvent(this, weekgrid,
-                calendarEvent);
-        dayEvent.setSlotHeightInPX(getSlotHeight());
-        dayEvent.setDisabled(isDisabled());
+
+        DateCellDayItem dayItem = new DateCellDayItem(this, weekgrid, calendarItem);
+        dayItem.setSlotHeightInPX(getSlotHeight());
+        dayItem.setDisabled(isDisabled());
 
         if (startingSlotHeight > 0) {
-            updatePositionFor(dayEvent, targetDay, calendarEvent);
+            updatePositionFor(dayItem, targetDay, calendarItem);
         }
 
-        add(dayEvent, main);
+        add(dayItem, main);
     }
 
     // date methods are not deprecated in GWT
     @SuppressWarnings("deprecation")
-    private void updatePositionFor(DateCellDayEvent dayEvent, Date targetDay,
-            CalendarEvent calendarEvent) {
+    private void updatePositionFor(DateCellDayItem dayItem, Date targetDay, CalendarItem calendarItem) {
 
-        if (shouldDisplay(calendarEvent)) {
-            dayEvent.getElement().getStyle().clearDisplay();
+        if (shouldDisplay(calendarItem)) {
+            dayItem.getElement().getStyle().clearDisplay();
 
-            Date fromDt = calendarEvent.getStartTime();
+            Date fromDt = calendarItem.getStartTime();
             int h = fromDt.getHours();
             int m = fromDt.getMinutes();
-            long range = calendarEvent.getRangeInMinutesForDay(targetDay);
+            long range = calendarItem.getRangeInMinutesForDay(targetDay);
 
-            boolean onDifferentDays = calendarEvent.isTimeOnDifferentDays();
+            boolean onDifferentDays = calendarItem.isTimeOnDifferentDays();
             if (onDifferentDays) {
-                if (calendarEvent.getStart().compareTo(targetDay) != 0) {
+                if (calendarItem.getStart().compareTo(targetDay) != 0) {
                     // Current day slot is for the end date and all in-between
                     // days. Lets fix also the start & end times.
                     h = 0;
@@ -509,43 +508,44 @@ public class DateCell extends FocusableComplexPanel
             }
 
             int startFromMinutes = (h * 60) + m;
-            dayEvent.updatePosition(startFromMinutes, range);
+            dayItem.updatePosition(startFromMinutes, range);
         } else {
-            dayEvent.getElement().getStyle().setDisplay(Display.NONE);
+            dayItem.getElement().getStyle().setDisplay(Display.NONE);
         }
     }
 
-    public void addEvent(DateCellDayEvent dayEvent) {
+    public void addItem(DateCellDayItem dayItem) {
+
         Element main = getElement();
         int index = 0;
-        List<CalendarEvent> events = new ArrayList<CalendarEvent>();
+        List<CalendarItem> events = new ArrayList<>();
 
-        // events are the only widgets in this panel
+        // items are the only widgets in this panel
         // slots are just elements
         for (; index < getWidgetCount(); index++) {
-            DateCellDayEvent dc = (DateCellDayEvent) getWidget(index);
+            DateCellDayItem dc = (DateCellDayItem) getWidget(index);
             dc.setDisabled(isDisabled());
-            events.add(dc.getCalendarEvent());
+            events.add(dc.getCalendarItem());
         }
-        events.add(dayEvent.getCalendarEvent());
+        events.add(dayItem.getCalendarItem());
 
         index = 0;
-        for (CalendarEvent e : weekgrid.getCalendar().sortEvents(events)) {
-            if (e.equals(dayEvent.getCalendarEvent())) {
+        for (CalendarItem e : weekgrid.getCalendar().sortItems(events)) {
+            if (e.equals(dayItem.getCalendarItem())) {
                 break;
             }
             index++;
         }
-        this.insert(dayEvent, main, index, true);
+        this.insert(dayItem, main, index, true);
     }
 
-    public void removeEvent(DateCellDayEvent dayEvent) {
+    public void removeEvent(DateCellDayItem dayEvent) {
         remove(dayEvent);
     }
 
     /**
      *
-     * @param event
+     * @param item
      * @return
      *
      *         This method is not necessary in the long run.. Or here can be
@@ -553,15 +553,15 @@ public class DateCell extends FocusableComplexPanel
      */
     // Date methods not deprecated in GWT
     @SuppressWarnings("deprecation")
-    private boolean shouldDisplay(CalendarEvent event) {
+    private boolean shouldDisplay(CalendarItem item) {
         boolean display = true;
-        if (event.isTimeOnDifferentDays()) {
+        if (item.isTimeOnDifferentDays()) {
             display = true;
         } else { // only in case of one-day event we are able not to display
                  // event
                  // which is placed in unpublished parts on calendar
-            Date eventStart = event.getStartTime();
-            Date eventEnd = event.getEndTime();
+            Date eventStart = item.getStartTime();
+            Date eventEnd = item.getEndTime();
 
             int eventStartHours = eventStart.getHours();
             int eventEndHours = eventEnd.getHours();
@@ -572,9 +572,9 @@ public class DateCell extends FocusableComplexPanel
              * (according to logic of this method), so this case should be
              * handled here
              */
-            if (!event.getStart().equals(event.getEnd())
-                    && (event.getEndTime().getHours() == 0
-                            && event.getEndTime().getMinutes() == 0)) {
+            if (!item.getStart().equals(item.getEnd())
+                    && (item.getEndTime().getHours() == 0
+                            && item.getEndTime().getMinutes() == 0)) {
                 eventEndHours = 23;
             }
 
@@ -829,16 +829,16 @@ public class DateCell extends FocusableComplexPanel
 
     private void updateEventCellsWidth() {
         for (Widget widget : getChildren()) {
-            if (widget instanceof DateCellDayEvent) {
-                ((DateCellDayEvent) widget).setMoveWidth(width);
+            if (widget instanceof DateCellDayItem) {
+                ((DateCellDayItem) widget).setMoveWidth(width);
             }
         }
     }
 
     private void updateEventCellsHeight() {
         for (Widget widget : getChildren()) {
-            if (widget instanceof DateCellDayEvent) {
-                ((DateCellDayEvent) widget).setSlotHeightInPX(getSlotHeight());
+            if (widget instanceof DateCellDayItem) {
+                ((DateCellDayItem) widget).setSlotHeightInPX(getSlotHeight());
             }
         }
     }

@@ -19,7 +19,7 @@ import com.vaadin.ui.Component;
 import org.vaadin.addon.calendar.Calendar;
 
 /**
- * All Calendar events extends this class.
+ * All Calendar items extends this class.
  *
  * @since 7.1
  * @author Vaadin Ltd.
@@ -43,7 +43,7 @@ public class CalendarComponentEvent extends Component.Event {
     /*
      * (non-Javadoc)
      *
-     * @see com.vaadin.ui.Component.Event#getComponent()
+     * @see com.vaadin.ui.Component.Item#getComponent()
      */
     @Override
     public Calendar getComponent() {

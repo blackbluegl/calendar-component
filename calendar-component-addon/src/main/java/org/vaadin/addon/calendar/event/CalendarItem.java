@@ -20,13 +20,13 @@ import java.util.Date;
 
 /**
  * <p>
- * Event in the calendar. Customize your own event by implementing this
+ * Item in the calendar. Customize your own event by implementing this
  * interface.
  * </p>
  *
  * <li>Start and end fields are mandatory.</li>
  *
- * <li>In "allDay" events longer than one day, starting and ending clock times
+ * <li>In "allDay" items longer than one day, starting and ending clock times
  * are omitted in UI and only dates are shown.</li>
  *
  * @since 7.1.0
@@ -34,35 +34,35 @@ import java.util.Date;
  *
  */
 
-public interface CalendarEvent extends Serializable {
+public interface CalendarItem extends Serializable {
 
     /**
      * Gets start date of event.
      *
      * @return Start date.
      */
-    public Date getStart();
+    Date getStart();
 
     /**
      * Get end date of event.
      *
      * @return End date;
      */
-    public Date getEnd();
+    Date getEnd();
 
     /**
      * Gets caption of event.
      *
      * @return Caption text
      */
-    public String getCaption();
+    String getCaption();
 
     /**
      * Gets description of event. Shown as a tooltip over the event.
      *
      * @return Description text.
      */
-    public String getDescription();
+    String getDescription();
 
     /**
      * <p>
@@ -79,15 +79,15 @@ public interface CalendarEvent extends Serializable {
      *
      * @return Style name.
      */
-    public String getStyleName();
+    String getStyleName();
 
     /**
      * An all-day event typically does not occur at a specific time but targets
-     * a whole day or days. The rendering of all-day events differs from normal
-     * events.
+     * a whole day or days. The rendering of all-day items differs from normal
+     * items.
      *
      * @return true if this event is an all-day event, false otherwise
      */
-    public boolean isAllDay();
+    boolean isAllDay();
 
 }

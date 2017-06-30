@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.blackbluegl</groupId>
 	<artifactId>calendar-component</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0-ALPHA3</version>
+	<version>1.0-BETA1</version>
 	<name>Calendar Add-on</name>
 
 	<prerequisites>

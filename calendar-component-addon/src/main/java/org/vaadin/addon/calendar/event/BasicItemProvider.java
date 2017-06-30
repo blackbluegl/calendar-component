@@ -16,15 +16,16 @@
 package org.vaadin.addon.calendar.event;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 /**
  * <p>
- * {@link org.vaadin.addon.calendar.event.CalendarEventProvider.EventSetChangeNotifier
- * EventSetChangeNotifier} and
- * {@link org.vaadin.addon.calendar.event.EditableCalendarEvent.EventChangeListener
- * EventChangeListener} are also implemented, so the Calendar is notified when
+ * {@link ItemSetChangedNotifier
+ * ItemSetChangedNotifier} and
+ * {@link EditableCalendarItem.ItemChangeListener
+ * ItemChangeListener} are also implemented, so the Calendar is notified when
  * an event is added, changed or removed.
  * </p>
  *
@@ -33,34 +34,34 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 
-public class BasicEventProvider<EVENT extends BasicEvent> implements
-        CalendarEditableEventProvider<EVENT>,
-        CalendarEventProvider.EventSetChangeNotifier,
-        EditableCalendarEvent.EventChangeListener {
+public class BasicItemProvider<ITEM extends BasicItem> implements
+        CalendarEditableItemProvider<ITEM>,
+        CalendarItemProvider.ItemSetChangedNotifier,
+        EditableCalendarItem.ItemChangeListener {
 
-    protected List<EVENT> eventList = new ArrayList<>();
+    protected List<ITEM> itemList = new ArrayList<>();
 
-    private List<EventSetChangeListener> listeners = new ArrayList<>();
+    private List<ItemSetChangedListener> listeners = new ArrayList<>();
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * org.vaadin.addon.calendar.event.CalendarEventProvider#getEvents(java.
+     * org.vaadin.addon.calendar.event.CalendarItemProvider#getItems(java.
      * util.Date, java.util.Date)
      */
     @Override
-    public List<EVENT> getEvents(Date startDate, Date endDate) {
-        ArrayList<EVENT> activeEvents = new ArrayList<>();
+    public List<ITEM> getItems(Date startDate, Date endDate) {
+        ArrayList<ITEM> activeEvents = new ArrayList<>();
 
-        for (EVENT ev : eventList) {
+        for (ITEM ev : itemList) {
             long from = startDate.getTime();
             long to = endDate.getTime();
 
             if (ev.getStart() != null && ev.getEnd() != null) {
                 long f = ev.getStart().getTime();
                 long t = ev.getEnd().getTime();
-                // Select only events that overlaps with startDate and
+                // Select only items that overlaps with startDate and
                 // endDate.
                 if ((f <= to && f >= from) || (t >= from && t <= to)
                         || (f <= from && t >= to)) {
@@ -75,25 +76,25 @@ public class BasicEventProvider<EVENT extends BasicEvent> implements
     /**
      * Does this event provider container this event
      *
-     * @param event
+     * @param item
      *            The event to check for
      * @return If this provider has the event then true is returned, else false
      */
     @SuppressWarnings("unused")
-    public boolean containsEvent(EVENT event) {
-        return eventList.contains(event);
+    public boolean containsEvent(ITEM item) {
+        return itemList.contains(item);
     }
 
     /*
      * (non-Javadoc)
      *
      * @see org.vaadin.addon.calendar.ui.CalendarComponentEvents.
-     * EventSetChangeNotifier #addListener
+     * ItemSetChangedNotifier #addListener
      * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.
-     * EventSetChangeListener )
+     * ItemSetChangedListener )
      */
     @Override
-    public void addEventSetChangeListener(EventSetChangeListener listener) {
+    public void addItemSetChangedListener(ItemSetChangedListener listener) {
         listeners.add(listener);
 
     }
@@ -102,12 +103,12 @@ public class BasicEventProvider<EVENT extends BasicEvent> implements
      * (non-Javadoc)
      *
      * @see org.vaadin.addon.calendar.ui.CalendarComponentEvents.
-     * EventSetChangeNotifier #removeListener
+     * ItemSetChangedNotifier #removeListener
      * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.
-     * EventSetChangeListener )
+     * ItemSetChangedListener )
      */
     @Override
-    public void removeEventSetChangeListener(EventSetChangeListener listener) {
+    public void removeItemSetChangedListener(ItemSetChangedListener listener) {
         listeners.remove(listener);
     }
 
@@ -115,10 +116,10 @@ public class BasicEventProvider<EVENT extends BasicEvent> implements
      * Fires a eventsetchange event. The event is fired when either an event is
      * added or removed to the event provider
      */
-    protected void fireEventSetChange() {
-        EventSetChangeEvent<EVENT> event = new EventSetChangeEvent<>(this);
-        for (EventSetChangeListener listener : listeners) {
-            listener.eventSetChange(event);
+    protected void fireItemSetChanged() {
+        ItemSetChangedEvent<ITEM> changeEvent = new ItemSetChangedEvent<>(this);
+        for (ItemSetChangedListener listener : listeners) {
+            listener.itemSetChanged(changeEvent);
         }
     }
 
@@ -126,45 +127,55 @@ public class BasicEventProvider<EVENT extends BasicEvent> implements
      * (non-Javadoc)
      *
      * @see
-     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventChangeListener
-     * #eventChange
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemChangeListener
+     * #itemChanged
      * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventSetChange)
      */
     @Override
-    public void eventChange(EditableCalendarEvent.EventChangeEvent changeEvent) {
+    public void itemChanged(EditableCalendarItem.ItemChangedEvent changedEvent) {
         // naive implementation
-        fireEventSetChange();
+        fireItemSetChanged();
     }
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * org.vaadin.addon.calendar.event.CalendarEditableEventProvider#addEvent
-     * (org.vaadin.addon.calendar.event.CalendarEvent)
+     * org.vaadin.addon.calendar.event.CalendarEditableItemProvider#addItem
+     * (org.vaadin.addon.calendar.event.CalendarItem)
      */
     @Override
-    public void addEvent(EVENT event) {
-        eventList.add(event);
+    public void addItem(ITEM item) {
+        itemList.add(item);
 
-        event.getNotifier().addListener(this);
+        item.getNotifier().addListener(this);
 
-        fireEventSetChange();
+        fireItemSetChanged();
     }
 
     /*
          * (non-Javadoc)
          *
          * @see
-         * org.vaadin.addon.calendar.event.CalendarEditableEventProvider#removeEvent
-         * (org.vaadin.addon.calendar.event.CalendarEvent)
+         * org.vaadin.addon.calendar.event.CalendarEditableItemProvider#removeItem
+         * (org.vaadin.addon.calendar.event.CalendarItem)
          */
     @Override
-    public void removeEvent(EVENT event) {
-        eventList.remove(event);
+    public void removeItem(ITEM item) {
+        itemList.remove(item);
 
-        event.getNotifier().removeListener(this);
+        item.getNotifier().removeListener(this);
 
-        fireEventSetChange();
+        fireItemSetChanged();
+    }
+
+    public void setItems(Collection<ITEM> items) {
+
+        for (ITEM item : items) {
+            itemList.add(item);
+            item.getNotifier().addListener(this);
+        }
+
+        fireItemSetChanged();
     }
 }

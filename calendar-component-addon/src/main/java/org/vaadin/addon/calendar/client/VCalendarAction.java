@@ -17,7 +17,7 @@ package org.vaadin.addon.calendar.client;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.client.ui.Action;
-import org.vaadin.addon.calendar.client.ui.schedule.CalendarEvent;
+import org.vaadin.addon.calendar.client.ui.schedule.CalendarItem;
 
 import java.util.Date;
 
@@ -37,7 +37,7 @@ public class VCalendarAction extends Action {
 
     private Date actionEndDate;
 
-    private CalendarEvent event;
+    private CalendarItem event;
 
     private final DateTimeFormat dateformat_datetime = DateTimeFormat
             .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
@@ -54,7 +54,7 @@ public class VCalendarAction extends Action {
      * Constructor
      *
      * @param owner
-     *            The owner who trigger this kinds of events
+     *            The owner who trigger this kinds of items
      * @param rpc
      *            The CalendarRpc which is used for executing actions
      * @param key
@@ -80,7 +80,7 @@ public class VCalendarAction extends Action {
         if (event == null) {
             rpc.actionOnEmptyCell(actionKey.split("-")[0], startDate, endDate);
         } else {
-            rpc.actionOnEvent(actionKey.split("-")[0], startDate, endDate, event.getIndex());
+            rpc.actionOnItem(actionKey.split("-")[0], startDate, endDate, event.getIndex());
         }
 
         owner.getClient().getContextMenu().hide();
@@ -124,11 +124,11 @@ public class VCalendarAction extends Action {
         this.actionEndDate = actionEndDate;
     }
 
-    public CalendarEvent getEvent() {
+    public CalendarItem getEvent() {
         return event;
     }
 
-    public void setEvent(CalendarEvent event) {
+    public void setEvent(CalendarItem event) {
         this.event = event;
     }
 

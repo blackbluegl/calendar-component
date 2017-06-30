@@ -15,45 +15,41 @@
  */
 package org.vaadin.addon.calendar.handler;
 
-import org.vaadin.addon.calendar.event.CalendarEvent;
-import org.vaadin.addon.calendar.event.EditableCalendarEvent;
+import org.vaadin.addon.calendar.event.CalendarItem;
+import org.vaadin.addon.calendar.event.EditableCalendarItem;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Date;
 
 /**
- * Implements basic functionality needed to enable moving events.
+ * Implements basic functionality needed to enable event resizing.
  *
  * @since 7.1
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("serial")
 
-public class BasicEventMoveHandler implements CalendarComponentEvents.EventMoveHandler {
+public class BasicItemResizeHandler implements CalendarComponentEvents.EventResizeHandler {
 
     /*
      * (non-Javadoc)
      *
      * @see
-     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventMoveHandler
-     * #eventMove
-     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.MoveEvent)
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.EventResizeHandler
+     * #itemResize
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.ItemResizeEvent)
      */
     @Override
-    public void eventMove(CalendarComponentEvents.MoveEvent event) {
-        CalendarEvent calendarEvent = event.getCalendarEvent();
+    public void itemResize(CalendarComponentEvents.ItemResizeEvent event) {
+        CalendarItem calendarItem = event.getCalendarItem();
 
-        if (calendarEvent instanceof EditableCalendarEvent) {
+        if (calendarItem instanceof EditableCalendarItem) {
+            Date newStartTime = event.getNewStart();
+            Date newEndTime = event.getNewEnd();
 
-            EditableCalendarEvent editableEvent = (EditableCalendarEvent) calendarEvent;
+            EditableCalendarItem editableItem = (EditableCalendarItem) calendarItem;
 
-            Date newFromTime = event.getNewStart();
-
-            // Update event dates
-            long length = editableEvent.getEnd().getTime()
-                    - editableEvent.getStart().getTime();
-            setDates(editableEvent, newFromTime,
-                    new Date(newFromTime.getTime() + length));
+            setDates(editableItem, newStartTime, newEndTime);
         }
     }
 
@@ -67,7 +63,7 @@ public class BasicEventMoveHandler implements CalendarComponentEvents.EventMoveH
      * @param end
      *            The end date
      */
-    protected void setDates(EditableCalendarEvent event, Date start, Date end) {
+    protected void setDates(EditableCalendarItem event, Date start, Date end) {
         event.setStart(start);
         event.setEnd(end);
     }

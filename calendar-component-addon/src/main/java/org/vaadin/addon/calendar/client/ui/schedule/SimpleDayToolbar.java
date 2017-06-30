@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  */
 public class SimpleDayToolbar extends HorizontalPanel {
+
     private int width = 0;
     private boolean isWidthUndefined = false;
 

@@ -27,7 +27,7 @@ import java.util.List;
  * @author Vaadin Ltd.
  *
  */
-public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
+public class WeeklyLongItems extends HorizontalPanel implements HasTooltipKey {
 
     public static final int EVENT_HEIGTH = 15;
 
@@ -39,7 +39,7 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
 
     private boolean undefinedWidth;
 
-    public WeeklyLongEvents(VCalendar calendar) {
+    public WeeklyLongItems(VCalendar calendar) {
         setStylePrimaryName("v-calendar-weekly-longevents");
         this.calendar = calendar;
     }
@@ -60,29 +60,29 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
         updateCellWidths();
     }
 
-    public void addEvents(List<CalendarEvent> events) {
-        for (CalendarEvent e : events) {
-            addEvent(e);
+    public void addItems(List<CalendarItem> items) {
+        for (CalendarItem item : items) {
+            addItem(item);
         }
     }
 
-    public void addEvent(CalendarEvent calendarEvent) {
-        updateEventSlot(calendarEvent);
+    public void addItem(CalendarItem calendarItem) {
+        updateItemSlot(calendarItem);
 
         int dateCount = getWidgetCount();
-        Date from = calendarEvent.getStart();
-        Date to = calendarEvent.getEnd();
+        Date from = calendarItem.getStart();
+        Date to = calendarItem.getEnd();
         boolean started = false;
         for (int i = 0; i < dateCount; i++) {
             DateCellContainer dc = (DateCellContainer) getWidget(i);
             Date dcDate = dc.getDate();
             int comp = dcDate.compareTo(from);
             int comp2 = dcDate.compareTo(to);
-            WeeklyLongEventsDateCell eventLabel = dc
-                    .getDateCell(calendarEvent.getSlotIndex());
+            WeeklyLongItemsDateCell eventLabel = dc
+                    .getDateCell(calendarItem.getSlotIndex());
             eventLabel.setStylePrimaryName("v-calendar-event");
             if (comp >= 0 && comp2 <= 0) {
-                eventLabel.setEvent(calendarEvent);
+                eventLabel.setItem(calendarItem);
                 eventLabel.setCalendar(calendar);
 
                 eventLabel.addStyleDependentName("all-day");
@@ -97,15 +97,15 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
                 } else if (i == (dateCount - 1)) {
                     eventLabel.addStyleDependentName("continued-to");
                 }
-                final String extraStyle = calendarEvent.getStyleName();
+                final String extraStyle = calendarItem.getStyleName();
                 if (extraStyle != null && extraStyle.length() > 0) {
                     eventLabel.addStyleDependentName(extraStyle + "-all-day");
                 }
                 if (!started) {
-                    if (calendar.isEventCaptionAsHtml()) {
-                        eventLabel.setHTML(calendarEvent.getCaption());
+                    if (calendar.isItemCaptionAsHtml()) {
+                        eventLabel.setHTML(calendarItem.getCaption());
                     } else {
-                        eventLabel.setText(calendarEvent.getCaption());
+                        eventLabel.setText(calendarItem.getCaption());
                     }
                     started = true;
                 }
@@ -113,7 +113,7 @@ public class WeeklyLongEvents extends HorizontalPanel implements HasTooltipKey {
         }
     }
 
-    private void updateEventSlot(CalendarEvent e) {
+    private void updateItemSlot(CalendarItem e) {
         boolean foundFreeSlot = false;
         int slot = 0;
         while (!foundFreeSlot) {

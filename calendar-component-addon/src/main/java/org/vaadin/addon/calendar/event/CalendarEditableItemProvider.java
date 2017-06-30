@@ -16,29 +16,39 @@
 
 package org.vaadin.addon.calendar.event;
 
+import java.util.Collection;
+
 /**
- * An event provider which allows adding and removing events
+ * An item provider which allows adding and removing item
  *
  * @since 7.1.0
  * @author Vaadin Ltd.
+ * @author l. guettler
  */
 
-public interface CalendarEditableEventProvider<EVENT extends EditableCalendarEvent> extends CalendarEventProvider<EVENT> {
+public interface CalendarEditableItemProvider<EDITITEM extends EditableCalendarItem> extends CalendarItemProvider<EDITITEM> {
 
     /**
-     * Adds an event to the event provider
+     * Adds an item to the event provider
      *
-     * @param event
-     *            The event to add
+     * @param item
+     *            The item to add
      */
-    void addEvent(EVENT event);
+    void addItem(EDITITEM item);
 
     /**
-     * Removes an event from the event provider
+     * Removes an item from the event provider
      *
-     * @param event
-     *            The event
+     * @param item
+     *            The item
      */
-    void removeEvent(EVENT event);
+    void removeItem(EDITITEM item);
+
+    /**
+     * Add a set of items to the event provider
+     *
+     * @param items The item set
+     */
+    void setItems(Collection<EDITITEM> items);
 
 }
