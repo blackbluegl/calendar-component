@@ -95,7 +95,7 @@ public class DateCellDayItem extends FocusableHTML
         eventContent.addClassName("v-calendar-event-content");
         getElement().appendChild(eventContent);
 
-        if (weekGrid.getCalendar().isItemResizeAllowed()) {
+        if (weekGrid.getCalendar().isItemResizeAllowed() && getCalendarItem().isResizeable()) {
             topResizeBar = DOM.createDiv();
             bottomResizeBar = DOM.createDiv();
 
@@ -215,8 +215,9 @@ public class DateCellDayItem extends FocusableHTML
         clickTarget = Element.as(event.getNativeEvent().getEventTarget());
         mouseMoveCanceled = false;
 
-        if (weekGrid.getCalendar().isItemMoveAllowed()
-                || clickTargetsResize()) {
+        if ((weekGrid.getCalendar().isItemMoveAllowed() && getCalendarItem().isMoveable())
+                || (clickTargetsResize() && getCalendarItem().isResizeable())) {
+
             moveRegistration = addMouseMoveHandler(this);
             setFocus(true);
             try {
@@ -237,7 +238,7 @@ public class DateCellDayItem extends FocusableHTML
         }
 
         // make sure the right cursor is always displayed
-        if (clickTargetsResize()) {
+        if (clickTargetsResize() && getCalendarItem().isResizeable()) {
             addGlobalResizeStyle();
         }
 
@@ -276,38 +277,38 @@ public class DateCellDayItem extends FocusableHTML
         mouseMoveStarted = false;
         Style s = getElement().getStyle();
         s.setZIndex(1);
+
         if (!clickTargetsResize()) {
+
             // check if mouse has moved over threshold of 3 pixels
-            boolean mouseMoved = (xDiff < -3 || xDiff > 3 || yDiff < -3
-                    || yDiff > 3);
+            boolean mouseMoved = (xDiff < -3 || xDiff > 3 || yDiff < -3 || yDiff > 3);
 
             if (!weekGrid.getCalendar().isDisabled() && mouseMoved) {
                 // Item Move:
                 // - calendar must be enabled
                 // - calendar must not be in read-only mode
                 weekGrid.itemMoved(this);
-            } else if (!weekGrid.getCalendar().isDisabled()) {
+
+            } else if (!weekGrid.getCalendar().isDisabled() && getCalendarItem().isClickable()) {
                 // Item Click:
                 // - calendar must be enabled (read-only is allowed)
                 EventTarget et = event.getNativeEvent().getEventTarget();
                 Element e = Element.as(et);
                 if (e == caption || e == eventContent
                         || e.getParentElement() == caption) {
-                    if (weekGrid.getCalendar()
-                            .getItemClickListener() != null) {
-                        weekGrid.getCalendar().getItemClickListener()
-                                .itemClick(calendarItem);
+                    if (weekGrid.getCalendar().getItemClickListener() != null) {
+                        weekGrid.getCalendar().getItemClickListener().itemClick(calendarItem);
                     }
                 }
             }
 
-        } else { // click targeted resize bar
+        } else {
+            // click targeted resize bar
             removeGlobalResizeStyle();
             if (weekGrid.getCalendar().getItemResizeListener() != null) {
-                weekGrid.getCalendar().getItemResizeListener()
-                        .itemResized(calendarItem);
+                weekGrid.getCalendar().getItemResizeListener().itemResized(calendarItem);
             }
-            dateCell.recalculateEventWidths();
+            dateCell.recalculateItemWidths();
         }
     }
 
@@ -503,7 +504,7 @@ public class DateCellDayItem extends FocusableHTML
         startX = -1;
 
         // to reset the event width
-        ((DateCell) getParent()).recalculateEventWidths();
+        ((DateCell) getParent()).recalculateItemWidths();
     }
 
     // date methods are not deprecated in GWT

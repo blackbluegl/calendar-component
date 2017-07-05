@@ -427,10 +427,10 @@ public class WeekGrid extends SimplePanel {
         newParent.addItem(dayItem);
 
         if (!previousParent.equals(newParent)) {
-            previousParent.recalculateEventWidths();
+            previousParent.recalculateItemWidths();
         }
 
-        newParent.recalculateEventWidths();
+        newParent.recalculateItemWidths();
 
         if (calendar.getItemMovedListener() != null) {
             calendar.getItemMovedListener().itemMoved(se);

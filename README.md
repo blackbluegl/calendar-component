@@ -11,6 +11,7 @@ Moved to BETA stage and testing for stable release. After that, a new feature-br
 - Fixed:    forward and backward day calculation
 - Enhanced: BasicDateClickHandler has a new property to exclude month from cycle
 - Enhanced: add blocked timeslots all over or per day. Blocked slots can be styled.
+- Enhanced: input states per item added. (CalendarItem.isResizeable | .isMoveable | .isClickable)
 
 ### Version 1.0-BETA1
 - JS-Errors fixed on moving items

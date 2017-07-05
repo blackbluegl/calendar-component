@@ -125,6 +125,7 @@ public class DateCell extends FocusableComplexPanel
             }
 
             Event.sinkEvents(slot.getElement(), Event.MOUSEEVENTS);
+
             mainElement.appendChild(slot.getElement());
             slotElements[i] = slot.getElement();
             slots.add(slot);
@@ -201,7 +202,7 @@ public class DateCell extends FocusableComplexPanel
                     - WidgetUtil.measureHorizontalBorder(getElement());
             // Update moveWidth for any DateCellDayItem child
             updateEventCellsWidth();
-            recalculateEventWidths();
+            recalculateItemWidths();
         } else {
             removeStyleDependentName("Hsized");
         }
@@ -238,7 +239,7 @@ public class DateCell extends FocusableComplexPanel
     public void setWidthPX(int cellWidth) {
         width = cellWidth;
         setWidth(cellWidth + "px");
-        recalculateEventWidths();
+        recalculateItemWidths();
     }
 
     public void setHeightPX(int height, int[] cellHeights) {
@@ -273,12 +274,12 @@ public class DateCell extends FocusableComplexPanel
         }
     }
 
-    public void recalculateEventWidths() {
-        List<DateCellGroup> groups = new ArrayList<DateCellGroup>();
+    public void recalculateItemWidths() {
+        List<DateCellGroup> groups = new ArrayList<>();
 
         int count = getWidgetCount();
 
-        List<Integer> handled = new ArrayList<Integer>();
+        List<Integer> handled = new ArrayList<>();
 
         // Iterate through all items and group them. Events that overlaps
         // with each other, are added to the same group.
@@ -291,39 +292,43 @@ public class DateCell extends FocusableComplexPanel
             handled.addAll(curGroup.getItems());
 
             boolean newGroup = true;
+
             // No need to check other groups, if size equals the count
             if (curGroup.getItems().size() != count) {
+
                 // Check other groups. When the whole group overlaps with
                 // other group, the group is merged to the other.
                 for (DateCellGroup g : groups) {
 
                     if (WeekGridMinuteTimeRange.doesOverlap(
                             curGroup.getDateRange(), g.getDateRange())) {
+
                         newGroup = false;
                         updateGroup(g, curGroup);
                     }
                 }
-            } else {
-                if (newGroup) {
-                    groups.add(curGroup);
-                }
-                break;
+
             }
+//            else {
+//
+//                groups.add(curGroup);
+//
+//                break;
+//            }
 
             if (newGroup) {
                 groups.add(curGroup);
             }
         }
 
-        drawDayEvents(groups);
+        drawDayItems(groups);
     }
 
     private void recalculateCellHeights() {
         startingSlotHeight = height / numberOfSlots;
 
         for (int i = 0; i < slotElements.length; i++) {
-            slotElements[i].getStyle().setHeight(slotElementHeights[i],
-                    Unit.PX);
+            slotElements[i].getStyle().setHeight(slotElementHeights[i], Unit.PX);
         }
 
         updateEventCellsHeight();
@@ -337,12 +342,12 @@ public class DateCell extends FocusableComplexPanel
         return WidgetUtil.measureVerticalBorder(slotElements[0]);
     }
 
-    private void drawDayEvents(List<DateCellGroup> groups) {
+    private void drawDayItems(List<DateCellGroup> groups) {
         for (DateCellGroup g : groups) {
             int col = 0;
             int colCount = 0;
-            List<Integer> order = new ArrayList<Integer>();
-            Map<Integer, Integer> columns = new HashMap<Integer, Integer>();
+            List<Integer> order = new ArrayList<>();
+            Map<Integer, Integer> columns = new HashMap<>();
             for (Integer eventIndex : g.getItems()) {
                 DateCellDayItem d = (DateCellDayItem) getWidget(eventIndex);
                 d.setMoveWidth(width);
@@ -531,19 +536,19 @@ public class DateCell extends FocusableComplexPanel
 
         Element main = getElement();
         int index = 0;
-        List<CalendarItem> events = new ArrayList<>();
+        List<CalendarItem> items = new ArrayList<>();
 
         // items are the only widgets in this panel
         // slots are just elements
         for (; index < getWidgetCount(); index++) {
             DateCellDayItem dc = (DateCellDayItem) getWidget(index);
             dc.setDisabled(isDisabled());
-            events.add(dc.getCalendarItem());
+            items.add(dc.getCalendarItem());
         }
-        events.add(dayItem.getCalendarItem());
+        items.add(dayItem.getCalendarItem());
 
         index = 0;
-        for (CalendarItem e : weekgrid.getCalendar().sortItems(events)) {
+        for (CalendarItem e : weekgrid.getCalendar().sortItems(items)) {
             if (e.equals(dayItem.getCalendarItem())) {
                 break;
             }

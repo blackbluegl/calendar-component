@@ -41,6 +41,10 @@ public class CalendarItem {
     DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm");
     private boolean allDay;
 
+    private boolean moveable = true;
+    private boolean resizeable = true;
+    private boolean clickable = true;
+
     /**
      * @see org.vaadin.addon.calendar.event.CalendarItem#getStyleName()
      */
@@ -316,5 +320,29 @@ public class CalendarItem {
                             && getEndTime().getMinutes() == 0));
         }
         return isSeveralDays;
+    }
+
+    public boolean isMoveable() {
+        return moveable;
+    }
+
+    public void setMoveable(boolean moveable) {
+        this.moveable = moveable;
+    }
+
+    public boolean isResizeable() {
+        return resizeable;
+    }
+
+    public void setResizeable(boolean resizeable) {
+        this.resizeable = resizeable;
+    }
+
+    public boolean isClickable() {
+        return clickable;
+    }
+
+    public void setClickable(boolean clickable) {
+        this.clickable = clickable;
     }
 }

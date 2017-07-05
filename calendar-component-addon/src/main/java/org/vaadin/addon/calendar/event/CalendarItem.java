@@ -86,8 +86,31 @@ public interface CalendarItem extends Serializable {
      * a whole day or days. The rendering of all-day items differs from normal
      * items.
      *
-     * @return true if this event is an all-day event, false otherwise
+     * @return true if this event is an all-day event, (default)false otherwise
      */
-    boolean isAllDay();
+    default boolean isAllDay() {
+        return false;
+    }
+
+    /**
+     * @return (default)true, if this item is moveable.
+     */
+    default boolean isMoveable() {
+        return true;
+    }
+
+    /**
+     * @return (default)true, if this item is resizeable.
+     */
+    default boolean isResizeable() {
+        return true;
+    }
+
+    /**
+     * @return (default)true, if this item is clickable.
+     */
+    default boolean isClickable() {
+        return true;
+    }
 
 }

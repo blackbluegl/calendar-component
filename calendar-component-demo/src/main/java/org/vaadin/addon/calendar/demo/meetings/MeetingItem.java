@@ -55,7 +55,22 @@ public class MeetingItem extends BasicItem {
 		return false;
 	}
 
-	@Override
+    @Override
+    public boolean isMoveable() {
+        return meeting.isEditable();
+    }
+
+    @Override
+    public boolean isResizeable() {
+        return meeting.isEditable();
+    }
+
+    @Override
+    public boolean isClickable() {
+        return meeting.isEditable();
+    }
+
+    @Override
 	public void setEnd(Date end) {
 		meeting.setEnd(end);
 		super.setEnd(end);

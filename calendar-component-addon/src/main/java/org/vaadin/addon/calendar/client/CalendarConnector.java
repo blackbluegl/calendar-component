@@ -591,7 +591,9 @@ public class CalendarConnector extends AbstractComponentConnector
 
     private List<CalendarItem> calendarEventListOf(
             List<CalendarState.Item> items, boolean format24h) {
-        List<CalendarItem> list = new ArrayList<CalendarItem>(items.size());
+
+        List<CalendarItem> list = new ArrayList<>(items.size());
+
         for (CalendarState.Item item : items) {
             final String dateFrom = item.dateFrom;
             final String dateTo = item.dateTo;
@@ -610,6 +612,9 @@ public class CalendarConnector extends AbstractComponentConnector
                     .parse(dateTo + " " + timeTo));
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
+            calendarItem.setMoveable(item.moveable);
+            calendarItem.setResizeable(item.resizeable);
+            calendarItem.setClickable(item.clickable);
             list.add(calendarItem);
         }
         return list;

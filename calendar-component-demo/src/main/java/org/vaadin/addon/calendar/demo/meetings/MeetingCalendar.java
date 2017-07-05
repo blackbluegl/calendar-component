@@ -78,11 +78,6 @@ public class MeetingCalendar extends CustomComponent {
         Notification.show(meeting.getName(), meeting.getDetails(), Type.HUMANIZED_MESSAGE);
     }
 
-	private void updateMeeting(MeetingItem item, Date start, Date end) {
-		item.setStart(start);
-		item.setEnd(end);
-	}
-
     private void initCalendar() {
 
         eventProvider = new MeetingDataProvider();
@@ -165,20 +160,14 @@ public class MeetingCalendar extends CustomComponent {
 
             MeetingItem item = (MeetingItem) event.getCalendarItem();
 
-            Meeting meeting = item.getMeeting();
-
             long length = item.getEnd().getTime() - item.getStart().getTime();
 
             Date newStart = event.getNewStart();
 
             Date newEnd = new Date(newStart.getTime() + length);
 
-            if (meeting.isEditable()) {
-                // TODO remove
-                updateMeeting(item, newStart, newEnd);
-            } else {
-                updateMeeting(item, meeting.getStart(), meeting.getEnd());
-            }
+            //updateMeeting(item, newStart, newEnd);
+
         }
     }
 
@@ -189,15 +178,9 @@ public class MeetingCalendar extends CustomComponent {
 
 
             MeetingItem item = (MeetingItem) event.getCalendarItem();
-            Meeting meeting = item.getMeeting();
 
-            if (meeting.isEditable()) {
-                // TODO remove
-                updateMeeting(item, event.getNewStart(), event.getNewEnd());
-            }
-            else {
-                updateMeeting(item, meeting.getStart(), meeting.getEnd());
-            }
+            //updateMeeting(item, event.getNewStart(), event.getNewEnd());
+
         }
     }
 

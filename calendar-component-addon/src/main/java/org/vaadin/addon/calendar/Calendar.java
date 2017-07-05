@@ -450,17 +450,20 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         List<CalendarState.Item> calendarStateItems = new ArrayList<>();
         if (items != null) {
             for (int i = 0; i < items.size(); i++) {
-                CalendarItem e = items.get(i);
+                CalendarItem calItem = items.get(i);
                 CalendarState.Item item = new CalendarState.Item();
                 item.index = i;
-                item.caption = e.getCaption() == null ? "" : e.getCaption();
-                item.dateFrom = df_date.format(e.getStart());
-                item.dateTo = df_date.format(e.getEnd());
-                item.timeFrom = df_time.format(e.getStart());
-                item.timeTo = df_time.format(e.getEnd());
-                item.description = e.getDescription() == null ? "" : e.getDescription();
-                item.styleName = e.getStyleName() == null ? "" : e.getStyleName();
-                item.allDay = e.isAllDay();
+                item.caption = calItem.getCaption() == null ? "" : calItem.getCaption();
+                item.dateFrom = df_date.format(calItem.getStart());
+                item.dateTo = df_date.format(calItem.getEnd());
+                item.timeFrom = df_time.format(calItem.getStart());
+                item.timeTo = df_time.format(calItem.getEnd());
+                item.description = calItem.getDescription() == null ? "" : calItem.getDescription();
+                item.styleName = calItem.getStyleName() == null ? "" : calItem.getStyleName();
+                item.allDay = calItem.isAllDay();
+                item.moveable = calItem.isMoveable();
+                item.resizeable = calItem.isResizeable();
+                item.clickable = calItem.isClickable();
                 calendarStateItems.add(item);
             }
         }

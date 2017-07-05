@@ -95,5 +95,8 @@ public class CalendarState extends AbstractComponentState {
         public String styleName;
         public String description;
         public boolean allDay;
+        public boolean moveable = true;
+        public boolean resizeable = true;
+        public boolean clickable = true;
     }
 }
