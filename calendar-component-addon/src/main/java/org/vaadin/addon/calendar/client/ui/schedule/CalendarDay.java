@@ -15,6 +15,8 @@
  */
 package org.vaadin.addon.calendar.client.ui.schedule;
 
+import java.util.Set;
+
 /**
  * Utility class used to represent a day when updating views. Only used
  * internally.
@@ -29,14 +31,16 @@ public class CalendarDay {
     private int dayOfWeek;
     private int week;
     private int yearOfWeek;
+    private Set<Long> blockedSlots;
 
-    public CalendarDay(String date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek) {
+    public CalendarDay(String date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek, Set<Long> blockedSlots) {
         super();
         this.date = date;
         this.localizedDateFormat = localizedDateFormat;
         this.dayOfWeek = dayOfWeek;
         this.week = week;
         this.yearOfWeek = yearOfWeek;
+        this.blockedSlots = blockedSlots;
     }
 
     public String getDate() {
@@ -57,5 +61,9 @@ public class CalendarDay {
 
     public int getYearOfWeek() {
         return yearOfWeek;
+    }
+
+    public Set<Long> getBlockedSlots() {
+        return blockedSlots;
     }
 }

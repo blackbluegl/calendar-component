@@ -195,6 +195,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private Integer customFirstDayOfWeek;
 
     /**
+     * A map with blocked timeslots.<br>
+     *     Contains a set with timestamp of starttimes.
+     */
+    private final Map<Date, Set<Long>> blockedTimes = new HashMap<>();
+
+    /**
+     * Initial date for all blocked times
+     */
+    private final Date allOverDate = new Date(0);
+
+    /**
      * Returns the logger for the calendar
      */
     protected Logger getLogger() {
@@ -601,6 +612,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             day.week = currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR);
             day.yearOfWeek = currentCalendar.getWeekYear();
 
+            // XXX block time slots
+            day.blockedSlots = new HashSet<>();
+
+            if (blockedTimes.containsKey(allOverDate)) {
+                day.blockedSlots.addAll(blockedTimes.get(allOverDate));
+            }
+
+            if (blockedTimes.containsKey(date)) {
+                day.blockedSlots.addAll(blockedTimes.get(date));
+            }
+
             days.add(day);
 
             // Get actions for a specific date
@@ -660,8 +682,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
             Action[] actions = actionHandler.getActions(range, this);
             if (actions != null) {
-                Set<Action> actionSet = new LinkedHashSet<>(
-                        Arrays.asList(actions));
+                Set<Action> actionSet = new LinkedHashSet<>(Arrays.asList(actions));
                 actionMap.put(range, actionSet);
             }
         }
@@ -1861,6 +1882,60 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
 
         customFirstDayOfWeek = dayOfWeek;
+        markAsDirty();
+    }
+
+    public void setBlockedTimes(Set<Long> timeMilliesOfHalfHour) {
+        setBlockedTimes(allOverDate, timeMilliesOfHalfHour);
+    }
+
+    public void setBlockedTimes(Date day, Set<Long> timeMilliesOfHalfHour) {
+        blockedTimes.put(day, timeMilliesOfHalfHour);
+        markAsDirty();
+    }
+
+    public void setBlockedTime(Long timeMilliesOfHalfHour) {
+        setBlockedTime(allOverDate, timeMilliesOfHalfHour);
+    }
+
+    public void setBlockedTime(Date day, Long timeMilliesOfHalfHour) {
+
+        Set<Long> times;
+        if (blockedTimes.containsKey(day)) {
+            times = blockedTimes.get(day);
+        } else {
+            times = new HashSet<>();
+        }
+        times.add(timeMilliesOfHalfHour);
+        blockedTimes.put(day, times);
+
+        markAsDirty();
+    }
+
+    public void removeBlockedTime(Long timeMilliesOfHalfHour) {
+        removeBlockedTime(allOverDate, timeMilliesOfHalfHour);
+    }
+
+    public void removeBlockedTime(Date day, Long timeMilliesOfHalfHour) {
+        if (blockedTimes.containsKey(day)) {
+            blockedTimes.get(day).remove(timeMilliesOfHalfHour);
+            if (blockedTimes.get(day).isEmpty()) {
+                blockedTimes.remove(day);
+            }
+        }
+
+        markAsDirty();
+    }
+
+    public void clearBlockedTimes() {
+        blockedTimes.clear();
+        markAsDirty();
+    }
+
+    public void clearBlockedTimes(Date day) {
+        if (blockedTimes.containsKey(day)) {
+            blockedTimes.remove(day);
+        }
         markAsDirty();
     }
 }

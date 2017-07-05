@@ -40,7 +40,7 @@ public class DateCell extends FocusableComplexPanel
     private boolean disabled = false;
     private int height;
     private final Element[] slotElements;
-    private final List<DateCellSlot> slots = new ArrayList<DateCellSlot>();
+    private final List<DateCellSlot> slots = new ArrayList<>();
     private int[] slotElementHeights;
     private int startingSlotHeight;
     private Date today;
@@ -58,12 +58,15 @@ public class DateCell extends FocusableComplexPanel
 
         private final Date to;
 
-        public DateCellSlot(DateCell cell, Date from, Date to) {
+        private final Boolean enabled;
+
+        public DateCellSlot(DateCell cell, Date from, Date to, Boolean enabled) {
             setElement(Document.get().createDivElement());
             getElement().setInnerHTML("&nbsp;");
             this.cell = cell;
             this.from = from;
             this.to = to;
+            this.enabled = enabled;
         }
 
         public Date getFrom() {
@@ -77,9 +80,13 @@ public class DateCell extends FocusableComplexPanel
         public DateCell getParentCell() {
             return cell;
         }
+
+        public Boolean getEnabled() {
+            return enabled;
+        }
     }
 
-    public DateCell(WeekGrid parent, Date date) {
+    public DateCell(WeekGrid parent, Date date, Set<Long> blockedSlots) {
         weekgrid = parent;
         Element mainElement = DOM.createDiv();
         setElement(mainElement);
@@ -94,23 +101,29 @@ public class DateCell extends FocusableComplexPanel
         firstHour = weekgrid.getFirstHour();
         lastHour = weekgrid.getLastHour();
         numberOfSlots = (lastHour - firstHour + 1) * 2;
-        long slotTime = Math.round(
-                ((lastHour - firstHour + 1) * 3600000.0) / numberOfSlots);
+
+        long slotTime = Math.round(((lastHour - firstHour + 1) * 3600000.0) / numberOfSlots);
 
         slotElements = new Element[numberOfSlots];
         slotElementHeights = new int[numberOfSlots];
 
         slots.clear();
-        long start = getDate().getTime() + firstHour * 3600000;
+
+        long dateTime = getDate().getTime();
+        long start = dateTime + firstHour * 3600000;
         long end = start + slotTime;
+
         for (int i = 0; i < numberOfSlots; i++) {
-            DateCellSlot slot = new DateCellSlot(this, new Date(start),
-                    new Date(end));
+
+            boolean blocked = blockedSlots != null && blockedSlots.contains(start-dateTime);
+
+            DateCellSlot slot = new DateCellSlot(this, new Date(start), new Date(end), blocked);
             if (i % 2 == 0) {
-                slot.setStyleName("v-datecellslot-even");
+                slot.setStyleName(blocked ? "v-datecellslot-blocked-even" : "v-datecellslot-even");
             } else {
-                slot.setStyleName("v-datecellslot");
+                slot.setStyleName(blocked ? "v-datecellslot-blocked" : "v-datecellslot");
             }
+
             Event.sinkEvents(slot.getElement(), Event.MOUSEEVENTS);
             mainElement.appendChild(slot.getElement());
             slotElements[i] = slot.getElement();

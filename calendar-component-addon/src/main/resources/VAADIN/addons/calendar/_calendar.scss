@@ -327,10 +327,16 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     }
   }
 
+  .#{$primary-stylename}-day-times-today {
+      background: #f5f5f5;
+  }
+
   $valo-calendar-time-divider-color: first-color(valo-border($color: $v-app-background-color, $strength: 0.5));
 
   .#{$primary-stylename} .v-datecellslot,
-  .#{$primary-stylename} .v-datecellslot-even {
+  .#{$primary-stylename} .v-datecellslot-even,
+  .#{$primary-stylename} .v-datecellslot-blocked,
+  .#{$primary-stylename} .v-datecellslot-blocked-even {
     border-top: 1px solid $valo-calendar-time-divider-color;
 
     &:first-child {
@@ -338,13 +344,23 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     }
   }
 
-  .#{$primary-stylename} .v-datecellslot {
+  .#{$primary-stylename} .v-datecellslot,
+  .#{$primary-stylename} .v-datecellslot-blocked {
     border-top-style: dotted;
   }
 
   .#{$primary-stylename} .v-datecellslot,
-  .#{$primary-stylename} .v-datecellslot-even {
-    margin-right: round($v-unit-size/8);
+  .#{$primary-stylename} .v-datecellslot-even,
+  .#{$primary-stylename} .v-datecellslot-blocked,
+  .#{$primary-stylename} .v-datecellslot-blocked-even {
+    margin-left: round($v-unit-size/16);
+    margin-right: round($v-unit-size/16);
+  }
+
+  .#{$primary-stylename} .v-datecellslot-blocked,
+  .#{$primary-stylename} .v-datecellslot-blocked-even {
+    background: #d6d6d6;
+    border-color: #cecece;
   }
 
   .#{$primary-stylename}-current-time {
@@ -500,7 +516,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     border-radius: $v-border-radius + 1px;
     border: 1px solid $v-app-background-color;
     padding-top: 3px;
-    margin-right: round($v-unit-size/8);
+    margin-right: round($v-unit-size/16);
+    margin-left: round($v-unit-size/16);
   }
 
 

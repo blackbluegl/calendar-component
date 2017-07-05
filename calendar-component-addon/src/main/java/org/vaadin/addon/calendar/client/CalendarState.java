@@ -18,6 +18,7 @@ package org.vaadin.addon.calendar.client;
 import com.vaadin.shared.AbstractComponentState;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @since 7.1.0
@@ -72,6 +73,7 @@ public class CalendarState extends AbstractComponentState {
         public int dayOfWeek;
         public int week;
         public int yearOfWeek;
+        public Set<Long> blockedSlots;
     }
 
     public static class Action implements java.io.Serializable {

@@ -618,7 +618,8 @@ public class CalendarConnector extends AbstractComponentConnector
     private List<CalendarDay> calendarDayListOf(List<CalendarState.Day> days) {
         List<CalendarDay> list = new ArrayList<>(days.size());
         for (CalendarState.Day day : days) {
-            CalendarDay d = new CalendarDay(day.date, day.localizedDateFormat,day.dayOfWeek, day.week, day.yearOfWeek);
+            CalendarDay d = new CalendarDay(
+                    day.date, day.localizedDateFormat,day.dayOfWeek, day.week, day.yearOfWeek, day.blockedSlots);
             list.add(d);
         }
         return list;

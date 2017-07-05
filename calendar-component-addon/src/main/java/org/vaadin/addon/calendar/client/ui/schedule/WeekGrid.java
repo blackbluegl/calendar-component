@@ -29,6 +29,7 @@ import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
 /**
  *
@@ -116,8 +117,8 @@ public class WeekGrid extends SimplePanel {
         return width;
     }
 
-    public void addDate(Date d) {
-        final DateCell dc = new DateCell(this, d);
+    public void addDate(Date d, Set<Long> blockedSlots) {
+        final DateCell dc = new DateCell(this, d, blockedSlots);
         dc.setDisabled(isDisabled());
         dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
         dc.setVerticalSized(isVerticalScrollable());

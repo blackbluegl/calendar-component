@@ -560,7 +560,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
             dayToolbar.add(realDayNames[dayOfWeek - 1], dateStr, localized_date_format, isToday ? "today" : null);
             weeklyLongEvents.addDate(date);
-            weekGrid.addDate(date);
+            weekGrid.addDate(date, day.getBlockedSlots());
 
             if (isToday) {
                 weekGrid.setToday(date, today);
