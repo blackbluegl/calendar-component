@@ -31,14 +31,22 @@ import java.util.Date;
 
 public class BasicDateClickHandler implements CalendarComponentEvents.DateClickHandler {
 
+    private boolean monthInCycle = true;
+
+    public BasicDateClickHandler() {}
+
+    public BasicDateClickHandler(boolean monthInCycle) {
+        this.monthInCycle = monthInCycle;
+    }
+
     /*
-     * (non-Javadoc)
-     *
-     * @see
-     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
-     * #dateClick
-     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
-     */
+         * (non-Javadoc)
+         *
+         * @see
+         * org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
+         * #dateClick
+         * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
+         */
     @Override
     public void dateClick(CalendarComponentEvents.DateClickEvent event) {
 
@@ -71,7 +79,7 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
             setDates(event, start, end);
 
-        } else if (comp.isWeeklyMode()) {
+        } else if (monthInCycle && comp.isWeeklyMode()) {
 
             // switch to monthly mode
 
@@ -112,5 +120,13 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
     protected void setDates(CalendarComponentEvents.DateClickEvent event, Date start, Date end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);
+    }
+
+    public boolean isMonthInCycle() {
+        return monthInCycle;
+    }
+
+    public void setMonthInCycle(boolean monthInCycle) {
+        this.monthInCycle = monthInCycle;
     }
 }

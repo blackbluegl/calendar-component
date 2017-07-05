@@ -91,8 +91,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
     }
 
-    public void add(String dayName, final String date,
-            String localized_date_format, String extraClass) {
+    public void add(String dayName, final String date, String localized_date_format, String extraClass) {
+
         Label l = new Label(dayName + " " + localized_date_format);
         l.setStylePrimaryName("v-calendar-header-day");
 

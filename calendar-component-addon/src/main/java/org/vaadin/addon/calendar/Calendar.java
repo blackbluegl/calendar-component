@@ -553,12 +553,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             endDate = getEndDate();
         }
 
-        int durationInDays = (int) ((endDate.getTime() - startDate.getTime())
-                / DateConstants.DAYINMILLIS);
+        int durationInDays = (int) ((endDate.getTime() - startDate.getTime())/ DateConstants.DAYINMILLIS);
         durationInDays++;
         if (durationInDays > 60) {
-            throw new RuntimeException(
-                    "Daterange is too big (max 60) = " + durationInDays);
+            throw new RuntimeException( "Daterange is too big (max 60) = " + durationInDays);
         }
 
         state.dayNames = getDayNamesShort();
@@ -592,23 +590,26 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         // approach was taken because gwt doesn't
         // support date localization properly.
         while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
+
             final Date date = currentCalendar.getTime();
+
             final CalendarState.Day day = new CalendarState.Day();
+
             day.date = df_date.format(date);
             day.localizedDateFormat = weeklyCaptionFormatter.format(date);
             day.dayOfWeek = getDowByLocale(currentCalendar);
-            day.week = getWeek(currentCalendar);
-            day.yearOfWeek = getYearOfWeek(currentCalendar);
+            day.week = currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR);
+            day.yearOfWeek = currentCalendar.getWeekYear();
 
             days.add(day);
 
             // Get actions for a specific date
             if (actionHandlers != null) {
+
                 for (Action.Handler actionHandler : actionHandlers) {
 
                     // Create calendar which omits time
-                    GregorianCalendar cal = new GregorianCalendar(getTimeZone(),
-                            getLocale());
+                    GregorianCalendar cal = new GregorianCalendar(getTimeZone(), getLocale());
                     cal.clear();
                     cal.set(currentCalendar.get(java.util.Calendar.YEAR),
                             currentCalendar.get(java.util.Calendar.MONTH),
@@ -622,15 +623,15 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
                     boolean monthView = durationInDays > 7;
 
-                    /**
+                    /*
                      * If in day or week view add actions for each half-an-hour.
                      * If in month view add actions for each day
                      */
+
                     if (monthView) {
                         setActionsForDay(actionMap, start, end, actionHandler);
                     } else {
-                        setActionsForEachHalfHour(actionMap, start, end,
-                                actionHandler);
+                        setActionsForEachHalfHour(actionMap, start, end, actionHandler);
                     }
 
                 }
@@ -638,25 +639,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
             currentCalendar.add(java.util.Calendar.DATE, 1);
         }
+
         state.days = days;
         state.actions = createActionsList(actionMap);
-    }
-
-    private int getWeek(java.util.Calendar calendar) {
-        return calendar.get(java.util.Calendar.WEEK_OF_YEAR);
-    }
-
-    private int getYearOfWeek(java.util.Calendar calendar) {
-        // Would use calendar.getWeekYear() but it's only available since 1.7.
-        int week = getWeek(calendar);
-        int month = calendar.get(java.util.Calendar.MONTH);
-        int year = calendar.get(java.util.Calendar.YEAR);
-
-        if (week == 1 && month == java.util.Calendar.DECEMBER) {
-            return year + 1;
-        }
-
-        return year;
     }
 
     private void setActionsForEachHalfHour(Map<CalendarDateRange, Set<Action>> actionMap,
@@ -1298,21 +1283,20 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *         set to the end of the day
      */
     protected Date expandEndDate(Date end, boolean expandToFullWeek) {
-        // If the duration is more than week, use monthly view and get startweek
-        // and endweek. Example if views daterange is from tuesday to next weeks
-        // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
-        // monday
+
+        // If the duration is more than week, use monthly view and get startweek and endweek.
+        // Example: if views daterange is from tuesday to next weeks
+        // wednesday -> expand to monday to nextweeks sunday.
+        // If firstdayofweek = monday
+
         if (expandToFullWeek) {
             end = getLastDateForWeek(end);
-
         } else {
             end = (Date) end.clone();
         }
 
-        // Always expand to the start of the first day to the end of the last
-        // day
+        // Always expand to the start of the first day to the end of the last day
         end = getEndOfDay(currentCalendar, end);
-
         return end;
     }
 

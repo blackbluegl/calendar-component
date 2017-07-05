@@ -52,7 +52,7 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
         durationInDays = -durationInDays;
 
         // set new start and end times
-        Calendar javaCalendar = event.getComponent().getInternalCalendar();
+        Calendar javaCalendar = Calendar.getInstance(event.getComponent().getInternalCalendar().getTimeZone());
         javaCalendar.setTime(start);
         javaCalendar.add(Calendar.DATE, durationInDays);
         Date newStart = javaCalendar.getTime();
@@ -64,12 +64,12 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
         if (start.equals(end)) { // day view
             int firstDay = event.getComponent().getFirstVisibleDayOfWeek();
             int lastDay = event.getComponent().getLastVisibleDayOfWeek();
-            int dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
+            int dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK) -1;
 
             // we suppose that 7 >= lastDay >= firstDay >= 1
             while (!(firstDay <= dayOfWeek && dayOfWeek <= lastDay)) {
                 javaCalendar.add(Calendar.DATE, -1);
-                dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
+                dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK) -1;
             }
 
             newStart = javaCalendar.getTime();

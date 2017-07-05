@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.blackbluegl</groupId>
 	<artifactId>calendar-component-demo</artifactId>
 	<packaging>war</packaging>
-	<version>1.0-BETA1</version>
+	<version>1.0-BETA2</version>
 	<name>Calendar Add-on :: Demo</name>
 
 	<prerequisites>

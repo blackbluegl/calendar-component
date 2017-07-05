@@ -538,28 +538,32 @@ public class VCalendar extends Composite implements VHasDropHandler {
         weekGrid.setDisabled(isDisabled());
 
         for (CalendarDay day : days) {
-            String date = day.getDate();
+
             String localized_date_format = day.getLocalizedDateFormat();
-            Date d = dateformat_date.parse(date);
+
+            String dateStr = day.getDate();
+            Date date = dateformat_date.parse(dateStr);
+
             int dayOfWeek = day.getDayOfWeek();
+
             if (dayOfWeek < getFirstDayNumber() || dayOfWeek > getLastDayNumber()) {
                 continue;
             }
 
             boolean isToday = false;
-            int dayOfMonth = d.getDate();
+            int dayOfMonth = date.getDate();
             if (today.getDate() == dayOfMonth
-                    && today.getYear() == d.getYear()
-                    && today.getMonth() == d.getMonth()) {
+                    && today.getYear() == date.getYear()
+                    && today.getMonth() == date.getMonth()) {
                 isToday = true;
             }
 
-            dayToolbar.add(realDayNames[dayOfWeek - 1], date, localized_date_format, isToday ? "today" : null);
-            weeklyLongEvents.addDate(d);
-            weekGrid.addDate(d);
+            dayToolbar.add(realDayNames[dayOfWeek - 1], dateStr, localized_date_format, isToday ? "today" : null);
+            weeklyLongEvents.addDate(date);
+            weekGrid.addDate(date);
 
             if (isToday) {
-                weekGrid.setToday(d, today);
+                weekGrid.setToday(date, today);
             }
         }
 
@@ -1017,14 +1021,12 @@ public class VCalendar extends Composite implements VHasDropHandler {
      *            The amount of pixels to scroll the week view
      * @param today
      *            Todays date
-     * @param daysInMonth
-     *            How many days are there in the month
      * @param firstDayOfWeek
      *            The first day of the week
      * @param events
      *            The items to render
      */
-    public void updateWeekView(int scroll, Date today, int daysInMonth, int firstDayOfWeek,
+    public void updateWeekView(int scroll, Date today,int firstDayOfWeek,
                                Collection<CalendarItem> events, List<CalendarDay> days) {
 
         while (outer.getWidgetCount() > 0) {

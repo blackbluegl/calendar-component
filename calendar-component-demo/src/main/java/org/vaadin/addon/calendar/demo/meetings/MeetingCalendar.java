@@ -7,10 +7,8 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
 import org.vaadin.addon.calendar.event.BasicItemProvider;
-import org.vaadin.addon.calendar.handler.BasicBackwardHandler;
 import org.vaadin.addon.calendar.handler.BasicItemMoveHandler;
 import org.vaadin.addon.calendar.handler.BasicItemResizeHandler;
-import org.vaadin.addon.calendar.handler.BasicForwardHandler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Collection;
@@ -100,16 +98,16 @@ public class MeetingCalendar extends CustomComponent {
 
         calendar.setContentMode(ContentMode.HTML);
 
-        calendar.setFirstVisibleDayOfWeek(1);
-        calendar.setLastVisibleDayOfWeek(7);
+        calendar.setFirstVisibleDayOfWeek(2);
+        calendar.setLastVisibleDayOfWeek(5);
 
         addCalendarEventListeners();
     }
 
 
     private void addCalendarEventListeners() {
-        calendar.setHandler(new ExtendedForwardHandler());
-        calendar.setHandler(new ExtendedBackwardHandler());
+//        calendar.setHandler(new ExtendedForwardHandler());
+//        calendar.setHandler(new ExtendedBackwardHandler());
         calendar.setHandler(new ExtendedBasicItemMoveHandler());
         calendar.setHandler(new ExtendedItemResizeHandler());
         calendar.setHandler(this::onCalendarClick);
@@ -159,31 +157,31 @@ public class MeetingCalendar extends CustomComponent {
         }
     }
 
-    private final class ExtendedForwardHandler extends BasicForwardHandler {
+//    private final class ExtendedForwardHandler extends BasicForwardHandler {
+//
+//        @Override
+//        protected void setDates(CalendarComponentEvents.ForwardEvent event, Date start, Date end) {
+//
+//            /*
+//             * TODO Load entities from next week here
+//             */
+//
+//            super.setDates(event, start, end);
+//        }
+//    }
 
-        @Override
-        protected void setDates(CalendarComponentEvents.ForwardEvent event, Date start, Date end) {
-
-            /*
-             * TODO Load entities from next week here
-             */
-
-            super.setDates(event, start, end);
-        }
-    }
-
-    private final class ExtendedBackwardHandler extends BasicBackwardHandler {
-
-        @Override
-        protected void setDates(CalendarComponentEvents.BackwardEvent event, Date start, Date end) {
-
-            /*
-             * TODO Load entities from prev week here
-             */
-
-            super.setDates(event, start, end);
-        }
-    }
+//    private final class ExtendedBackwardHandler extends BasicBackwardHandler {
+//
+//        @Override
+//        protected void setDates(CalendarComponentEvents.BackwardEvent event, Date start, Date end) {
+//
+//            /*
+//             * TODO Load entities from prev week here
+//             */
+//
+//            super.setDates(event, start, end);
+//        }
+//    }
 
     private final class MeetingDataProvider extends BasicItemProvider<MeetingItem> {
 
