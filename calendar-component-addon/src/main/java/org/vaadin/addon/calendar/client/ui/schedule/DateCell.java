@@ -309,12 +309,14 @@ public class DateCell extends FocusableComplexPanel
                 }
 
             }
-//            else {
-//
-//                groups.add(curGroup);
-//
-//                break;
-//            }
+            else {
+
+                if (newGroup) {
+                    groups.add(curGroup);
+                }
+
+                break;
+            }
 
             if (newGroup) {
                 groups.add(curGroup);
