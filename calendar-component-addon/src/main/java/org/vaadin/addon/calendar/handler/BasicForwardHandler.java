@@ -15,7 +15,6 @@
  */
 package org.vaadin.addon.calendar.handler;
 
-import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Calendar;
@@ -41,40 +40,44 @@ public class BasicForwardHandler implements CalendarComponentEvents.ForwardHandl
     @Override
     public void forward(CalendarComponentEvents.ForwardEvent event) {
 
+        int firstDay = event.getComponent().getFirstVisibleDayOfWeek();
+        int lastDay = event.getComponent().getLastVisibleDayOfWeek();
         Date start = event.getComponent().getStartDate();
         Date end = event.getComponent().getEndDate();
 
-        // calculate amount to move forward
-        int durationInDays = (int) (((end.getTime()) - start.getTime()) / DateConstants.DAYINMILLIS);
+        int durationInDays = 0;
+
         // for week view durationInDays = 7, for day view durationInDays = 1
-        durationInDays++;
+        if (event.getComponent().isDayMode()) { // day view
+            durationInDays = 1;
+        } else if (event.getComponent().isWeeklyMode()) {
+            durationInDays = 7;
+        }
 
         // set new start and end times
         Calendar javaCalendar = Calendar.getInstance(event.getComponent().getInternalCalendar().getTimeZone());
         javaCalendar.setTime(start);
-        javaCalendar.add(Calendar.DATE, durationInDays);
+        javaCalendar.add(Calendar.DAY_OF_MONTH, durationInDays);
         Date newStart = javaCalendar.getTime();
 
         javaCalendar.setTime(end);
-        javaCalendar.add(Calendar.DATE, durationInDays);
+        javaCalendar.add(Calendar.DAY_OF_MONTH, durationInDays);
         Date newEnd = javaCalendar.getTime();
 
-        if (start.equals(end)) { // day view
+        if (event.getComponent().isDayMode()) { // day view
 
-            int firstDay = event.getComponent().getFirstVisibleDayOfWeek();
-            int lastDay = event.getComponent().getLastVisibleDayOfWeek();
-
-            int dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK)-1;
+            int dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
 
             while (!(firstDay <= dayOfWeek && dayOfWeek <= lastDay)) {
-                javaCalendar.add(Calendar.DATE, 1);
-                dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK)-1;
+                javaCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
             }
 
             newStart = newEnd = javaCalendar.getTime();
         }
 
         setDates(event, newStart, newEnd);
+
     }
 
     /**

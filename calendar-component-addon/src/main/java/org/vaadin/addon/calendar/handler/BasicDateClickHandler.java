@@ -40,71 +40,30 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
     }
 
     /*
-         * (non-Javadoc)
-         *
-         * @see
-         * org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
-         * #dateClick
-         * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
-         */
+     * (non-Javadoc)
+     *
+     * @see
+     * org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickHandler
+     * #dateClick
+     * (org.vaadin.addon.calendar.ui.CalendarComponentEvents.DateClickEvent)
+     */
     @Override
     public void dateClick(CalendarComponentEvents.DateClickEvent event) {
 
         org.vaadin.addon.calendar.Calendar comp = event.getComponent();
 
-        Date clickedDate = event.getDate();
-
-        java.util.Calendar cal = comp.getInternalCalendar();
-
-        Date start, end;
-
         if (comp.isDayMode()) {
 
-            // switch to weekly mode
-
-            cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
-            cal.clear(java.util.Calendar.MINUTE);
-            cal.clear(java.util.Calendar.SECOND);
-            cal.clear(java.util.Calendar.MILLISECOND);
-            cal.setTime(clickedDate);
-            cal.set(java.util.Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
-
-            cal.add(java.util.Calendar.DAY_OF_WEEK, comp.getFirstVisibleDayOfWeek() -1);
-
-            start = cal.getTime();
-
-            cal.add(java.util.Calendar.DAY_OF_WEEK, comp.getLastVisibleDayOfWeek() -1);
-
-            end = cal.getTime();
-
-            setDates(event, start, end);
+            switchToWeek(event);
 
         } else if (monthInCycle && comp.isWeeklyMode()) {
 
-            // switch to monthly mode
-
-            cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
-            cal.clear(java.util.Calendar.MINUTE);
-            cal.clear(java.util.Calendar.SECOND);
-            cal.clear(java.util.Calendar.MILLISECOND);
-            cal.setTime(clickedDate);
-            cal.set(Calendar.DAY_OF_MONTH, 1);
-
-            start = cal.getTime();
-
-            cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-
-            end = cal.getTime();
+            switchToMonth(event);
 
         } else {
 
-            // switch to daily mode
-            cal.setTime(clickedDate);
-
-            start = end = cal.getTime();
+            switchToDay(event);
         }
-
-        setDates(event, start, end);
     }
 
     /**
@@ -128,5 +87,67 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
     public void setMonthInCycle(boolean monthInCycle) {
         this.monthInCycle = monthInCycle;
+    }
+
+
+    /*
+     * Switch modes
+     */
+
+    protected void switchToDay(CalendarComponentEvents.DateClickEvent event) {
+
+        java.util.Calendar cal = event.getComponent().getInternalCalendar();
+
+        cal.setTime(event.getDate());
+
+        Date start, end;
+        start = end = cal.getTime();
+
+        setDates(event, start, end);
+    }
+
+    protected void switchToWeek(CalendarComponentEvents.DateClickEvent event) {
+
+        java.util.Calendar cal = event.getComponent().getInternalCalendar();
+        Date start, end;
+
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
+        cal.clear(java.util.Calendar.MINUTE);
+        cal.clear(java.util.Calendar.SECOND);
+        cal.clear(java.util.Calendar.MILLISECOND);
+        cal.setTime(event.getDate());
+
+        cal.set(java.util.Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+
+        cal.add(java.util.Calendar.DAY_OF_WEEK, event.getComponent().getFirstVisibleDayOfWeek() -1);
+
+        start = cal.getTime();
+
+        cal.add(java.util.Calendar.DAY_OF_WEEK, event.getComponent().getLastVisibleDayOfWeek() -1);
+
+        end = cal.getTime();
+
+        setDates(event, start, end);
+    }
+
+    protected void switchToMonth(CalendarComponentEvents.DateClickEvent event) {
+
+        java.util.Calendar cal = event.getComponent().getInternalCalendar();
+        Date start, end;
+
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
+        cal.clear(java.util.Calendar.MINUTE);
+        cal.clear(java.util.Calendar.SECOND);
+        cal.clear(java.util.Calendar.MILLISECOND);
+        cal.setTime(event.getDate());
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+
+        start = cal.getTime();
+
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+        end = cal.getTime();
+
+        setDates(event, start, end);
     }
 }

@@ -31,25 +31,20 @@ public class MeetingCalendar extends CustomComponent {
         initCalendar();
 
         VerticalLayout layout = new VerticalLayout();
+        layout.setMargin(false);
+        layout.setSpacing(false);
         layout.setSizeFull();
         layout.addComponent(calendar);
         setCompositionRoot(layout);
 
     }
 
-    public void setMeetings(Collection<Meeting> meetings) {
-
-        // cleanup
-        eventProvider.removeAllEvents();
-        if (meetings == null || meetings.size() == 0) {
-            return;
-        }
-
-        // erstelle Kalendereinträge neu
-        for (Meeting boo : meetings) {
-            MeetingItem i = new MeetingItem(boo);
-            eventProvider.addItem(i);
-        }
+    public void setWeekDayRange(int from, int to) {
+        assert (from >= 1 && from < to && to <= 7);
+        calendar.setFirstVisibleDayOfWeek(1); // XXX reset to week
+        calendar.setLastVisibleDayOfWeek(7); // XXX reset to week
+        calendar.setFirstVisibleDayOfWeek(from);
+        calendar.setLastVisibleDayOfWeek(to);
     }
 
     private void onCalendarRangeSelect(CalendarComponentEvents.RangeSelectEvent event) {
