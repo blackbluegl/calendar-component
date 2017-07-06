@@ -9,8 +9,6 @@ import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
 import org.vaadin.addon.calendar.event.BasicItemProvider;
 import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
-import org.vaadin.addon.calendar.handler.BasicItemMoveHandler;
-import org.vaadin.addon.calendar.handler.BasicItemResizeHandler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.*;
@@ -146,43 +144,35 @@ public class MeetingCalendar extends CustomComponent {
     private void addCalendarEventListeners() {
 //        calendar.setHandler(new ExtendedForwardHandler());
 //        calendar.setHandler(new ExtendedBackwardHandler());
-        calendar.setHandler(new ExtendedBasicItemMoveHandler());
-        calendar.setHandler(new ExtendedItemResizeHandler());
+//        calendar.setHandler(new ExtendedBasicItemMoveHandler());
+//        calendar.setHandler(new ExtendedItemResizeHandler());
         calendar.setHandler(new BasicDateClickHandler(false));
         calendar.setHandler(this::onCalendarClick);
         calendar.setHandler(this::onCalendarRangeSelect);
     }
 
-    private final class ExtendedBasicItemMoveHandler extends BasicItemMoveHandler {
+//    private final class ExtendedBasicItemMoveHandler extends BasicItemMoveHandler {
+//
+//        @Override
+//        public void itemMove(CalendarComponentEvents.ItemMoveEvent event) {
+//
+//            MeetingItem item = (MeetingItem) event.getCalendarItem();
+//            long length = item.getEnd().getTime() - item.getStart().getTime();
+//            Date newStart = event.getNewStart();
+//            Date newEnd = new Date(newStart.getTime() + length);
+//            updateMeeting(item, newStart, newEnd);
+//        }
+//    }
 
-        @Override
-        public void itemMove(CalendarComponentEvents.ItemMoveEvent event) {
-
-            MeetingItem item = (MeetingItem) event.getCalendarItem();
-
-            long length = item.getEnd().getTime() - item.getStart().getTime();
-
-            Date newStart = event.getNewStart();
-
-            Date newEnd = new Date(newStart.getTime() + length);
-
-            //updateMeeting(item, newStart, newEnd);
-
-        }
-    }
-
-    private final class ExtendedItemResizeHandler extends BasicItemResizeHandler {
-
-        @Override
-        public void itemResize(CalendarComponentEvents.ItemResizeEvent event) {
-
-
-            MeetingItem item = (MeetingItem) event.getCalendarItem();
-
-            //updateMeeting(item, event.getNewStart(), event.getNewEnd());
-
-        }
-    }
+//    private final class ExtendedItemResizeHandler extends BasicItemResizeHandler {
+//
+//        @Override
+//        public void itemResize(CalendarComponentEvents.ItemResizeEvent event) {
+//
+//            MeetingItem item = (MeetingItem) event.getCalendarItem();
+//            updateMeeting(item, event.getNewStart(), event.getNewEnd());
+//        }
+//    }
 
 //    private final class ExtendedForwardHandler extends BasicForwardHandler {
 //
