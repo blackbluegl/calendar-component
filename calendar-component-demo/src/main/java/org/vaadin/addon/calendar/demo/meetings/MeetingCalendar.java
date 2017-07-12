@@ -11,8 +11,9 @@ import org.vaadin.addon.calendar.event.BasicItemProvider;
 import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.Random;
 
 
 public class MeetingCalendar extends CustomComponent {
@@ -96,8 +97,6 @@ public class MeetingCalendar extends CustomComponent {
 
     private void setupBlockedTimeSlots() {
 
-        Set<Long> times = new HashSet<>();
-
         java.util.Calendar cal = (java.util.Calendar)calendar.getInternalCalendar().clone();
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
         cal.clear(java.util.Calendar.MINUTE);
@@ -108,31 +107,25 @@ public class MeetingCalendar extends CustomComponent {
 
         bcal.clear();
 
-        bcal.add(java.util.Calendar.HOUR, 10);
-        times.add(bcal.getTimeInMillis());
-        bcal.add(java.util.Calendar.MINUTE, 30);
-        times.add(bcal.getTimeInMillis());
-        bcal.add(java.util.Calendar.MINUTE, 30);
-        times.add(bcal.getTimeInMillis());
-        bcal.add(java.util.Calendar.MINUTE, 30);
-        times.add(bcal.getTimeInMillis());
-        bcal.add(java.util.Calendar.MINUTE, 30);
-        times.add(bcal.getTimeInMillis());
-        bcal.add(java.util.Calendar.MINUTE, 30);
-        times.add(bcal.getTimeInMillis());
+        long start = bcal.getTimeInMillis();
 
-        calendar.setBlockedTimes(times);
+        bcal.add(java.util.Calendar.HOUR, 7);
+        bcal.add(java.util.Calendar.MINUTE, 30);
+        long end = bcal.getTimeInMillis();
+
+        calendar.addTimeBlock(start, end, "");
 
         cal.add(java.util.Calendar.DAY_OF_WEEK, 1);
 
         bcal.clear();
-        bcal.add(java.util.Calendar.HOUR, 4);
-        calendar.setBlockedTime(cal.getTime(), bcal.getTimeInMillis());
-
-        Logger.getLogger(getClass().getName()).info("TIME: " + cal.getTime());
-
+        bcal.add(java.util.Calendar.HOUR, 14);
         bcal.add(java.util.Calendar.MINUTE, 30);
-        calendar.setBlockedTime(cal.getTime(), bcal.getTimeInMillis());
+        start = bcal.getTimeInMillis();
+
+        bcal.add(java.util.Calendar.MINUTE, 60);
+        end = bcal.getTimeInMillis();
+
+        calendar.addTimeBlock(start, end);
 
     }
 

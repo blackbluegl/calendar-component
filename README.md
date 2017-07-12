@@ -9,6 +9,7 @@ Moved to BETA stage and testing for stable release. After that, a new feature-br
 
 ### Version 1.0-BETA3
 - Fixed:    cell selection style is not added to calendar items anymore 
+- Enhanced: convenience methods for time blocks added
 
 ### Version 1.0-BETA2
 - Fixed:    forward and backward day calculation
@@ -90,3 +91,6 @@ Contributions are welcome, but there are no guarantees that they are accepted as
 Add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
 The original source of calendar is written by Vaadin Ltd.
+
+Fixes and additions by: 
+Lutz Güttler

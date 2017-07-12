@@ -205,10 +205,11 @@ public class DateCellDayItem extends FocusableHTML
 
     @Override
     public void onMouseDown(MouseDownEvent event) {
+
         startX = event.getClientX();
         startY = event.getClientY();
-        if (isDisabled()
-                || event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
+
+        if (isDisabled() || event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
             return;
         }
 
@@ -221,8 +222,7 @@ public class DateCellDayItem extends FocusableHTML
             moveRegistration = addMouseMoveHandler(this);
             setFocus(true);
             try {
-                startYrelative = (int) ((double) event.getRelativeY(caption)
-                        % slotHeight);
+                startYrelative = (int) ((double) event.getRelativeY(caption) % slotHeight);
                 startXrelative = (event.getRelativeX(weekGrid.getElement())
                         - weekGrid.timebar.getOffsetWidth())
                         % getDateCellWidth();
@@ -263,6 +263,7 @@ public class DateCellDayItem extends FocusableHTML
             moveRegistration.removeHandler();
             moveRegistration = null;
         }
+
         int endX = event.getClientX();
         int endY = event.getClientY();
         int xDiff = 0, yDiff = 0;

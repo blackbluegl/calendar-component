@@ -1888,43 +1888,76 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         markAsDirty();
     }
 
-    public void setBlockedTimes(Set<Long> timeMilliesOfHalfHour) {
-        setBlockedTimes(allOverDate, timeMilliesOfHalfHour);
-    }
-
-    public void setBlockedTimes(Date day, Set<Long> timeMilliesOfHalfHour) {
-        blockedTimes.put(day, timeMilliesOfHalfHour);
-        markAsDirty();
-    }
-
-    public void setBlockedTime(Long timeMilliesOfHalfHour) {
-        setBlockedTime(allOverDate, timeMilliesOfHalfHour);
-    }
-
-    public void setBlockedTime(Date day, Long timeMilliesOfHalfHour) {
-
+    /**
+     * Add a time block start index. Time steps are half hour beginning at 0
+     * and a minimal time slot length of 1800000 milliseconds is used.
+     *
+     * @param day Day for this time slot
+     * @param fromMillies time millies from where the block starts
+     * @param styleName css class for this block (currently unused)
+     */
+    protected final void addTimeBlockInternaly(Date day, Long fromMillies, String styleName) {
         Set<Long> times;
         if (blockedTimes.containsKey(day)) {
             times = blockedTimes.get(day);
         } else {
             times = new HashSet<>();
         }
-        times.add(timeMilliesOfHalfHour);
+        times.add(fromMillies);
         blockedTimes.put(day, times);
-
-        markAsDirty();
     }
 
-    public void removeBlockedTime(Long timeMilliesOfHalfHour) {
-        removeBlockedTime(allOverDate, timeMilliesOfHalfHour);
+    /**
+     * Add a time block marker for a range of time. Time steps are half hour,
+     * so a minimal time slot is 1800000 milliseconds long.
+     *
+     * @param fromMillies time millies from where the block starts
+     * @param toMillies time millies from where the block ends
+     */
+    public void addTimeBlock(long fromMillies, long toMillies) {
+        addTimeBlock(fromMillies, toMillies, "");
     }
 
-    public void removeBlockedTime(Date day, Long timeMilliesOfHalfHour) {
-        if (blockedTimes.containsKey(day)) {
-            blockedTimes.get(day).remove(timeMilliesOfHalfHour);
-            if (blockedTimes.get(day).isEmpty()) {
-                blockedTimes.remove(day);
-            }
+    /**
+     * Add a time block marker for a range of time. Time steps are half hour,
+     * so a minimal time slot is 1800000 milliseconds long.
+     *
+     * @param fromMillies time millies from where the block starts
+     * @param toMillies time millies from where the block ends
+     * @param styleName css class for this block (currently unused)
+     */
+    public void addTimeBlock(long fromMillies, long toMillies, String styleName) {
+        addTimeBlock(allOverDate, fromMillies, toMillies, styleName);
+    }
+
+    /**
+     * Add a time block marker for a range of time. Time steps are half hour,
+     * so a minimal time slot is 1800000 milliseconds long.
+     *
+     * @param day Day for this time slot
+     * @param fromMillies time millies from where the block starts
+     * @param toMillies time millies from where the block ends
+     */
+    public void addTimeBlock(Date day, long fromMillies, long toMillies) {
+        addTimeBlock(day, fromMillies, toMillies, "");
+    }
+
+    /**
+     * Add a time block marker for a range of time. Time steps are half hour,
+     * so a minimal time slot is 1800000 milliseconds long.
+     *
+     * @param day Day for this time slot
+     * @param fromMillies time millies from where the block starts
+     * @param toMillies time millies from where the block ends
+     * @param styleName css class for this block (currently unused)
+     */
+    public void addTimeBlock(Date day, long fromMillies, long toMillies, String styleName) {
+        assert (toMillies > fromMillies && fromMillies % 1800000 == 0 && toMillies % 1800000 == 0);
+
+        while (fromMillies < toMillies) {
+
+            addTimeBlockInternaly(day, fromMillies, styleName);
+            fromMillies += 1800000;
         }
 
         markAsDirty();
@@ -1941,4 +1974,5 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
         markAsDirty();
     }
+
 }
