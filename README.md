@@ -7,6 +7,9 @@ Calendar-component is a UI component add-on for Vaadin 8.
 Moved to BETA stage and testing for stable release. After that, a new feature-branch will be opened.  
 (see issues -> tag:enhancements)
 
+### Version 1.0-BETA3
+- Fixed:    cell selection style is not added to calendar items anymore 
+
 ### Version 1.0-BETA2
 - Fixed:    forward and backward day calculation
 - Enhanced: BasicDateClickHandler has a new property to exclude month from cycle

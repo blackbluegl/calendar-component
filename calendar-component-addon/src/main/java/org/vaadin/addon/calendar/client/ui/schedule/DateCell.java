@@ -631,11 +631,15 @@ public class DateCell extends FocusableComplexPanel
     @Override
     @SuppressWarnings("deprecation")
     public void onMouseUp(MouseUpEvent event) {
+
         if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
             return;
         }
+
         Event.releaseCapture(getElement());
         setFocus(false);
+
+        // Drag initialized?
         int dragDistance = Math.abs(eventRangeStart - event.getY());
         if (dragDistance > 0 && eventRangeStart >= 0) {
             Element main = getElement();
@@ -657,8 +661,7 @@ public class DateCell extends FocusableComplexPanel
             // and then the end
             for (int i = 0; i < nodes.getLength(); i++) {
                 Element element = (Element) nodes.getItem(i);
-                boolean isRangeElement = element.getClassName()
-                        .contains("v-daterange");
+                boolean isRangeElement = element.getClassName().contains("v-daterange");
 
                 if (isRangeElement && slotStart == -1) {
                     slotStart = i;
@@ -680,29 +683,33 @@ public class DateCell extends FocusableComplexPanel
             String yr = (currentDate.getYear() + 1900) + "-"
                     + (currentDate.getMonth() + 1) + "-"
                     + currentDate.getDate();
+
             if (weekgrid.getCalendar().getRangeSelectListener() != null) {
                 weekgrid.getCalendar().getRangeSelectListener().rangeSelected(
                         yr + ":" + startMinutes + ":" + endMinutes);
             }
             eventRangeStart = -1;
+
         } else {
+
             // Click event
             eventRangeStart = -1;
             cancelRangeSelect();
-
         }
     }
 
     @Override
     public void onMouseMove(MouseMoveEvent event) {
+
         if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
             return;
         }
 
         if (eventRangeStart >= 0) {
+
             int newY = event.getY();
-            int fromY = 0;
-            int toY = 0;
+            int fromY, toY;
+
             if (newY < eventRangeStart) {
                 fromY = newY;
                 toY = eventRangeStart;
@@ -710,13 +717,16 @@ public class DateCell extends FocusableComplexPanel
                 fromY = eventRangeStart;
                 toY = newY;
             }
-            Element main = getElement();
+
             eventRangeStop = newY;
+
+            Element main = getElement();
             NodeList<Node> nodes = main.getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
+
                 Element c = (Element) nodes.getItem(i);
 
-                if (todaybar != c) {
+                if (Arrays.stream(slotElements).anyMatch(e -> e == c)) {
 
                     int elemStart = c.getOffsetTop();
                     int elemStop = elemStart + getSlotHeight();
