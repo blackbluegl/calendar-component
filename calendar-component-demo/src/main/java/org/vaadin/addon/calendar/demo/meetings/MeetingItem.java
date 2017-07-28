@@ -2,7 +2,7 @@ package org.vaadin.addon.calendar.demo.meetings;
 
 import org.vaadin.addon.calendar.item.BasicItem;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 /**
  * Meeting Pojo
@@ -71,13 +71,13 @@ public class MeetingItem extends BasicItem {
     }
 
     @Override
-	public void setEnd(Date end) {
+	public void setEnd(ZonedDateTime end) {
 		meeting.setEnd(end);
 		super.setEnd(end);
 	}
 
 	@Override
-	public void setStart(Date start) {
+	public void setStart(ZonedDateTime start) {
 		meeting.setStart(start);
 		super.setStart(start);
 	}

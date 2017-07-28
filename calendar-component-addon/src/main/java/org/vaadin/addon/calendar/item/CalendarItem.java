@@ -16,7 +16,7 @@
 package org.vaadin.addon.calendar.item;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 /**
  * <p>
@@ -41,14 +41,14 @@ public interface CalendarItem extends Serializable {
      *
      * @return Start date.
      */
-    Date getStart();
+    ZonedDateTime getStart();
 
     /**
      * Get end date of event.
      *
      * @return End date;
      */
-    Date getEnd();
+    ZonedDateTime getEnd();
 
     /**
      * Gets caption of event.

@@ -16,7 +16,7 @@
 package org.vaadin.addon.calendar.item;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -51,7 +51,7 @@ public interface CalendarItemProvider<ITEM extends CalendarItem> extends Seriali
      *            End date
      * @return List of items
      */
-    List<ITEM> getItems(Date startDate, Date endDate);
+    List<ITEM> getItems(ZonedDateTime startDate, ZonedDateTime endDate);
 
     /**
      * Item to signal that the set of items has changed and the calendar

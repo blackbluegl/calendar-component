@@ -17,6 +17,8 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -42,8 +44,8 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
     public void backward(CalendarComponentEvents.BackwardEvent event) {
         int firstDay = event.getComponent().getFirstVisibleDayOfWeek();
         int lastDay = event.getComponent().getLastVisibleDayOfWeek();
-        Date start = event.getComponent().getStartDate();
-        Date end = event.getComponent().getEndDate();
+        Date start = Date.from(event.getComponent().getStartDate().toInstant());
+        Date end = Date.from(event.getComponent().getEndDate().toInstant());
 
         int durationInDays = 0;
 
@@ -80,6 +82,8 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
     }
 
     /**
+     * @deprecated use setDates(CalendarComponentEvents.BackwardEvent, ZonedDateTime, ZonedDateTime)
+     *
      * Set the start and end dates for the event
      *
      * @param event
@@ -90,6 +94,22 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
      *            The end date
      */
     protected void setDates(CalendarComponentEvents.BackwardEvent event, Date start, Date end) {
+        setDates( event,
+                ZonedDateTime.ofInstant(start.toInstant(), ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(end.toInstant(), ZoneId.systemDefault()));
+    }
+
+    /**
+     * Set the start and end dates for the event
+     *
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
+    protected void setDates(CalendarComponentEvents.BackwardEvent event, ZonedDateTime start, ZonedDateTime end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);
     }

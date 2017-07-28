@@ -19,7 +19,9 @@ import org.vaadin.addon.calendar.item.CalendarItem;
 import org.vaadin.addon.calendar.item.EditableCalendarItem;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Implements basic functionality needed to enable moving items.
@@ -47,11 +49,13 @@ public class BasicItemMoveHandler implements CalendarComponentEvents.ItemMoveHan
 
             EditableCalendarItem editableItem = (EditableCalendarItem) calendarItem;
 
-            Date newFromTime = event.getNewStart();
+            ZonedDateTime newFromTime = event.getNewStart();
 
-            // Update event dates
-            long length = editableItem.getEnd().getTime() - editableItem.getStart().getTime();
-            setDates(editableItem, newFromTime, new Date(newFromTime.getTime() + length));
+            long length = Duration.between(editableItem.getStart(), editableItem.getEnd()).toMillis();
+
+            ZonedDateTime newEndTime = ZonedDateTime.from(newFromTime).plus(length, ChronoUnit.MILLIS);
+
+            setDates(editableItem, newFromTime, newEndTime);
         }
     }
 
@@ -65,7 +69,7 @@ public class BasicItemMoveHandler implements CalendarComponentEvents.ItemMoveHan
      * @param end
      *            The end date
      */
-    protected void setDates(EditableCalendarItem event, Date start, Date end) {
+    protected void setDates(EditableCalendarItem event, ZonedDateTime start, ZonedDateTime end) {
         event.setStart(start);
         event.setEnd(end);
     }

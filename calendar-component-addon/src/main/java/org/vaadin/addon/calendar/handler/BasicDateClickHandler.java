@@ -17,6 +17,8 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -67,6 +69,8 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
     }
 
     /**
+     * @deprecated use setDates(CalendarComponentEvents.DateClickEvent, ZonedDateTime, ZonedDateTime)
+     *
      * Set the start and end dates for the event
      *
      * @param event
@@ -77,6 +81,22 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
      *            The end date
      */
     protected void setDates(CalendarComponentEvents.DateClickEvent event, Date start, Date end) {
+        setDates( event,
+                ZonedDateTime.ofInstant(start.toInstant(), ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(end.toInstant(), ZoneId.systemDefault()));
+    }
+
+    /**
+     * Set the start and end dates for the event
+     *
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
+    protected void setDates(CalendarComponentEvents.DateClickEvent event, ZonedDateTime start, ZonedDateTime end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);
     }
@@ -96,42 +116,35 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
     protected void switchToDay(CalendarComponentEvents.DateClickEvent event) {
 
+        // Fixme remove internal Calendar
         java.util.Calendar cal = event.getComponent().getInternalCalendar();
+        cal.setTime(Date.from(event.getDate().toInstant()));
 
-        cal.setTime(event.getDate());
-
-        Date start, end;
-        start = end = cal.getTime();
-
-        setDates(event, start, end);
+        setDates(event, event.getDate(), event.getDate());
     }
 
     protected void switchToWeek(CalendarComponentEvents.DateClickEvent event) {
 
-        java.util.Calendar cal = event.getComponent().getInternalCalendar();
-        Date start, end;
+        ZonedDateTime dateTime = event.getDate().truncatedTo(ChronoUnit.DAYS);
 
-        cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
-        cal.clear(java.util.Calendar.MINUTE);
-        cal.clear(java.util.Calendar.SECOND);
-        cal.clear(java.util.Calendar.MILLISECOND);
-        cal.setTime(event.getDate());
+        ZonedDateTime s = dateTime.with( DayOfWeek.MONDAY ) // FIXME! monday as start of week
+            .plus(event.getComponent().getFirstVisibleDayOfWeek() -1, ChronoUnit.DAYS);
 
-        cal.set(java.util.Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+        ZonedDateTime e = s.plus(event.getComponent().getLastVisibleDayOfWeek() -1, ChronoUnit.DAYS);
 
-        cal.add(java.util.Calendar.DAY_OF_WEEK, event.getComponent().getFirstVisibleDayOfWeek() -1);
-
-        start = cal.getTime();
-
-        cal.add(java.util.Calendar.DAY_OF_WEEK, event.getComponent().getLastVisibleDayOfWeek() -1);
-
-        end = cal.getTime();
-
-        setDates(event, start, end);
+        setDates(event, s, e);
     }
 
     protected void switchToMonth(CalendarComponentEvents.DateClickEvent event) {
 
+//        Month month = Month.from(event.getDate());
+//
+//        ZonedDateTime s = event.getDate().with(MonthDay.of(month, 1));
+//
+//        ZonedDateTime e = event.getDate().with(MonthDay.of(month, 31));
+//
+//        setDates(event, s, e);
+
         java.util.Calendar cal = event.getComponent().getInternalCalendar();
         Date start, end;
 
@@ -139,7 +152,7 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
         cal.clear(java.util.Calendar.MINUTE);
         cal.clear(java.util.Calendar.SECOND);
         cal.clear(java.util.Calendar.MILLISECOND);
-        cal.setTime(event.getDate());
+        cal.setTime(Date.from(event.getDate().toInstant()));
         cal.set(Calendar.DAY_OF_MONTH, 1);
 
         start = cal.getTime();

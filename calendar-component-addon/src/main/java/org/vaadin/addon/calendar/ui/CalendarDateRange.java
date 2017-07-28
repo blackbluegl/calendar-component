@@ -16,6 +16,7 @@
 package org.vaadin.addon.calendar.ui;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -30,11 +31,23 @@ import java.util.TimeZone;
 
 public class CalendarDateRange implements Serializable {
 
-    private Date start;
+    private ZonedDateTime start;
 
-    private Date end;
+    private ZonedDateTime end;
 
-    private final transient TimeZone tz;
+    /**
+     * Constructor
+     * @deprecated
+     *
+     * @param start
+     *            The start date and time of the date range
+     * @param end
+     *            The end date and time of the date range
+     */
+    public CalendarDateRange(Date start, Date end, TimeZone tz) {
+        this(ZonedDateTime.ofInstant(start.toInstant(), tz.toZoneId()),
+                ZonedDateTime.ofInstant(end.toInstant(), tz.toZoneId()));
+    }
 
     /**
      * Constructor
@@ -44,11 +57,10 @@ public class CalendarDateRange implements Serializable {
      * @param end
      *            The end date and time of the date range
      */
-    public CalendarDateRange(Date start, Date end, TimeZone tz) {
+    public CalendarDateRange(ZonedDateTime start, ZonedDateTime end) {
         super();
         this.start = start;
         this.end = end;
-        this.tz = tz;
     }
 
     /**
@@ -56,7 +68,7 @@ public class CalendarDateRange implements Serializable {
      *
      * @return the start Date of the range
      */
-    public Date getStart() {
+    public ZonedDateTime getStart() {
         return start;
     }
 
@@ -65,7 +77,7 @@ public class CalendarDateRange implements Serializable {
      *
      * @return the end Date of the range
      */
-    public Date getEnd() {
+    public ZonedDateTime getEnd() {
         return end;
     }
 
@@ -77,7 +89,7 @@ public class CalendarDateRange implements Serializable {
      * @return true if the date range contains a date start and end of range
      *         inclusive; false otherwise
      */
-    public boolean inRange(Date date) {
+    public boolean inRange(ZonedDateTime date) {
         if (date == null) {
             return false;
         }

@@ -17,6 +17,8 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -49,8 +51,7 @@ public class BasicWeekClickHandler implements CalendarComponentEvents.WeekClickH
         javaCalendar.set(GregorianCalendar.WEEK_OF_YEAR, week);
 
         // starting at the beginning of the week
-        javaCalendar.set(GregorianCalendar.DAY_OF_WEEK,
-                javaCalendar.getFirstDayOfWeek());
+        javaCalendar.set(GregorianCalendar.DAY_OF_WEEK, javaCalendar.getFirstDayOfWeek());
         Date start = javaCalendar.getTime();
 
         // ending at the end of the week
@@ -63,6 +64,8 @@ public class BasicWeekClickHandler implements CalendarComponentEvents.WeekClickH
     }
 
     /**
+     * @deprecated use setDates(CalendarComponentEvents.WeekClick, ZonedDateTime, ZonedDateTime)
+     *
      * Set the start and end dates for the event
      *
      * @param event
@@ -73,6 +76,22 @@ public class BasicWeekClickHandler implements CalendarComponentEvents.WeekClickH
      *            The end date
      */
     protected void setDates(CalendarComponentEvents.WeekClick event, Date start, Date end) {
+        setDates( event,
+                ZonedDateTime.ofInstant(start.toInstant(), ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(end.toInstant(), ZoneId.systemDefault()));
+    }
+
+    /**
+     * Set the start and end dates for the event
+     *
+     * @param event
+     *            The event that the start and end dates should be set
+     * @param start
+     *            The start date
+     * @param end
+     *            The end date
+     */
+    protected void setDates(CalendarComponentEvents.WeekClick event, ZonedDateTime start, ZonedDateTime end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);
     }

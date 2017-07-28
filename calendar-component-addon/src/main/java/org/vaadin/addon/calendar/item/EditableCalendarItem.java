@@ -16,7 +16,7 @@
 package org.vaadin.addon.calendar.item;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 /**
  * <p>
@@ -62,7 +62,7 @@ public interface EditableCalendarItem extends CalendarItem {
      * @param end
      *            The end date to set
      */
-    void setEnd(Date end);
+    void setEnd(ZonedDateTime end);
 
     /**
      * Set the start date for the event. Must be before the end date
@@ -70,7 +70,7 @@ public interface EditableCalendarItem extends CalendarItem {
      * @param start
      *            The start date of the event
      */
-    void setStart(Date start);
+    void setStart(ZonedDateTime start);
 
     /**
      * Set the style name for the event used for styling the event cells

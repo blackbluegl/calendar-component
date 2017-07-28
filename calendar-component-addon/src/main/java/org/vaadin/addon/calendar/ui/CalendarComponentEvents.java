@@ -22,7 +22,7 @@ import org.vaadin.addon.calendar.item.CalendarItem;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.EventListener;
 
 /**
@@ -73,10 +73,10 @@ public interface CalendarComponentEvents extends Serializable {
         public static final String EVENT_ID = CalendarEventId.RANGESELECT;
 
         /** Calendar event's start date. */
-        private Date start;
+        private ZonedDateTime start;
 
         /** Calendar event's end date. */
-        private Date end;
+        private ZonedDateTime end;
 
         /**
          * RangeSelectEvent needs a start and end date.
@@ -88,7 +88,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param end
          *            End date.
          */
-        public RangeSelectEvent(Calendar source, Date start, Date end) {
+        public RangeSelectEvent(Calendar source, ZonedDateTime start, ZonedDateTime end) {
             super(source);
             this.start = start;
             this.end = end;
@@ -99,7 +99,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return Start date.
          */
-        public Date getStart() {
+        public ZonedDateTime getStart() {
             return start;
         }
 
@@ -108,7 +108,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return End date.
          */
-        public Date getEnd() {
+        public ZonedDateTime getEnd() {
             return end;
         }
 
@@ -254,10 +254,10 @@ public interface CalendarComponentEvents extends Serializable {
         public static final String EVENT_ID = CalendarEventId.DATECLICK;
 
         /** Date that was clicked. */
-        private Date date;
+        private ZonedDateTime date;
 
         /** DateClickEvent needs the target date that was clicked. */
-        public DateClickEvent(Calendar source, Date date) {
+        public DateClickEvent(Calendar source, ZonedDateTime date) {
             super(source);
             this.date = date;
         }
@@ -267,7 +267,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return Clicked date.
          */
-        public Date getDate() {
+        public ZonedDateTime getDate() {
             return date;
         }
     }
@@ -365,12 +365,12 @@ public interface CalendarComponentEvents extends Serializable {
 
         private CalendarItem calendarItem;
 
-        private Date startTime;
+        private ZonedDateTime startTime;
 
-        private Date endTime;
+        private ZonedDateTime endTime;
 
         public ItemResizeEvent(Calendar source, CalendarItem calendarItem,
-                               Date startTime, Date endTime) {
+                               ZonedDateTime startTime, ZonedDateTime endTime) {
             super(source);
             this.calendarItem = calendarItem;
             this.startTime = startTime;
@@ -391,7 +391,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return the new start time
          */
-        public Date getNewStartTime() {
+        public ZonedDateTime getNewStartTime() {
             return startTime;
         }
 
@@ -400,7 +400,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return The new date for the event
          */
-        public Date getNewStart() {
+        public ZonedDateTime getNewStart() {
             return startTime;
         }
 
@@ -409,7 +409,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return the new end time
          */
-        public Date getNewEndTime() {
+        public ZonedDateTime getNewEndTime() {
             return endTime;
         }
 
@@ -418,7 +418,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return The new date for the item
          */
-        public Date getNewEnd() {
+        public ZonedDateTime getNewEnd() {
             return endTime;
         }
     }
@@ -476,7 +476,7 @@ public interface CalendarComponentEvents extends Serializable {
         private CalendarItem calendarItem;
 
         /** New starting date for the moved Calendar.Item. */
-        private Date newStart;
+        private ZonedDateTime newStart;
 
         /**
          * ItemMoveEvent needs the target event and new start date.
@@ -489,7 +489,7 @@ public interface CalendarComponentEvents extends Serializable {
          *            Target event's new start date.
          */
         public ItemMoveEvent(Calendar source, CalendarItem calendarItem,
-                             Date newStart) {
+                             ZonedDateTime newStart) {
             super(source);
 
             this.calendarItem = calendarItem;
@@ -510,7 +510,7 @@ public interface CalendarComponentEvents extends Serializable {
          *
          * @return New start date.
          */
-        public Date getNewStart() {
+        public ZonedDateTime getNewStart() {
             return newStart;
         }
     }
