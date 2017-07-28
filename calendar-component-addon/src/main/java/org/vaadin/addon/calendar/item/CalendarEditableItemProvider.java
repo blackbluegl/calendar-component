@@ -14,7 +14,7 @@
  * the License.
  */
 
-package org.vaadin.addon.calendar.event;
+package org.vaadin.addon.calendar.item;
 
 import java.util.Collection;
 

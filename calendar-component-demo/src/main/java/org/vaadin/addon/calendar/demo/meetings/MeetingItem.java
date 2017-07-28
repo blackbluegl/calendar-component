@@ -1,6 +1,6 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
-import org.vaadin.addon.calendar.event.BasicItem;
+import org.vaadin.addon.calendar.item.BasicItem;
 
 import java.util.Date;
 

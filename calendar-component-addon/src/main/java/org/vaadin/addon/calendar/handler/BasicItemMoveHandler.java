@@ -15,8 +15,8 @@
  */
 package org.vaadin.addon.calendar.handler;
 
-import org.vaadin.addon.calendar.event.CalendarItem;
-import org.vaadin.addon.calendar.event.EditableCalendarItem;
+import org.vaadin.addon.calendar.item.CalendarItem;
+import org.vaadin.addon.calendar.item.EditableCalendarItem;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.util.Date;

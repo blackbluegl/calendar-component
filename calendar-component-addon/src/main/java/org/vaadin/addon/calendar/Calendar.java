@@ -34,7 +34,7 @@ import org.vaadin.addon.calendar.client.CalendarEventId;
 import org.vaadin.addon.calendar.client.CalendarServerRpc;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.event.*;
+import org.vaadin.addon.calendar.item.*;
 import org.vaadin.addon.calendar.handler.*;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvent;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;

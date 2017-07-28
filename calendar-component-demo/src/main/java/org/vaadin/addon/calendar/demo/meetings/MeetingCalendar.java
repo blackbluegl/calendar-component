@@ -7,7 +7,7 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.event.BasicItemProvider;
+import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 

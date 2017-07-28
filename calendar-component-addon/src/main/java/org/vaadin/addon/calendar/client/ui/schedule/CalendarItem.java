@@ -46,21 +46,21 @@ public class CalendarItem {
     private boolean clickable = true;
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarItem#getStyleName()
+     * @see org.vaadin.addon.calendar.item.CalendarItem#getStyleName()
      */
     public String getStyleName() {
         return styleName;
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarItem#getStart()
+     * @see org.vaadin.addon.calendar.item.CalendarItem#getStart()
      */
     public Date getStart() {
         return start;
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarItem#getStyleName()
+     * @see org.vaadin.addon.calendar.item.CalendarItem#getStyleName()
      * @param style
      */
     public void setStyleName(String style) {
@@ -68,7 +68,7 @@ public class CalendarItem {
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarItem#getStart()
+     * @see org.vaadin.addon.calendar.item.CalendarItem#getStart()
      * @param start
      */
     public void setStart(Date start) {
@@ -76,7 +76,7 @@ public class CalendarItem {
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarItem#getEnd()
+     * @see org.vaadin.addon.calendar.item.CalendarItem#getEnd()
      * @return
      */
     public Date getEnd() {
@@ -84,7 +84,7 @@ public class CalendarItem {
     }
 
     /**
-     * @see org.vaadin.addon.calendar.event.CalendarItem#getEnd()
+     * @see org.vaadin.addon.calendar.item.CalendarItem#getEnd()
      * @param end
      */
     public void setEnd(Date end) {

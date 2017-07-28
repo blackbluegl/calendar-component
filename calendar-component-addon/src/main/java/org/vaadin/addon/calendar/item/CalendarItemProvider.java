@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.vaadin.addon.calendar.event;
+package org.vaadin.addon.calendar.item;
 
 import java.io.Serializable;
 import java.util.Date;

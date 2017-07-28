@@ -18,7 +18,7 @@ package org.vaadin.addon.calendar.ui;
 import com.vaadin.util.ReflectTools;
 import org.vaadin.addon.calendar.Calendar;
 import org.vaadin.addon.calendar.client.CalendarEventId;
-import org.vaadin.addon.calendar.event.CalendarItem;
+import org.vaadin.addon.calendar.item.CalendarItem;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
