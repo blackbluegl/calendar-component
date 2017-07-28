@@ -7,7 +7,7 @@ Calendar-component is a UI component add-on for Vaadin 8.
 Moved to BETA stage and testing for stable release. After that, a new feature-branch will be opened.  
 (see issues -> tag:enhancements)
 
-### Version 1.0-BETA3
+### Version 1.0
 - Fixed:    cell selection style is not added to calendar items anymore 
 - Enhanced: convenience methods for time blocks added
 

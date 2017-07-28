@@ -5,7 +5,7 @@
 	<groupId>org.vaadin.blackbluegl</groupId>
 	<artifactId>calendar-component-root</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0-BETA3</version>
+	<version>1.0</version>
 	<name>Calendar Add-on :: Root</name>
 
 	<prerequisites>
