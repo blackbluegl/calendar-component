@@ -126,15 +126,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     protected List<? extends CalendarItem> items;
 
+
     /** Date format that will be used in the UIDL for dates. */
-    protected DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(DateConstants.CLIENT_DATE_FORMAT_PATTERN);
 
     /** Time format that will be used in the UIDL for time. */
-    protected DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_TIME_FORMAT_PATTERN);
 
     /** Date format that will be used in the UIDL for both date and time. */
-    protected DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
-            DateConstants.CLIENT_DATE_FORMAT + "-" + DateConstants.CLIENT_TIME_FORMAT);
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DateConstants.CLIENT_DATE_FORMAT_PATTERN + "-" + DateConstants.CLIENT_TIME_FORMAT_PATTERN);
+    /** Date format that will be used in the UIDL for both date and time. */
+    private DateTimeFormatter actionDateTimeFormatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_FORMAT_PATTERN);
 
     /**
      * Week view's scroll position. Client sends updates to this value so that
@@ -473,10 +475,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 CalendarState.Item item = new CalendarState.Item();
                 item.index = i;
                 item.caption = calItem.getCaption() == null ? "" : calItem.getCaption();
+
+// TODO STRING FORMATTER yyyy-MM-dd
                 item.dateFrom = dateFormatter.format(calItem.getStart());
                 item.dateTo = dateFormatter.format(calItem.getEnd());
+// TODO STRING FORMATTER HH:mm:ss
                 item.timeFrom = timeFormatter.format(calItem.getStart());
                 item.timeTo = timeFormatter.format(calItem.getEnd());
+
                 item.description = calItem.getDescription() == null ? "" : calItem.getDescription();
                 item.styleName = calItem.getStyleName() == null ? "" : calItem.getStyleName();
                 item.allDay = calItem.isAllDay();
@@ -599,7 +605,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         ZonedDateTime now = ZonedDateTime.now(zoneId);
 
-        state.now = dateFormatter.format(now) + " " + timeFormatter.format(now);
+        state.now = actionDateTimeFormatter.format(now);
 
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't

@@ -25,8 +25,11 @@ import java.io.Serializable;
 public class DateConstants implements Serializable {
 
     public static final String ACTION_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    public static final String CLIENT_DATE_FORMAT = "yyyy-MM-dd";
-    public static final String CLIENT_TIME_FORMAT = "HH-mm";
+    public static final String ACTION_TIME_FORMAT_PATTERN = "HH:mm:ss";
+
+    public static final String CLIENT_DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+    public static final String CLIENT_TIME_FORMAT_PATTERN = "HH-mm";
+
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
     public static final long DAYINMILLIS = 24 * HOURINMILLIS;

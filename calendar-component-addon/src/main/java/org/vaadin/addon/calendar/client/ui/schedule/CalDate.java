@@ -15,5 +15,13 @@ public class CalDate implements Serializable {
     public int month;
     public int day;
 
+    public CalTime time;
+
     public CalDate() { super(); }
+
+    public CalDate(int year, int month, int day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+    }
 }

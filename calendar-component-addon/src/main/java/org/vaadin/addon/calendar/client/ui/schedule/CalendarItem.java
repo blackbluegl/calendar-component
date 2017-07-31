@@ -37,8 +37,8 @@ public class CalendarItem {
     private int slotIndex = -1;
     private boolean format24h;
 
-    DateTimeFormat dateformat_date = DateTimeFormat.getFormat("h:mm a");
-    DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm");
+    DateTimeFormat dateformat_date = DateTimeFormat.getFormat("h:mm a"); // TODO make user adjustable
+    DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm"); // TODO make user adjustable
     private boolean allDay;
 
     private boolean moveable = true;

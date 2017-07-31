@@ -561,25 +561,6 @@ public class DateCellDayItem extends FocusableHTML
         return DateConstants.MINUTEINMILLIS * 30;
     }
 
-    /**
-     * Build the string for sending resize items to server
-     *
-     * @param event The calendar event
-     * @return The string with resizeing information
-     */
-    private String buildResizeString(CalendarItem event) {
-
-        return String.valueOf(event.getIndex()) +
-                "," +
-                DateUtil.formatClientSideDate(event.getStart()) +
-                "-" +
-                DateUtil.formatClientSideTime(event.getStartTime()) +
-                "," +
-                DateUtil.formatClientSideDate(event.getEnd()) +
-                "-" +
-                DateUtil.formatClientSideTime(event.getEndTime());
-    }
-
     private Date getTargetDateByCurrentPosition(int left) {
         DateCell newParent = (DateCell) weekGrid.content.getWidget((left / getDateCellWidth()) + 1);
         return newParent.getDate();

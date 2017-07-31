@@ -70,14 +70,11 @@ public class VCalendar extends Composite implements VHasDropHandler {
     private int intWidth = 0;
     private int intHeight = 0;
 
-    protected final DateTimeFormat dateformat_datetime = DateTimeFormat
-            .getFormat("yyyy-MM-dd HH:mm:ss");
-    protected final DateTimeFormat dateformat_date = DateTimeFormat
-            .getFormat("yyyy-MM-dd");
-    protected final DateTimeFormat time12format_date = DateTimeFormat
-            .getFormat("h:mm a");
-    protected final DateTimeFormat time24format_date = DateTimeFormat
-            .getFormat("HH:mm");
+    private final DateTimeFormat dateformat_datetime = DateTimeFormat.getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
+    private final DateTimeFormat dateformat_date = DateTimeFormat.getFormat(DateConstants.CLIENT_DATE_FORMAT_PATTERN);
+
+    protected final DateTimeFormat time12format_date = DateTimeFormat.getFormat("h:mm a");
+    protected final DateTimeFormat time24format_date = DateTimeFormat.getFormat("HH:mm");
 
     private boolean disabled = false;
     private boolean isHeightUndefined = false;
@@ -538,7 +535,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
             String localized_date_format = day.getLocalizedDateFormat();
 
             String dateStr = day.getDate();
-            Date date = dateformat_date.parse(dateStr);
+            Date date = getDateFormat().parse(dateStr);
 
             int dayOfWeek = day.getDayOfWeek();
 
@@ -592,7 +589,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
         for (CalendarDay day : days) {
             String date = day.getDate();
-            Date d = dateformat_date.parse(date);
+            Date d = getDateFormat().parse(date);
             int dayOfWeek = day.getDayOfWeek();
             int week = day.getWeek();
 

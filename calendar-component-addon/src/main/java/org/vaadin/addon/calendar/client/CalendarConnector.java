@@ -128,28 +128,26 @@ public class CalendarConnector extends AbstractComponentConnector
         });
         getWidget().setListener((VCalendar.ItemMovedListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_MOVE)) {
-                rpc.itemMove(item.getIndex(), DateUtil.formatClientSideDate(item.getStart()) +
-                        "-" + DateUtil.formatClientSideTime(item.getStartTime()));
+                rpc.itemMove(item.getIndex(),
+// TODO STRING FORMATTER yyyy-MM-dd-HH-mm
+                        DateUtil.formatClientSideDate(item.getStart()) + "-" + DateUtil.formatClientSideTime(item.getStartTime()));
             }
         });
         getWidget().setListener((VCalendar.ItemResizeListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_RESIZE)) {
                 StringBuilder buffer = new StringBuilder();
-
-                buffer.append(
-                        DateUtil.formatClientSideDate(item.getStart()));
+// TODO STRING FORMATTER yyyy-MM-dd-HH-mm
+                buffer.append(DateUtil.formatClientSideDate(item.getStart()));
                 buffer.append("-");
-                buffer.append(DateUtil
-                        .formatClientSideTime(item.getStartTime()));
+                buffer.append(DateUtil.formatClientSideTime(item.getStartTime()));
 
                 String newStartDate = buffer.toString();
 
                 buffer = new StringBuilder();
-                buffer.append(
-                        DateUtil.formatClientSideDate(item.getEnd()));
+// TODO STRING FORMATTER yyyy-MM-dd-HH-mm
+                buffer.append(DateUtil.formatClientSideDate(item.getEnd()));
                 buffer.append("-");
-                buffer.append(
-                        DateUtil.formatClientSideTime(item.getEndTime()));
+                buffer.append(DateUtil.formatClientSideTime(item.getEndTime()));
 
                 String newEndDate = buffer.toString();
 
@@ -592,10 +590,13 @@ public class CalendarConnector extends AbstractComponentConnector
         List<CalendarItem> list = new ArrayList<>(items.size());
 
         for (CalendarState.Item item : items) {
+
+            // TODO replace with timestamps or object states
             final String dateFrom = item.dateFrom;
             final String dateTo = item.dateTo;
             final String timeFrom = item.timeFrom;
             final String timeTo = item.timeTo;
+
             CalendarItem calendarItem = new CalendarItem();
             calendarItem.setAllDay(item.allDay);
             calendarItem.setCaption(item.caption);
@@ -603,10 +604,8 @@ public class CalendarConnector extends AbstractComponentConnector
             calendarItem.setStart(getWidget().getDateFormat().parse(dateFrom));
             calendarItem.setEnd(getWidget().getDateFormat().parse(dateTo));
             calendarItem.setFormat24h(format24h);
-            calendarItem.setStartTime(getWidget().getDateTimeFormat()
-                    .parse(dateFrom + " " + timeFrom));
-            calendarItem.setEndTime(getWidget().getDateTimeFormat()
-                    .parse(dateTo + " " + timeTo));
+            calendarItem.setStartTime(getWidget().getDateTimeFormat().parse(dateFrom + " " + timeFrom));
+            calendarItem.setEndTime(getWidget().getDateTimeFormat().parse(dateTo + " " + timeTo));
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
             calendarItem.setMoveable(item.moveable);
