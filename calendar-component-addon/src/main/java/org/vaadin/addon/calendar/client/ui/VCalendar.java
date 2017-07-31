@@ -458,43 +458,27 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * @return An array where the items has been sorted
      */
     public CalendarItem[] sortItems(Collection<CalendarItem> items) {
-        if (CalendarState.ItemSortOrder.DURATION_DESC.equals(itemSortOrder)) {
+        if (!CalendarState.ItemSortOrder.UNSORTED.equals(itemSortOrder)) {
 
-            return sortItemsByDuration(items);
-
-        } else if (!CalendarState.ItemSortOrder.UNSORTED.equals(itemSortOrder)) {
-            CalendarItem[] sorted = items
-                    .toArray(new CalendarItem[items.size()]);
+            CalendarItem[] sorted = items.toArray(new CalendarItem[items.size()]);
             switch (itemSortOrder) {
-            case DURATION_ASC:
-                Arrays.sort(sorted, new ItemDurationComparator(true));
-                break;
-            case START_DATE_ASC:
-                Arrays.sort(sorted, new StartDateComparator(true));
-                break;
-            case START_DATE_DESC:
-                Arrays.sort(sorted, new StartDateComparator(false));
-                break;
+                case START_DATE_ASC:
+                    Arrays.sort(sorted, new StartDateComparator(true));
+                    break;
+                case START_DATE_DESC:
+                    Arrays.sort(sorted, new StartDateComparator(false));
+                    break;
+                case DURATION_ASC:
+                    Arrays.sort(sorted, new ItemDurationComparator(true));
+                    break;
+                case DURATION_DESC:
+                default:
+                    Arrays.sort(sorted, DEFAULT_COMPARATOR);
             }
+
             return sorted;
         }
         return items.toArray(new CalendarItem[items.size()]);
-    }
-
-    /**
-     * Sort the event by how long they are
-     *
-     * @param items
-     *            The items to sort
-     * @return An array where the items has been sorted
-     * @deprecated use {@link #sortItems(Collection)} method which shorts
-     *             items by current sort order.
-     */
-    @Deprecated
-    public CalendarItem[] sortItemsByDuration(Collection<CalendarItem> items) {
-        CalendarItem[] sorted = items.toArray(new CalendarItem[items.size()]);
-        Arrays.sort(sorted, getItemComparator());
-        return sorted;
     }
 
     /*
@@ -817,22 +801,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
         // cellSizes[numberOfCells - 1] += cellSizeOverFlow;
 
         return cellSizes;
-    }
-
-    /**
-     * Returns the default comparator which can compare calendar items by
-     * duration.
-     *
-     * @deprecated this returns just one default comparator, but there are
-     *             number of comparators that are used to sort items depending
-     *             on order.
-     *
-     * @return the default comparator which can compare calendar items by
-     * duration
-     */
-    @Deprecated
-    public static Comparator<CalendarItem> getItemComparator() {
-        return DEFAULT_COMPARATOR;
     }
 
     /**
