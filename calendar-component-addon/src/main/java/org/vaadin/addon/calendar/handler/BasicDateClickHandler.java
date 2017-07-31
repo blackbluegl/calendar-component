@@ -17,10 +17,13 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.time.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Date;
+
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 /**
  * Implements basic functionality needed to switch to day view when a single day
@@ -115,11 +118,6 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
      */
 
     protected void switchToDay(CalendarComponentEvents.DateClickEvent event) {
-
-        // Fixme remove internal Calendar
-        java.util.Calendar cal = event.getComponent().getInternalCalendar();
-        cal.setTime(Date.from(event.getDate().toInstant()));
-
         setDates(event, event.getDate(), event.getDate());
     }
 
@@ -127,7 +125,7 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
         ZonedDateTime dateTime = event.getDate().truncatedTo(ChronoUnit.DAYS);
 
-        ZonedDateTime s = dateTime.with( DayOfWeek.MONDAY ) // FIXME! monday as start of week
+        ZonedDateTime s = event.getComponent().getfirstDayOfWeek(dateTime)
             .plus(event.getComponent().getFirstVisibleDayOfWeek() -1, ChronoUnit.DAYS);
 
         ZonedDateTime e = s.plus(event.getComponent().getLastVisibleDayOfWeek() -1, ChronoUnit.DAYS);
@@ -137,30 +135,10 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
     protected void switchToMonth(CalendarComponentEvents.DateClickEvent event) {
 
-//        Month month = Month.from(event.getDate());
-//
-//        ZonedDateTime s = event.getDate().with(MonthDay.of(month, 1));
-//
-//        ZonedDateTime e = event.getDate().with(MonthDay.of(month, 31));
-//
-//        setDates(event, s, e);
+        ZonedDateTime s = event.getDate().with(firstDayOfMonth());
+        ZonedDateTime e = event.getDate().with(lastDayOfMonth());
 
-        java.util.Calendar cal = event.getComponent().getInternalCalendar();
-        Date start, end;
+        setDates(event, s, e);
 
-        cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
-        cal.clear(java.util.Calendar.MINUTE);
-        cal.clear(java.util.Calendar.SECOND);
-        cal.clear(java.util.Calendar.MILLISECOND);
-        cal.setTime(Date.from(event.getDate().toInstant()));
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-
-        start = cal.getTime();
-
-        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-
-        end = cal.getTime();
-
-        setDates(event, start, end);
     }
 }

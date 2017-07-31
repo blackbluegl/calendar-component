@@ -151,15 +151,11 @@ public class VCalendar extends Composite implements VHasDropHandler {
          * Called when a user selected a new item by highlighting an area of
          * the calendar.
          *
-         * FIXME Fix the value nonsense.
-         *
-         * @param value
-         *            The format of the value string is
-         *            "<year>:<start-minutes>:<end-minutes>" if called from the
-         *            {@link SimpleWeekToolbar} and "<yyyy-MM-dd>TO<yyyy-MM-dd>"
-         *            if called from {@link MonthGrid}
+         * @param dateSelectionRange
+         *                  The selection range
          */
-        void rangeSelected(String value);
+        void rangeSelected(DateRangeSelection dateSelectionRange);
+
     }
 
     /**

@@ -99,7 +99,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
     public void setSelectionReady() {
         if (selectionStart != null && selectionEnd != null) {
-            String value = "";
+
             Date startDate = selectionStart.getDate();
             Date endDate = selectionEnd.getDate();
             if (startDate.compareTo(endDate) > 0) {
@@ -109,9 +109,12 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
             }
 
             if (calendar.getRangeSelectListener() != null) {
-                value = calendar.getDateFormat().format(startDate) + "TO"
-                        + calendar.getDateFormat().format(endDate);
-                calendar.getRangeSelectListener().rangeSelected(value);
+
+                DateRangeSelection weekSelection = new DateRangeSelection();
+                weekSelection.setStartDay(startDate.getYear() +1900, startDate.getMonth() +1, startDate.getDate());
+                weekSelection.setEndDay(endDate.getYear() +1900, endDate.getMonth() +1, endDate.getDate());
+
+                calendar.getRangeSelectListener().rangeSelected(weekSelection);
             }
             selectionStart = null;
             selectionEnd = null;

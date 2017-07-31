@@ -115,9 +115,9 @@ public class CalendarConnector extends AbstractComponentConnector
                 rpc.backward();
             }
         });
-        getWidget().setListener((VCalendar.RangeSelectListener) value -> {
+        getWidget().setListener((VCalendar.RangeSelectListener) rangeSelection -> {
             if (hasEventListener(CalendarEventId.RANGESELECT)) {
-                rpc.rangeSelect(value);
+                rpc.rangeSelect(rangeSelection);
             }
         });
         getWidget().setListener((VCalendar.WeekClickListener) event -> {
@@ -128,12 +128,8 @@ public class CalendarConnector extends AbstractComponentConnector
         });
         getWidget().setListener((VCalendar.ItemMovedListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_MOVE)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(DateUtil.formatClientSideDate(item.getStart()));
-                sb.append("-");
-                sb.append(DateUtil
-                        .formatClientSideTime(item.getStartTime()));
-                rpc.itemMove(item.getIndex(), sb.toString());
+                rpc.itemMove(item.getIndex(), DateUtil.formatClientSideDate(item.getStart()) +
+                        "-" + DateUtil.formatClientSideTime(item.getStartTime()));
             }
         });
         getWidget().setListener((VCalendar.ItemResizeListener) item -> {
@@ -498,7 +494,7 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the original action ID that was passed in from the shared state
      *
      * @param actionKey the unique action key
-     * @return
+     * @return The original action ID that was passed in from the shared state
      * @since 7.1.2
      */
     public String getActionID(String actionKey) {
@@ -509,7 +505,7 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the text that is displayed for a context menu item
      *
      * @param actionKey The unique action key
-     * @return
+     * @return The text that is displayed for a context menu item
      */
     public String getActionCaption(String actionKey) {
         return actionMap.get(actionKey + "_c");
@@ -519,7 +515,7 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the icon url for a context menu item
      *
      * @param actionKey The unique action key
-     * @return
+     * @return The icon url for a context menu item
      */
     public String getActionIcon(String actionKey) {
         return actionMap.get(actionKey + "_i");
@@ -529,8 +525,8 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the start date for an action item
      *
      * @param actionKey The unique action key
-     * @return
-     * @throws ParseException
+     * @return The start date for an action item
+     * @throws ParseException on parse
      */
     public Date getActionStartDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_s");
@@ -543,8 +539,8 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the end date for an action item
      *
      * @param actionKey The unique action key
-     * @return
-     * @throws ParseException
+     * @return The end date for an action item
+     * @throws ParseException on parse
      */
     public Date getActionEndDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_e");
@@ -559,9 +555,9 @@ public class CalendarConnector extends AbstractComponentConnector
 
     @Override
     public Action[] getActions() {
-        List<Action> actions = new ArrayList<Action>();
-        for (int i = 0; i < actionKeys.size(); i++) {
-            final String actionKey = actionKeys.get(i);
+        List<Action> actions = new ArrayList<>();
+
+        for (final String actionKey : actionKeys) {
             final VCalendarAction a = new VCalendarAction(this, rpc, actionKey);
             a.setCaption(getActionCaption(actionKey));
             a.setIconUrl(getActionIcon(actionKey));
@@ -571,11 +567,12 @@ public class CalendarConnector extends AbstractComponentConnector
                 a.setActionEndDate(getActionEndDate(actionKey));
             } catch (ParseException pe) {
                 Logger.getLogger(CalendarConnector.class.getName()).
-                        log(Level.SEVERE,"", pe);
+                        log(Level.SEVERE, "", pe);
             }
 
             actions.add(a);
         }
+
         return actions.toArray(new Action[actions.size()]);
     }
 

@@ -7,8 +7,8 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
+import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.time.ZoneId;
@@ -92,6 +92,9 @@ public class MeetingCalendar extends CustomComponent {
 
         calendar.setFirstVisibleDayOfWeek(1);
         calendar.setLastVisibleDayOfWeek(7);
+
+//        calendar.setStartDate(ZonedDateTime.now().plus(3, DAYS));
+//        calendar.setEndDate(ZonedDateTime.now().plus(10, DAYS));
 
         addCalendarEventListeners();
 

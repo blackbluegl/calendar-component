@@ -680,13 +680,17 @@ public class DateCell extends FocusableComplexPanel
             int startMinutes = firstHour * 60 + slotStart * 30;
             int endMinutes = (firstHour * 60) + (slotEnd + 1) * 30;
             Date currentDate = getDate();
-            String yr = (currentDate.getYear() + 1900) + "-"
-                    + (currentDate.getMonth() + 1) + "-"
-                    + currentDate.getDate();
 
             if (weekgrid.getCalendar().getRangeSelectListener() != null) {
-                weekgrid.getCalendar().getRangeSelectListener().rangeSelected(
-                        yr + ":" + startMinutes + ":" + endMinutes);
+
+                DateRangeSelection weekSelection = new DateRangeSelection();
+                weekSelection.startMinutes = startMinutes;
+                weekSelection.endMinutes = endMinutes;
+                weekSelection.setStartDay(currentDate.getYear() + 1900,
+                        currentDate.getMonth() + 1,
+                        currentDate.getDate());
+
+                weekgrid.getCalendar().getRangeSelectListener().rangeSelected(weekSelection);
             }
             eventRangeStart = -1;
 
