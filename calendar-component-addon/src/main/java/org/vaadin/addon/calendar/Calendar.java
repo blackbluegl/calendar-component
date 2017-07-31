@@ -992,15 +992,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
     }
 
-    //TODO remove
-//    private DateFormat getWeeklyCaptionFormatter() {
-//        if (weeklyCaptionFormat != null) {
-//            return new SimpleDateFormat(weeklyCaptionFormat, getLocale());
-//        } else {
-//            return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, getLocale());
-//        }
-//    }
-
     /**
      * Get the day of week by the given calendar and its locale
      *
@@ -1525,8 +1516,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 LocalDateTime dateTime = LocalDateTime.from(dateTimeFormatter.parse(newDate));
 
                 if (itemIndex >= 0 && itemIndex < items.size() && items.get(itemIndex) != null) {
-                    // FIXME check ZoneID
-                    fireItemMove(itemIndex, ZonedDateTime.of(dateTime, ZoneId.systemDefault()));
+                    fireItemMove(itemIndex, ZonedDateTime.of(dateTime, zoneId));
                 }
             }
         }
@@ -1585,8 +1575,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
                 LocalDate date = LocalDate.from(dateFormatter.parse(dateUIDL));
 
-                // TODO check ZoneID
-                fireDateClick(ZonedDateTime.of(date, LocalTime.now(), ZoneId.systemDefault()));
+                fireDateClick(ZonedDateTime.of(date, LocalTime.now(), zoneId));
             }
         }
 
@@ -1627,10 +1616,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 LocalDateTime newStartTime = LocalDateTime.from(dateTimeFormatter.parse(newStartDate));
                 LocalDateTime newEndTime = LocalDateTime.from(dateTimeFormatter.parse(newEndDate));
 
-                // TODO check zoneID
                 fireItemResize(itemIndex,
-                        ZonedDateTime.of(newStartTime, ZoneId.systemDefault()),
-                        ZonedDateTime.of(newEndTime, ZoneId.systemDefault()));
+                        ZonedDateTime.of(newStartTime, zoneId),
+                        ZonedDateTime.of(newEndTime, zoneId));
 
             }
         }
