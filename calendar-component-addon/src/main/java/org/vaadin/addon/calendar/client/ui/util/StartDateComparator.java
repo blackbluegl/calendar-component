@@ -3,7 +3,7 @@ package org.vaadin.addon.calendar.client.ui.util;
 import org.vaadin.addon.calendar.client.ui.schedule.CalendarItem;
 
 /**
- * TODO new class is undocumented
+ * A date comparator
  *
  * @author guettler
  * @since 30.06.17

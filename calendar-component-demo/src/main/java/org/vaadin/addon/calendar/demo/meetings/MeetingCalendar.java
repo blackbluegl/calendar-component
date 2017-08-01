@@ -12,7 +12,9 @@ import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.Random;
 
 
@@ -40,17 +42,14 @@ public class MeetingCalendar extends CustomComponent {
 
     }
 
-    public void setWeekDayRange(int from, int to) {
-        assert (from >= 1 && from < to && to <= 7);
-        calendar.setFirstVisibleDayOfWeek(1); // XXX reset to week
-        calendar.setLastVisibleDayOfWeek(7); // XXX reset to week
-        calendar.setFirstVisibleDayOfWeek(from);
-        calendar.setLastVisibleDayOfWeek(to);
+    public Calendar<MeetingItem> getCalendar() {
+        return calendar;
     }
 
     private void onCalendarRangeSelect(CalendarComponentEvents.RangeSelectEvent event) {
 
-        Meeting meeting = new Meeting();
+        Meeting meeting = new Meeting(
+                !event.getStart().truncatedTo(ChronoUnit.DAYS).equals(event.getEnd().truncatedTo(ChronoUnit.DAYS)));
 
         meeting.setStart(event.getStart());
         meeting.setEnd(event.getEnd());
@@ -87,12 +86,11 @@ public class MeetingCalendar extends CustomComponent {
         calendar.setItemCaptionAsHtml(true);
         calendar.setContentMode(ContentMode.HTML);
 
-        //calendar.setLocale(Locale.US);
+        calendar.setLocale(Locale.US);
         //calendar.setZoneId(ZoneId.of("America/Chicago"));
         calendar.setWeeklyCaptionProvider(date -> DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 
-        calendar.setFirstVisibleDayOfWeek(1);
-        calendar.setLastVisibleDayOfWeek(7);
+        calendar.setVisibleDayRange(1, 7);
 
 //        calendar.setStartDate(ZonedDateTime.now().plus(3, DAYS));
 //        calendar.setEndDate(ZonedDateTime.now().plus(10, DAYS));

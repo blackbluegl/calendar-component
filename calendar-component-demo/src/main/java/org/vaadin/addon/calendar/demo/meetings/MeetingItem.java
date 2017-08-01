@@ -52,7 +52,7 @@ public class MeetingItem extends BasicItem {
 
 	@Override
 	public boolean isAllDay() {
-		return false;
+		return meeting.isLongTimeEvent();
 	}
 
     @Override

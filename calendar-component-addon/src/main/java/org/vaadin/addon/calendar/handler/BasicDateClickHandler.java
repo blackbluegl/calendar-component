@@ -18,6 +18,7 @@ package org.vaadin.addon.calendar.handler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
@@ -105,12 +106,9 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
         ZonedDateTime dateTime = event.getDate().truncatedTo(ChronoUnit.DAYS);
 
-        ZonedDateTime s = event.getComponent().getfirstDayOfWeek(dateTime)
-            .plus(event.getComponent().getFirstVisibleDayOfWeek() -1, ChronoUnit.DAYS);
-
-        ZonedDateTime e = s.plus(event.getComponent().getLastVisibleDayOfWeek() -1, ChronoUnit.DAYS);
-
-        setDates(event, s, e);
+        setDates(event,
+                dateTime.with(ChronoField.DAY_OF_WEEK,event.getComponent().getFirstVisibleDayOfWeek()),
+                dateTime.with(ChronoField.DAY_OF_WEEK,event.getComponent().getLastVisibleDayOfWeek()));
     }
 
     protected void switchToMonth(CalendarComponentEvents.DateClickEvent event) {

@@ -193,7 +193,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     private Integer maxTimeInMinutes;
 
-    private Integer customFirstDayOfWeek;
+//    private Integer customFirstDayOfWeek;
 
     /**
      * A map with blocked timeslots.<br>
@@ -775,12 +775,18 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * @param firstDay
      *            the first day of the week to show, between 1 and 7
+     * @param lastDay
+     *            the first day of the week to show, between 1 and 7
      */
-    public void setFirstVisibleDayOfWeek(int firstDay) {
-        if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7 && getLastVisibleDayOfWeek() >= firstDay) {
-            this.firstDay = firstDay;
-            getState().firstVisibleDayOfWeek = firstDay;
-        }
+    public void setVisibleDayRange(int firstDay, int lastDay) {
+        assert (firstDay >= 1 && firstDay < lastDay && lastDay <= 7);
+
+        this.firstDay = firstDay;
+        this.lastDay = lastDay;
+
+        getState(false).firstVisibleDayOfWeek = firstDay;
+        getState().lastVisibleDayOfWeek = lastDay;
+
     }
 
     /**
@@ -792,29 +798,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public int getFirstVisibleDayOfWeek() {
         return firstDay;
-    }
-
-    /**
-     * <p>
-     * This method restricts the weekdays that are shown. This affects both the
-     * monthly and the weekly view. The general contract is that <b>firstDay <
-     * lastDay</b>.
-     * </p>
-     *
-     * <p>
-     * Note that this only affects the rendering process. Items are still
-     * requested by the dates set by {@link #setStartDate(ZonedDateTime)} and
-     * {@link #setEndDate(ZonedDateTime)}.
-     * </p>
-     *
-     * @param lastDay
-     *            the first day of the week to show, between 1 and 7
-     */
-    public void setLastVisibleDayOfWeek(int lastDay) {
-        if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7 && getFirstVisibleDayOfWeek() <= lastDay) {
-            this.lastDay = lastDay;
-            getState().lastVisibleDayOfWeek = lastDay;
-        }
     }
 
     /**
@@ -943,24 +926,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         } else {
             return order;
         }
-    }
-
-    /**
-     * Get the day of week by the given calendar and its locale
-     *
-     * @param calendar
-     *            The calendar to use
-     * @return
-     */
-    private static int getDayOfWeekByLocale(java.util.Calendar calendar) {
-        int fow = calendar.get(java.util.Calendar.DAY_OF_WEEK);
-
-        // monday first
-        if (calendar.getFirstDayOfWeek() == java.util.Calendar.MONDAY) {
-            fow = fow == java.util.Calendar.SUNDAY ? 7 : fow - 1;
-        }
-
-        return fow;
     }
 
     /**
@@ -1243,8 +1208,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param listenerMethod
      *            The method on the lister to call when the event is triggered
      */
-    protected void setHandler(String eventId, Class<?> eventType,
-            EventListener listener, Method listenerMethod) {
+    protected void setHandler(String eventId, Class<?> eventType, EventListener listener, Method listenerMethod) {
         if (handlers.get(eventId) != null) {
             removeListener(eventId, eventType, handlers.get(eventId));
             handlers.remove(eventId);
@@ -1696,7 +1660,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         return customAttributes;
     }
 
-    /**
+    /*
      * Allow setting first day of week independent of Locale. Set to null if you
      * want first day of week being defined by the locale
      *
@@ -1704,7 +1668,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param dayOfWeek
      *            any of java.util.Calendar.SUNDAY..java.util.Calendar.SATURDAY
      *            or null to revert to default first day of week by locale
-     */
+
     public void setFirstDayOfWeek(Integer dayOfWeek) {
 
         int minimalSupported = java.util.Calendar.SUNDAY;
@@ -1718,7 +1682,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         customFirstDayOfWeek = dayOfWeek;
         markAsDirty();
-    }
+    } */
 
     /**
      * Add a time block start index. Time steps are half hour beginning at 0

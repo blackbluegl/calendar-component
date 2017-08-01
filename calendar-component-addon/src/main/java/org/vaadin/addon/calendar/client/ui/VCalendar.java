@@ -283,14 +283,11 @@ public class VCalendar extends Composite implements VHasDropHandler {
      * @param events
      *            The items to add
      * @param drawImmediately
-     *            Should the grid be rendered immediately. (currently not in
-     *            use)
-     *
+     *            Should the grid be rendered immediately.
      */
     public void updateItemsToMonthGrid(Collection<CalendarItem> events, boolean drawImmediately) {
         for (CalendarItem e : sortItems(events)) {
-            // FIXME Why is drawImmediately not used ?????
-            addItemToMonthGrid(e, false);
+            addItemToMonthGrid(e, drawImmediately);
         }
     }
 

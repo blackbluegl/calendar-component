@@ -26,8 +26,10 @@ public class Meeting {
 
     private State state = empty;
 
-    public Meeting() {
+    private boolean longTime;
 
+    public Meeting(boolean longTime) {
+        this.longTime = longTime;
     }
 
     public String getName() {
@@ -72,6 +74,10 @@ public class Meeting {
 
     public boolean isEditable() {
         return state != State.confirmed;
+    }
+
+    public boolean isLongTimeEvent() {
+        return longTime;
     }
 
 }
