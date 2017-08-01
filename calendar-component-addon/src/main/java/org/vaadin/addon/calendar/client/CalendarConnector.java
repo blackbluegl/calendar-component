@@ -129,29 +129,39 @@ public class CalendarConnector extends AbstractComponentConnector
         getWidget().setListener((VCalendar.ItemMovedListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_MOVE)) {
                 rpc.itemMove(item.getIndex(),
-// TODO STRING FORMATTER yyyy-MM-dd-HH-mm
-                        DateUtil.formatClientSideDate(item.getStart()) + "-" + DateUtil.formatClientSideTime(item.getStartTime()));
+                            new CalDate(
+                                    item.getStartTime().getYear() + 1900,
+                                    item.getStartTime().getMonth() + 1,
+                                    item.getStartTime().getDate(),
+                                    new CalTime(
+                                            item.getStartTime().getHours(),
+                                            item.getStartTime().getMinutes(),
+                                            item.getStartTime().getSeconds()))
+                );
             }
         });
         getWidget().setListener((VCalendar.ItemResizeListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_RESIZE)) {
-                StringBuilder buffer = new StringBuilder();
-// TODO STRING FORMATTER yyyy-MM-dd-HH-mm
-                buffer.append(DateUtil.formatClientSideDate(item.getStart()));
-                buffer.append("-");
-                buffer.append(DateUtil.formatClientSideTime(item.getStartTime()));
 
-                String newStartDate = buffer.toString();
+                CalDate nStart = new CalDate(
+                        item.getStartTime().getYear() + 1900,
+                        item.getStartTime().getMonth() + 1,
+                        item.getStartTime().getDate(),
+                        new CalTime(
+                                item.getStartTime().getHours(),
+                                item.getStartTime().getMinutes(),
+                                item.getStartTime().getSeconds()));
 
-                buffer = new StringBuilder();
-// TODO STRING FORMATTER yyyy-MM-dd-HH-mm
-                buffer.append(DateUtil.formatClientSideDate(item.getEnd()));
-                buffer.append("-");
-                buffer.append(DateUtil.formatClientSideTime(item.getEndTime()));
+                CalDate nEnd = new CalDate(
+                        item.getEndTime().getYear() + 1900,
+                        item.getEndTime().getMonth() + 1,
+                        item.getEndTime().getDate(),
+                        new CalTime(
+                                item.getEndTime().getHours(),
+                                item.getEndTime().getMinutes(),
+                                item.getEndTime().getSeconds()));
 
-                String newEndDate = buffer.toString();
-
-                rpc.itemResize(item.getIndex(), newStartDate, newEndDate);
+                rpc.itemResize(item.getIndex(), nStart, nEnd);
             }
         });
         getWidget().setListener((VCalendar.ScrollListener) scrollPosition -> {

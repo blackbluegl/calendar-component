@@ -11,17 +11,24 @@ import java.io.Serializable;
 
 public class CalDate implements Serializable {
 
-    public int year;
-    public int month;
-    public int day;
+    public int y;
+    public int m;
+    public int d;
 
-    public CalTime time;
+    public CalTime t;
 
     public CalDate() { super(); }
 
     public CalDate(int year, int month, int day) {
-        this.year = year;
-        this.month = month;
-        this.day = day;
+        this.y = year;
+        this.m = month;
+        this.d = day;
+    }
+
+    public CalDate(int year, int month, int day, CalTime time) {
+        this.y = year;
+        this.m = month;
+        this.d = day;
+        this.t = time;
     }
 }

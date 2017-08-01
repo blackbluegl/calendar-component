@@ -150,7 +150,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
          * @param dateSelectionRange
          *                  The selection range
          */
-        void rangeSelected(DateRangeSelection dateSelectionRange);
+        void rangeSelected(SelectionRange dateSelectionRange);
 
     }
 

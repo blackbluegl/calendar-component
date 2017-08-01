@@ -683,9 +683,9 @@ public class DateCell extends FocusableComplexPanel
 
             if (weekgrid.getCalendar().getRangeSelectListener() != null) {
 
-                DateRangeSelection weekSelection = new DateRangeSelection();
-                weekSelection.startMinutes = startMinutes;
-                weekSelection.endMinutes = endMinutes;
+                SelectionRange weekSelection = new SelectionRange();
+                weekSelection.sMin = startMinutes;
+                weekSelection.eMin = endMinutes;
                 weekSelection.setStartDay(currentDate.getYear() + 1900,
                         currentDate.getMonth() + 1,
                         currentDate.getDate());

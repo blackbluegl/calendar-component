@@ -31,7 +31,8 @@ import org.vaadin.addon.calendar.client.CalendarEventId;
 import org.vaadin.addon.calendar.client.CalendarServerRpc;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.client.ui.schedule.DateRangeSelection;
+import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
 import org.vaadin.addon.calendar.handler.*;
 import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.item.CalendarItem;
@@ -133,8 +134,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     /** Time format that will be used in the UIDL for time. */
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_TIME_FORMAT_PATTERN);
 
-    /** Date format that will be used in the UIDL for both date and time. */
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DateConstants.CLIENT_DATE_FORMAT_PATTERN + "-" + DateConstants.CLIENT_TIME_FORMAT_PATTERN);
     /** Date format that will be used in the UIDL for both date and time. */
     private DateTimeFormatter actionDateTimeFormatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_FORMAT_PATTERN);
 
@@ -1511,54 +1510,66 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private class CalendarServerRpcImpl implements CalendarServerRpc {
 
         @Override
-        public void itemMove(int itemIndex, String newDate) {
+        public void itemResize(int itemIndex, CalDate newStartDate, CalDate newEndDate) {
 
             if (!isClientChangeAllowed()) {
                 return;
             }
 
-            if (newDate != null) {
+            fireItemResize(itemIndex,
+                    ZonedDateTime.of(
+                            newStartDate.y, newStartDate.m, newStartDate.d,
+                            newStartDate.t.h, newStartDate.t.m, newStartDate.t.s, 0, zoneId),
+                    ZonedDateTime.of(
+                            newEndDate.y, newEndDate.m, newEndDate.d,
+                            newEndDate.t.h, newEndDate.t.m, newEndDate.t.s, 0, zoneId));
+        }
 
-                LocalDateTime dateTime = LocalDateTime.from(dateTimeFormatter.parse(newDate));
+        @Override
+        public void itemMove(int itemIndex, CalDate newDate) {
 
-                if (itemIndex >= 0 && itemIndex < items.size() && items.get(itemIndex) != null) {
-                    fireItemMove(itemIndex, ZonedDateTime.of(dateTime, zoneId));
-                }
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+
+            if (itemIndex >= 0 && itemIndex < items.size() && items.get(itemIndex) != null) {
+                fireItemMove(itemIndex, ZonedDateTime.of(
+                        newDate.y, newDate.m, newDate.d, newDate.t.h, newDate.t.m, newDate.t.s, 0, zoneId));
             }
         }
 
         @Override
-        public void rangeSelect(DateRangeSelection dateRangeSelection) {
+        public void rangeSelect(SelectionRange selectionRange) {
 
             if (!isClientChangeAllowed()) {
                 return;
             }
 
             // MounthSelection
-            if (dateRangeSelection.startDay != null && dateRangeSelection.endDay != null) {
+            if (selectionRange.s != null && selectionRange.e != null) {
 
                 fireRangeSelect(
                         ZonedDateTime.of(
-                                dateRangeSelection.startDay.year,
-                                dateRangeSelection.startDay.month,
-                                dateRangeSelection.startDay.day,
+                                selectionRange.s.y,
+                                selectionRange.s.m,
+                                selectionRange.s.d,
                                 0,0,0,0, zoneId),
                         ZonedDateTime.of(
-                                dateRangeSelection.endDay.year,
-                                dateRangeSelection.endDay.month,
-                                dateRangeSelection.endDay.day,
+                                selectionRange.e.y,
+                                selectionRange.e.m,
+                                selectionRange.e.d,
                                 23, 59, 59, 999999, zoneId));
 
-            } else if (dateRangeSelection.startDay != null) {
+            } else if (selectionRange.s != null) {
 
                 ZonedDateTime dateTime = ZonedDateTime.of(
-                        dateRangeSelection.startDay.year,
-                        dateRangeSelection.startDay.month,
-                        dateRangeSelection.startDay.day,
+                        selectionRange.s.y,
+                        selectionRange.s.m,
+                        selectionRange.s.d,
                         0,0,0,0, zoneId);
 
-                ZonedDateTime start = ZonedDateTime.from(dateTime.plus(dateRangeSelection.startMinutes, ChronoUnit.MINUTES));
-                ZonedDateTime end   = ZonedDateTime.from(dateTime.plus(dateRangeSelection.endMinutes, ChronoUnit.MINUTES));
+                ZonedDateTime start = ZonedDateTime.from(dateTime.plus(selectionRange.sMin, ChronoUnit.MINUTES));
+                ZonedDateTime end   = ZonedDateTime.from(dateTime.plus(selectionRange.eMin, ChronoUnit.MINUTES));
 
                 fireRangeSelect(start, end);
 
@@ -1606,26 +1617,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             if (itemIndex >= 0 && itemIndex < items.size()
                     && items.get(itemIndex) != null) {
                 fireItemClick(itemIndex);
-            }
-        }
-
-        @Override
-        public void itemResize(int itemIndex, String newStartDate, String newEndDate) {
-
-            if (!isClientChangeAllowed()) {
-                return;
-            }
-
-            if (newStartDate != null && !"".equals(newStartDate)
-                    && newEndDate != null && !"".equals(newEndDate)) {
-
-                LocalDateTime newStartTime = LocalDateTime.from(dateTimeFormatter.parse(newStartDate));
-                LocalDateTime newEndTime = LocalDateTime.from(dateTimeFormatter.parse(newEndDate));
-
-                fireItemResize(itemIndex,
-                        ZonedDateTime.of(newStartTime, zoneId),
-                        ZonedDateTime.of(newEndTime, zoneId));
-
             }
         }
 

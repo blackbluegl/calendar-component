@@ -11,15 +11,15 @@ import java.io.Serializable;
 
 public class CalTime implements Serializable {
 
-    public int hour;
-    public int minute;
-    public int second;
+    public int h;
+    public int m;
+    public int s;
 
     public CalTime() { super(); }
 
     public CalTime(int hour, int minute, int second) {
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second;
+        this.h = hour;
+        this.m = minute;
+        this.s = second;
     }
 }
