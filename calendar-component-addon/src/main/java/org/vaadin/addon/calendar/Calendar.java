@@ -622,7 +622,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
             final CalendarState.Day day = new CalendarState.Day();
 
-            day.date = DATE_FORMAT.format(dateToShow);
+            day.date = new CalDate(dateToShow.getYear(), dateToShow.getMonthValue(), dateToShow.getDayOfMonth());
 
             day.localizedDateFormat = DateTimeFormatter.ofPattern(
                     weeklyCaptionFormat == null ? "yyyy/MM/dd"

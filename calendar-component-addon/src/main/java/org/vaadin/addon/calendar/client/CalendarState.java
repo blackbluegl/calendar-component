@@ -69,7 +69,7 @@ public class CalendarState extends AbstractComponentState {
     }
 
     public static class Day implements java.io.Serializable {
-        public String date;
+        public CalDate date;
         public String localizedDateFormat;
         public int dayOfWeek;
         public int week;

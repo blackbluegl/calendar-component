@@ -26,7 +26,6 @@ import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 import java.util.Date;
-import java.util.Iterator;
 
 /**
  *
@@ -158,9 +157,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     private void updateDayLabelSizedStyleNames() {
-        Iterator<Widget> it = iterator();
-        while (it.hasNext()) {
-            updateWidgetSizedStyleName(it.next());
+        for (Widget widget : this) {
+            updateWidgetSizedStyleName(widget);
         }
     }
 

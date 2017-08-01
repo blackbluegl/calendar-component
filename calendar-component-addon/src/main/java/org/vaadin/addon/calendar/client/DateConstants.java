@@ -32,7 +32,7 @@ public class DateConstants implements Serializable {
 
     public static final String TIME_FORMAT_PATTERN = "HH:mm:ss";
     public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-    public static final String ACTION_DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String ACTION_DATE_TIME_FORMAT_PATTERN = DATE_FORMAT_PATTERN + " " + TIME_FORMAT_PATTERN;
 
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
@@ -43,6 +43,10 @@ public class DateConstants implements Serializable {
     public static final int HOURINMINUTES = 60;
 
     public static Date toClientDate(CalDate date) {
+        return new Date(date.y -1900, date.m -1, date.d, 0, 0, 0);
+    }
+
+    public static Date toClientDateTime(CalDate date) {
         return new Date(date.y -1900, date.m -1, date.d, date.t.h, date.t.m, date.t.s);
     }
 

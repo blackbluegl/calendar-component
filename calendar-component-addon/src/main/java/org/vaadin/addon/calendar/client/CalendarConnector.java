@@ -370,7 +370,7 @@ public class CalendarConnector extends AbstractComponentConnector
                                  List<CalendarState.Item> items) {
         CalendarState state = getState();
         getWidget().updateMonthView(state.firstDayOfWeek,
-                DateConstants.toClientDate(state.now),
+                DateConstants.toClientDateTime(state.now),
                 days.size(),
                 calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days));
@@ -381,7 +381,7 @@ public class CalendarConnector extends AbstractComponentConnector
         CalendarState state = getState();
         getWidget().updateWeekView(
                 state.scroll,
-                DateConstants.toClientDate(state.now),
+                DateConstants.toClientDateTime(state.now),
                 state.firstDayOfWeek,
                 calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days)
@@ -599,7 +599,8 @@ public class CalendarConnector extends AbstractComponentConnector
         List<CalendarDay> list = new ArrayList<>(days.size());
         for (CalendarState.Day day : days) {
             CalendarDay d = new CalendarDay(
-                    VCalendar.DATE_FORMAT.parse(day.date), day.localizedDateFormat, day.dayOfWeek, day.week, day.yearOfWeek, day.blockedSlots);
+                    DateConstants.toClientDate(day.date),
+                    day.localizedDateFormat, day.dayOfWeek, day.week, day.yearOfWeek, day.blockedSlots);
             list.add(d);
         }
         return list;
