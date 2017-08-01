@@ -15,8 +15,8 @@
  */
 package org.vaadin.addon.calendar.client;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.client.ui.Action;
+import org.vaadin.addon.calendar.client.ui.VCalendar;
 import org.vaadin.addon.calendar.client.ui.schedule.CalendarItem;
 
 import java.util.Date;
@@ -38,9 +38,6 @@ public class VCalendarAction extends Action {
     private Date actionEndDate;
 
     private CalendarItem event;
-
-    private final DateTimeFormat dateformat_datetime = DateTimeFormat
-            .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
 
     /**
      *
@@ -74,8 +71,8 @@ public class VCalendarAction extends Action {
      */
     @Override
     public void execute() {
-        String startDate = dateformat_datetime.format(actionStartDate);
-        String endDate = dateformat_datetime.format(actionEndDate);
+        String startDate = VCalendar.ACTION_DATE_TIME_FORMAT.format(actionStartDate);
+        String endDate = VCalendar.ACTION_DATE_TIME_FORMAT.format(actionEndDate);
 
         if (event == null) {
             rpc.actionOnEmptyCell(actionKey.split("-")[0], startDate, endDate);

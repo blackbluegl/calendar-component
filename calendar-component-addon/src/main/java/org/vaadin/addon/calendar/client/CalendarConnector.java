@@ -17,7 +17,6 @@ package org.vaadin.addon.calendar.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -513,9 +512,7 @@ public class CalendarConnector extends AbstractComponentConnector
      */
     public Date getActionStartDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_s");
-        DateTimeFormat formatter = DateTimeFormat
-                .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-        return formatter.parse(dateStr);
+        return VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateStr);
     }
 
     /**
@@ -527,9 +524,7 @@ public class CalendarConnector extends AbstractComponentConnector
      */
     public Date getActionEndDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_e");
-        DateTimeFormat formatter = DateTimeFormat
-                .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-        return formatter.parse(dateStr);
+        return VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateStr);
     }
 
     /**
@@ -585,11 +580,11 @@ public class CalendarConnector extends AbstractComponentConnector
             calendarItem.setAllDay(item.allDay);
             calendarItem.setCaption(item.caption);
             calendarItem.setDescription(item.description);
-            calendarItem.setStart(VCalendar.DATEFORMAT_DATE.parse(dateFrom));
-            calendarItem.setEnd(VCalendar.DATEFORMAT_DATE.parse(dateTo));
+            calendarItem.setStart(VCalendar.DATE_FORMAT.parse(dateFrom));
+            calendarItem.setEnd(VCalendar.DATE_FORMAT.parse(dateTo));
             calendarItem.setFormat24h(format24h);
-            calendarItem.setStartTime(VCalendar.DATEFORMAT_DATETIME.parse(dateFrom + " " + timeFrom));
-            calendarItem.setEndTime(VCalendar.DATEFORMAT_DATETIME.parse(dateTo + " " + timeTo));
+            calendarItem.setStartTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateFrom + " " + timeFrom));
+            calendarItem.setEndTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateTo + " " + timeTo));
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
             calendarItem.setMoveable(item.moveable);

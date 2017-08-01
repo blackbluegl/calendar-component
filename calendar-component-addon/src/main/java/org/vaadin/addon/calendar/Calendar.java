@@ -130,13 +130,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
 
     /** Date format that will be used in the UIDL for dates. */
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(DateConstants.CLIENT_DATE_FORMAT_PATTERN);
+    private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(DateConstants.DATE_FORMAT_PATTERN);
 
     /** Time format that will be used in the UIDL for time. */
-    private DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_TIME_FORMAT_PATTERN);
+    private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.TIME_FORMAT_PATTERN);
 
-    /** Date format that will be used in the UIDL for both date and time. */
-    private DateTimeFormatter actionDateTimeFormatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_FORMAT_PATTERN);
+    private final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
 
     /**
      * Week view's scroll position. Client sends updates to this value so that
@@ -477,11 +476,11 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 item.caption = calItem.getCaption() == null ? "" : calItem.getCaption();
 
 // TODO STRING FORMATTER yyyy-MM-dd
-                item.dateFrom = dateFormatter.format(calItem.getStart());
-                item.dateTo = dateFormatter.format(calItem.getEnd());
+                item.dateFrom = DATE_FORMAT.format(calItem.getStart());
+                item.dateTo = DATE_FORMAT.format(calItem.getEnd());
 // TODO STRING FORMATTER HH:mm:ss
-                item.timeFrom = timeFormatter.format(calItem.getStart());
-                item.timeTo = timeFormatter.format(calItem.getEnd());
+                item.timeFrom = TIME_FORMAT.format(calItem.getStart());
+                item.timeTo = TIME_FORMAT.format(calItem.getEnd());
 
                 item.description = calItem.getDescription() == null ? "" : calItem.getDescription();
                 item.styleName = calItem.getStyleName() == null ? "" : calItem.getStyleName();
@@ -623,7 +622,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
             final CalendarState.Day day = new CalendarState.Day();
 
-            day.date = dateFormatter.format(dateToShow);
+            day.date = DATE_FORMAT.format(dateToShow);
 
             day.localizedDateFormat = DateTimeFormatter.ofPattern(
                     weeklyCaptionFormat == null ? "yyyy/MM/dd"
@@ -714,8 +713,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         List<CalendarState.Action> calendarActions = new ArrayList<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-
         for (Entry<CalendarDateRange, Set<Action>> entry : actionMap.entrySet()) {
             CalendarDateRange range = entry.getKey();
             Set<Action> actions = entry.getValue();
@@ -726,8 +723,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 calendarAction.caption = action.getCaption();
                 setResource(key, action.getIcon());
                 calendarAction.iconKey = key;
-                calendarAction.startDate = formatter.format(range.getStart());
-                calendarAction.endDate = formatter.format(range.getEnd());
+                calendarAction.startDate = ACTION_DATE_TIME_FORMAT.format(range.getStart());
+                calendarAction.endDate = ACTION_DATE_TIME_FORMAT.format(range.getEnd());
                 calendarActions.add(calendarAction);
             }
         }
@@ -1593,7 +1590,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         public void dateClick(String dateUIDL) {
             if (dateUIDL != null && dateUIDL.length() > 6) {
 
-                LocalDate date = LocalDate.from(dateFormatter.parse(dateUIDL));
+                LocalDate date = LocalDate.from(DATE_FORMAT.parse(dateUIDL));
 
                 fireDateClick(ZonedDateTime.of(date, LocalTime.now(), zoneId));
             }
@@ -1633,18 +1630,19 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         public void actionOnEmptyCell(String actionKey, String startDate, String endDate) {
 
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
+
+            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
             formatter.setTimeZone(getTimeZone());
 
             try {
+
                 Date start = formatter.parse(startDate);
                 for (Action.Handler ah : actionHandlers) {
                     ah.handleAction(action, Calendar.this, start);
                 }
 
             } catch (ParseException e) {
-                getLogger().log(Level.WARNING,
-                        "Could not parse action date string");
+                getLogger().log(Level.WARNING,"Could not parse action date string");
             }
 
         }
@@ -1653,7 +1651,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         public void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex) {
 
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
+            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
             formatter.setTimeZone(getTimeZone());
 
             for (Action.Handler ah : actionHandlers) {
@@ -1746,10 +1744,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                     currentTimeFormat == TimeFormat.Format12H ? "12h" : "24h");
         }
         if (startDate != null) {
-            design.attr("start-date", dateFormatter.format(getStartDate()));
+            design.attr("start-date", DATE_FORMAT.format(getStartDate()));
         }
         if (endDate != null) {
-            design.attr("end-date", dateFormatter.format(getEndDate()));
+            design.attr("end-date", DATE_FORMAT.format(getEndDate()));
         }
         if (!getTimeZone().equals(TimeZone.getDefault())) {
             design.attr("time-zone", getTimeZone().getID());

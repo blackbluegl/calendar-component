@@ -412,7 +412,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
             getMonthGrid().setSelectionReady();
 
         } else if (w instanceof Label && labelMouseDown) {
-            String clickedDate = VCalendar.DATEFORMAT_DATE.format(date);
+            String clickedDate = VCalendar.DATE_FORMAT.format(date);
             if (calendar.getDateClickListener() != null) {
                 calendar.getDateClickListener().dateClick(clickedDate);
             }

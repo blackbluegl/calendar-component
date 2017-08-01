@@ -30,10 +30,9 @@ import java.util.Date;
 @SuppressWarnings({"deprecation"})
 public class DateConstants implements Serializable {
 
-    public static final String ACTION_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    public static final String ACTION_TIME_FORMAT_PATTERN = "HH:mm:ss";
-
-    public static final String CLIENT_DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+    public static final String TIME_FORMAT_PATTERN = "HH:mm:ss";
+    public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+    public static final String ACTION_DATE_TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;

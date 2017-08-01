@@ -69,8 +69,8 @@ public class VCalendar extends Composite implements VHasDropHandler {
     private int intWidth = 0;
     private int intHeight = 0;
 
-    public static final DateTimeFormat DATEFORMAT_DATETIME = DateTimeFormat.getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-    public static final DateTimeFormat DATEFORMAT_DATE = DateTimeFormat.getFormat(DateConstants.CLIENT_DATE_FORMAT_PATTERN);
+    public static final DateTimeFormat ACTION_DATE_TIME_FORMAT = DateTimeFormat.getFormat(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
+    public static final DateTimeFormat DATE_FORMAT = DateTimeFormat.getFormat(DateConstants.DATE_FORMAT_PATTERN);
 
     protected final DateTimeFormat time12format_date = DateTimeFormat.getFormat("h:mm a");
     protected final DateTimeFormat time24format_date = DateTimeFormat.getFormat("HH:mm");
@@ -518,7 +518,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
             String localized_date_format = day.getLocalizedDateFormat();
 
             String dateStr = day.getDate();
-            Date date = DATEFORMAT_DATE.parse(dateStr);
+            Date date = DATE_FORMAT.parse(dateStr);
 
             int dayOfWeek = day.getDayOfWeek();
 
@@ -571,12 +571,12 @@ public class VCalendar extends Composite implements VHasDropHandler {
         boolean lastDayFound = false;
 
         for (CalendarDay day : days) {
-            String date = day.getDate();
-            Date d = DATEFORMAT_DATE.parse(date);
+
+            Date date = DATE_FORMAT.parse(day.getDate());
+
             int dayOfWeek = day.getDayOfWeek();
             int week = day.getWeek();
-
-            int dayOfMonth = d.getDate();
+            int dayOfMonth = date.getDate();
 
             // reset at start of each month
             if (dayOfMonth == 1) {
@@ -587,19 +587,20 @@ public class VCalendar extends Composite implements VHasDropHandler {
                 firstDayFound = true;
             }
 
-            if (dayOfWeek < getFirstDayNumber()
-                    || dayOfWeek > getLastDayNumber()) {
+            if (dayOfWeek < getFirstDayNumber() || dayOfWeek > getLastDayNumber()) {
                 continue;
             }
+
             int y = (pos / columns);
             int x = pos - (y * columns);
             if (x == 0 && daysCount > 7) {
                 // Add week to weekToolbar for navigation
                 weekToolbar.addWeek(week, day.getYearOfWeek());
             }
+
             final SimpleDayCell cell = new SimpleDayCell(this, y, x);
             cell.setMonthGrid(monthGrid);
-            cell.setDate(d);
+            cell.setDate(date);
             cell.addDomHandler(event -> {
                 if (mouseEventListener != null) {
                     event.preventDefault();
@@ -619,8 +620,8 @@ public class VCalendar extends Composite implements VHasDropHandler {
                 monthNameDrawn = true;
             }
 
-            if (today.getDate() == dayOfMonth && today.getYear() == d.getYear()
-                    && today.getMonth() == d.getMonth()) {
+            if (today.getDate() == dayOfMonth && today.getYear() == date.getYear()
+                    && today.getMonth() == date.getMonth()) {
                 cell.setToday(true);
 
             }
