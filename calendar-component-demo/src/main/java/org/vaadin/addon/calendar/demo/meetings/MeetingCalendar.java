@@ -11,10 +11,8 @@ import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
 import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Random;
 
 
@@ -54,8 +52,8 @@ public class MeetingCalendar extends CustomComponent {
 
         Meeting meeting = new Meeting();
 
-        meeting.setStart(ZonedDateTime.ofInstant(event.getStart().toInstant(), ZoneId.systemDefault()));
-        meeting.setEnd(ZonedDateTime.ofInstant(event.getEnd().toInstant(), ZoneId.systemDefault()));
+        meeting.setStart(event.getStart());
+        meeting.setEnd(event.getEnd());
 
         meeting.setName("A Name");
         meeting.setDetails("A Detail");
@@ -82,13 +80,16 @@ public class MeetingCalendar extends CustomComponent {
         calendar = new Calendar<>(eventProvider);
 
         calendar.addStyleName("meetings");
-        calendar.setLocale(Locale.getDefault());
         calendar.setWidth(100.0f, Unit.PERCENTAGE);
         calendar.setHeight(100.0f, Unit.PERCENTAGE);
-        calendar.setItemCaptionAsHtml(true);
         calendar.setResponsive(true);
 
+        calendar.setItemCaptionAsHtml(true);
         calendar.setContentMode(ContentMode.HTML);
+
+        //calendar.setLocale(Locale.US);
+        //calendar.setZoneId(ZoneId.of("America/Chicago"));
+        calendar.setWeeklyCaptionProvider(date -> DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 
         calendar.setFirstVisibleDayOfWeek(1);
         calendar.setLastVisibleDayOfWeek(7);
@@ -103,14 +104,13 @@ public class MeetingCalendar extends CustomComponent {
 
     private void setupBlockedTimeSlots() {
 
-        java.util.Calendar cal = (java.util.Calendar)calendar.getInternalCalendar().clone();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
         cal.clear(java.util.Calendar.MINUTE);
         cal.clear(java.util.Calendar.SECOND);
         cal.clear(java.util.Calendar.MILLISECOND);
 
         GregorianCalendar bcal = new GregorianCalendar(UI.getCurrent().getLocale());
-
         bcal.clear();
 
         long start = bcal.getTimeInMillis();

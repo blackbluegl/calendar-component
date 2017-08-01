@@ -39,10 +39,7 @@ import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.item.CalendarItem;
 import org.vaadin.addon.calendar.item.CalendarItemProvider;
 import org.vaadin.addon.calendar.item.EditableCalendarItem;
-import org.vaadin.addon.calendar.ui.CalendarComponentEvent;
-import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
-import org.vaadin.addon.calendar.ui.CalendarDateRange;
-import org.vaadin.addon.calendar.ui.CalendarTargetDetails;
+import org.vaadin.addon.calendar.ui.*;
 
 import java.lang.reflect.Method;
 import java.text.DateFormatSymbols;
@@ -98,19 +95,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
      */
-    @Deprecated
     public enum TimeFormat {
         Format12H(), Format24H()
     }
 
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
-
-    /** Internal calendar data source. */
-    protected java.util.Calendar currentCalendar = java.util.Calendar.getInstance();
-
-    /** Defines the component's active time zone. */
-    protected TimeZone timezone;
 
     /** Defines the component's active time zone. */
     protected ZoneId zoneId = ZoneId.systemDefault();
@@ -136,7 +126,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     /** Time format that will be used in the UIDL for time. */
     private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.TIME_FORMAT_PATTERN);
 
-    private final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
+    /** Time format that will be used in the UIDL for time. */
+    protected final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
 
     /**
      * Week view's scroll position. Client sends updates to this value so that
@@ -144,8 +135,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     private int scrollTop = 0;
 
-    /** Caption format for the weekly view */
-    private String weeklyCaptionFormat = null;
+    /** Caption format provuder for the weekly view */
+    private WeeklyCaptionProvider weeklyCaptionFormatProvider = date -> DateTimeFormatter.ofPattern("yyyy/MM/dd", getLocale()).format(date);
 
     /** Map from event ids to event handlers */
     private final Map<String, EventListener> handlers;
@@ -282,7 +273,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         setCaption(caption);
         handlers = new HashMap<>();
         setDefaultHandlers();
-        currentCalendar.setTime(new Date());
         setDataProvider(dataProvider);
         getState().firstDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
@@ -304,8 +294,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     @Override
     public void beforeClientResponse(boolean initial) {
         super.beforeClientResponse(initial);
-
-        initCalendarWithLocale();
 
         getState().format24H = TimeFormat.Format24H == getTimeFormat();
         setupDaysAndActions();
@@ -351,7 +339,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     public ZonedDateTime getStartDate() {
         if (startDate == null) {
             // A new datetime with components zone id
-            startDate = ZonedDateTime.now(zoneId)
+            startDate = ZonedDateTime.now(getZoneId())
                     // and first day in week
                     .with(ChronoField.DAY_OF_WEEK, 1)
                     // with a time of 00:00:00:000
@@ -386,7 +374,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public ZonedDateTime getEndDate() {
         if (endDate == null) {
-            endDate = ZonedDateTime.now(zoneId)
+            endDate = ZonedDateTime.now(getZoneId())
                     // and last day of week
                     .with(ChronoField.DAY_OF_WEEK, 7)
                     // with a time of 23:59:59.999999999
@@ -430,24 +418,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     @Override
     public void setLocale(Locale newLocale) {
         super.setLocale(newLocale);
-        initCalendarWithLocale();
-    }
-
-    /**
-     * Initialize the java calendar instance with the current locale and
-     * timezone.
-     */
-    private void initCalendarWithLocale() {
-        if (timezone != null) {
-            currentCalendar = java.util.Calendar.getInstance(timezone, getLocale());
-
-        } else {
-            currentCalendar = java.util.Calendar.getInstance(getLocale());
-        }
-
-        if (customFirstDayOfWeek != null) {
-            currentCalendar.setFirstDayOfWeek(customFirstDayOfWeek);
-        }
+        markAsDirty();
     }
 
     private void setupCalendarItems() {
@@ -462,8 +433,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         ZonedDateTime firstDateToShow = expandStartDate(startDate, durationInDays > 7);
         ZonedDateTime lastDateToShow = expandEndDate(endDate, durationInDays > 7);
-
-        currentCalendar.setTime(Date.from(firstDateToShow.toInstant()));
 
         items = getDataProvider().getItems(firstDateToShow, lastDateToShow);
         cacheMinMaxTimeOfDay(items);
@@ -564,12 +533,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
     private void setupDaysAndActions() {
 
-        // Make sure we have a up-to-date locale
-        initCalendarWithLocale();
-
         CalendarState state = getState();
 
-        state.firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
+        state.firstDayOfWeek = java.util.Calendar.getInstance(getLocale()).getFirstDayOfWeek();
 
         // If only one is null, throw exception
         // If both are null, set defaults
@@ -602,16 +568,13 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         state.monthNames = getMonthNamesShort();
 
         // Show "now"-marker in browser within given timezone.
-
-        ZonedDateTime now = ZonedDateTime.now(zoneId);
-
+        final ZonedDateTime now = ZonedDateTime.now(getZoneId());
         state.now = new CalDate(now.getYear(), now.getMonthValue(), now.getDayOfMonth(),
                 new CalTime(now.getHour(), now.getMinute(), now.getSecond()));
 
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't
         // support date localization properly.
-
         ZonedDateTime firstDateToShow = expandStartDate(startDate, monthView);
         ZonedDateTime lastDateToShow = expandEndDate(endDate, monthView);
         ZonedDateTime dateToShow = firstDateToShow;
@@ -625,9 +588,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
             day.date = new CalDate(dateToShow.getYear(), dateToShow.getMonthValue(), dateToShow.getDayOfMonth());
 
-            day.localizedDateFormat = DateTimeFormatter.ofPattern(
-                    weeklyCaptionFormat == null ? "yyyy/MM/dd"
-                            : weeklyCaptionFormat, getLocale()).format(dateToShow);
+            day.localizedDateFormat = weeklyCaptionFormatProvider.captionFrom(dateToShow);
 
             day.dayOfWeek = dateToShow.getDayOfWeek().getValue();
             day.week = (int) WeekFields.of(getLocale()).weekOfYear().getFrom(dateToShow);
@@ -772,16 +733,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     /**
-     * @deprecated
      * Returns a time zone that is currently used by this component.
      *
      * @return Component's Time zone
      */
-    public TimeZone getTimeZone() {
-        if (timezone == null) {
-            return currentCalendar.getTimeZone();
-        }
-        return timezone;
+    public ZoneId getZoneId() {
+        return zoneId;
     }
 
     /**
@@ -791,26 +748,16 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param zone
      *            Time zone to use
      */
-    public void setTimeZone(TimeZone zone) {
-        timezone = zone;
-        if (!currentCalendar.getTimeZone().equals(zone)) {
-            if (zone == null) {
-                zone = TimeZone.getDefault();
-            }
-            currentCalendar.setTimeZone(zone);
+    public void setZoneId(ZoneId zone) {
+
+        if (!zoneId.equals(zone)) {
+            zoneId = zone;
+
+            setStartDate(ZonedDateTime.ofInstant(getStartDate().toInstant(), zone));
+            setEndDate(ZonedDateTime.ofInstant(getEndDate().toInstant(), zone));
+
             markAsDirty();
         }
-    }
-
-    /**
-     * Get the internally used Calendar instance. This is the currently used
-     * instance of {@link java.util.Calendar} but is bound to change during the
-     * lifetime of the component.
-     *
-     * @return the currently used java calendar
-     */
-    public java.util.Calendar getInternalCalendar() {
-        return currentCalendar;
     }
 
     /**
@@ -947,25 +894,24 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     /**
-     * Gets the date caption format for the weekly view.
+     * Gets the custom date caption provider for the weekly view.
      *
-     * @return The pattern used in caption of dates in weekly view.
+     * @return The custom date caption provider for the weekly view.
      */
-    public String getWeeklyCaptionFormat() {
-        return weeklyCaptionFormat;
+    public WeeklyCaptionProvider getWeeklyCaptionProvider() {
+        return weeklyCaptionFormatProvider;
     }
 
     /**
-     * Sets custom date format for the weekly view. This is the caption of the
+     * Sets custom date caption provider for the weekly view. This is the caption of the
      * date. Format could be like "mmm MM/dd".
      *
-     * @param dateFormatPattern
-     *            The date caption pattern.
+     * @param captionProvider
+     *            The caption provider.
      */
-    public void setWeeklyCaptionFormat(String dateFormatPattern) {
-        if (weeklyCaptionFormat == null && dateFormatPattern != null
-                || weeklyCaptionFormat != null && !weeklyCaptionFormat.equals(dateFormatPattern)) {
-            weeklyCaptionFormat = dateFormatPattern;
+    public void setWeeklyCaptionProvider(WeeklyCaptionProvider captionProvider) {
+        if (captionProvider != null) {
+            weeklyCaptionFormatProvider = captionProvider;
             markAsDirty();
         }
     }
@@ -1390,19 +1336,20 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             int slotIndex = (Integer) clientVariables.get("dropSlotIndex");
             int dayIndex = (Integer) clientVariables.get("dropDayIndex");
 
-            currentCalendar.setTime(Date.from(startDate.with(LocalTime.MIN).toInstant()));
-            currentCalendar.add(java.util.Calendar.DATE, dayIndex);
+            ZonedDateTime dropTime = startDate
+                    .with(LocalTime.MIN)
+                    .plus(dayIndex, ChronoUnit.DAYS)
+                    .plus(slotIndex * 30, ChronoUnit.MINUTES);
 
-            // change this if slot length is modified
-            currentCalendar.add(java.util.Calendar.MINUTE, slotIndex * 30);
-
-            serverVariables.put("dropTime", currentCalendar.getTime());
+            serverVariables.put("dropTime", dropTime.toEpochSecond() * 1000);
 
         } else {
             int dayIndex = (Integer) clientVariables.get("dropDayIndex");
-            currentCalendar.setTime(Date.from(expandStartDate(startDate, true).toInstant()));
-            currentCalendar.add(java.util.Calendar.DATE, dayIndex);
-            serverVariables.put("dropDay", currentCalendar.getTime());
+
+            ZonedDateTime dropTime = expandStartDate(startDate, true)
+                    .plus(dayIndex, ChronoUnit.DAYS);
+
+            serverVariables.put("dropDay", dropTime.toEpochSecond() * 1000);
         }
         serverVariables.put("mouseEvent", clientVariables.get("mouseEvent"));
 
@@ -1521,10 +1468,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             fireItemResize(itemIndex,
                     ZonedDateTime.of(
                             newStartDate.y, newStartDate.m, newStartDate.d,
-                            newStartDate.t.h, newStartDate.t.m, newStartDate.t.s, 0, zoneId),
+                            newStartDate.t.h, newStartDate.t.m, newStartDate.t.s, 0, getZoneId()),
                     ZonedDateTime.of(
                             newEndDate.y, newEndDate.m, newEndDate.d,
-                            newEndDate.t.h, newEndDate.t.m, newEndDate.t.s, 0, zoneId));
+                            newEndDate.t.h, newEndDate.t.m, newEndDate.t.s, 0, getZoneId()));
         }
 
         @Override
@@ -1536,7 +1483,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
             if (itemIndex >= 0 && itemIndex < items.size() && items.get(itemIndex) != null) {
                 fireItemMove(itemIndex, ZonedDateTime.of(
-                        newDate.y, newDate.m, newDate.d, newDate.t.h, newDate.t.m, newDate.t.s, 0, zoneId));
+                        newDate.y, newDate.m, newDate.d, newDate.t.h, newDate.t.m, newDate.t.s, 0, getZoneId()));
             }
         }
 
@@ -1555,12 +1502,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                                 selectionRange.s.y,
                                 selectionRange.s.m,
                                 selectionRange.s.d,
-                                0,0,0,0, zoneId),
+                                0,0,0,0, getZoneId()),
                         ZonedDateTime.of(
                                 selectionRange.e.y,
                                 selectionRange.e.m,
                                 selectionRange.e.d,
-                                23, 59, 59, 999999, zoneId));
+                                23, 59, 59, 999999, getZoneId()));
 
             } else if (selectionRange.s != null) {
 
@@ -1568,7 +1515,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                         selectionRange.s.y,
                         selectionRange.s.m,
                         selectionRange.s.d,
-                        0,0,0,0, zoneId);
+                        0,0,0,0, getZoneId());
 
                 ZonedDateTime start = ZonedDateTime.from(dateTime.plus(selectionRange.sMin, ChronoUnit.MINUTES));
                 ZonedDateTime end   = ZonedDateTime.from(dateTime.plus(selectionRange.eMin, ChronoUnit.MINUTES));
@@ -1590,7 +1537,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         @Override
         public void dateClick(CalDate date) {
-            fireDateClick(ZonedDateTime.of(date.y, date.m, date.d, 0,0,0,0, zoneId));
+            fireDateClick(ZonedDateTime.of(date.y, date.m, date.d, 0,0,0,0, getZoneId()));
         }
 
         @Override
@@ -1631,7 +1578,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             for (Action.Handler ah : actionHandlers) {
                 ah.handleAction(action, Calendar.this,
                         ZonedDateTime.of(startDate.y, startDate.m, startDate.d,
-                                startDate.t.h, startDate.t.m, startDate.t.s, 0, zoneId));
+                                startDate.t.h, startDate.t.m, startDate.t.s, 0, getZoneId()));
             }
 
         }
@@ -1700,8 +1647,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         ZoneId zoneId = ZoneId.systemDefault();
 
         if (design.hasAttr("time-zone")) {
-            zoneId = TimeZone.getTimeZone(DesignAttributeHandler.readAttribute("end-date", attr, String.class))
-                    .toZoneId();
+            zoneId = ZoneId.of(DesignAttributeHandler.readAttribute("end-date", attr, String.class));
         }
 
         if (design.hasAttr("time-format")) {
@@ -1736,8 +1682,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         if (endDate != null) {
             design.attr("end-date", DATE_FORMAT.format(getEndDate()));
         }
-        if (!getTimeZone().equals(TimeZone.getDefault())) {
-            design.attr("time-zone", getTimeZone().getID());
+        if (!getZoneId().equals(ZoneId.systemDefault())) {
+            design.attr("time-zone", getZoneId().getId());
         }
     }
 

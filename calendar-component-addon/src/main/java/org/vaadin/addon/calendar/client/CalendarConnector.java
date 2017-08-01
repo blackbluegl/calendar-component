@@ -454,8 +454,7 @@ public class CalendarConnector extends AbstractComponentConnector
         }
 
         for (CalendarState.Action action : actions) {
-            String id = action.actionKey + "-" + action.startDate + "-"
-                    + action.endDate;
+            String id = action.actionKey + "-" + action.startDate + "-" + action.endDate;
             actionMap.put(id + "_k", action.actionKey);
             actionMap.put(id + "_c", action.caption);
             actionMap.put(id + "_s", action.startDate);

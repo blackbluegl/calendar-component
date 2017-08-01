@@ -17,10 +17,8 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
@@ -69,24 +67,6 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
             switchToDay(event);
         }
-    }
-
-    /**
-     * @deprecated use setDates(CalendarComponentEvents.DateClickEvent, ZonedDateTime, ZonedDateTime)
-     *
-     * Set the start and end dates for the event
-     *
-     * @param event
-     *            The event that the start and end dates should be set
-     * @param start
-     *            The start date
-     * @param end
-     *            The end date
-     */
-    protected void setDates(CalendarComponentEvents.DateClickEvent event, Date start, Date end) {
-        setDates( event,
-                ZonedDateTime.ofInstant(start.toInstant(), ZoneId.systemDefault()),
-                ZonedDateTime.ofInstant(end.toInstant(), ZoneId.systemDefault()));
     }
 
     /**

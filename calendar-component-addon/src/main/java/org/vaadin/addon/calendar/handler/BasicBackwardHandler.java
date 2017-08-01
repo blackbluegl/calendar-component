@@ -17,10 +17,9 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Implements basic functionality needed to enable backwards navigation.
@@ -42,61 +41,43 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
      */
     @Override
     public void backward(CalendarComponentEvents.BackwardEvent event) {
+
         int firstDay = event.getComponent().getFirstVisibleDayOfWeek();
         int lastDay = event.getComponent().getLastVisibleDayOfWeek();
-        Date start = Date.from(event.getComponent().getStartDate().toInstant());
-        Date end = Date.from(event.getComponent().getEndDate().toInstant());
+
+        ZonedDateTime start = event.getComponent().getStartDate();
+        ZonedDateTime end = event.getComponent().getEndDate();
 
         int durationInDays = 0;
 
         // for week view durationInDays = 7, for day view durationInDays = 1
         if (event.getComponent().isDayMode()) { // day view
-            durationInDays = -1;
+            durationInDays = 1;
         } else if (event.getComponent().isWeeklyMode()) {
-            durationInDays = -7;
+            durationInDays = 7;
         }
 
-        // set new start and end times
-        Calendar javaCalendar = Calendar.getInstance(event.getComponent().getInternalCalendar().getTimeZone());
-        javaCalendar.setTime(start);
-        javaCalendar.add(Calendar.DAY_OF_MONTH, durationInDays);
-        Date newStart = javaCalendar.getTime();
-
-        javaCalendar.setTime(end);
-        javaCalendar.add(Calendar.DAY_OF_MONTH, durationInDays);
-        Date newEnd = javaCalendar.getTime();
+        start = start.minus(durationInDays, ChronoUnit.DAYS);
+        end = end.minus(durationInDays, ChronoUnit.DAYS);
 
         if (event.getComponent().isDayMode()) { // day view
 
-            int dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
+            int dayOfWeek = start.get(ChronoField.DAY_OF_WEEK);
 
+            ZonedDateTime newDate = start;
             while (!(firstDay <= dayOfWeek && dayOfWeek <= lastDay)) {
-                javaCalendar.add(Calendar.DAY_OF_MONTH, -1);
-                dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
+
+                newDate = newDate.minus(1, ChronoUnit.DAYS);
+
+                dayOfWeek = start.get(ChronoField.DAY_OF_WEEK);
             }
 
-            newStart = newEnd = javaCalendar.getTime();
+            setDates(event, newDate, newDate);
+
+        } else {
+
+            setDates(event, start, end);
         }
-
-        setDates(event, newStart, newEnd);
-    }
-
-    /**
-     * @deprecated use setDates(CalendarComponentEvents.BackwardEvent, ZonedDateTime, ZonedDateTime)
-     *
-     * Set the start and end dates for the event
-     *
-     * @param event
-     *            The event that the start and end dates should be set
-     * @param start
-     *            The start date
-     * @param end
-     *            The end date
-     */
-    protected void setDates(CalendarComponentEvents.BackwardEvent event, Date start, Date end) {
-        setDates( event,
-                ZonedDateTime.ofInstant(start.toInstant(), ZoneId.systemDefault()),
-                ZonedDateTime.ofInstant(end.toInstant(), ZoneId.systemDefault()));
     }
 
     /**
