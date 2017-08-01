@@ -15,20 +15,25 @@
  */
 package org.vaadin.addon.calendar.client;
 
+import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+import org.vaadin.addon.calendar.client.ui.schedule.CalTime;
+
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  *
  * @since 7.1
  *
  */
+
+@SuppressWarnings({"deprecation"})
 public class DateConstants implements Serializable {
 
     public static final String ACTION_DATE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public static final String ACTION_TIME_FORMAT_PATTERN = "HH:mm:ss";
 
     public static final String CLIENT_DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-    public static final String CLIENT_TIME_FORMAT_PATTERN = "HH-mm";
 
     public static final long MINUTEINMILLIS = 60 * 1000;
     public static final long HOURINMILLIS = 60 * MINUTEINMILLIS;
@@ -37,5 +42,22 @@ public class DateConstants implements Serializable {
 
     public static final int DAYINMINUTES = 24 * 60;
     public static final int HOURINMINUTES = 60;
+
+    public static Date toClientDate(CalDate date) {
+        return new Date(date.y -1900, date.m -1, date.d, date.t.h, date.t.m, date.t.s);
+    }
+
+    public static CalDate toRPCDateTime(Date date) {
+        return new CalDate(date.getYear() + 1900, date.getMonth() + 1, date.getDate(),
+                new CalTime(date.getHours(), date.getMinutes(), date.getSeconds()));
+    }
+
+    public static CalDate toRPCDate(Date date) {
+        return new CalDate(date.getYear() + 1900, date.getMonth() + 1, date.getDate());
+    }
+
+    public static CalDate toRPCDate(int year, int month, int day) {
+        return new CalDate(year + 1900, month + 1, day);
+    }
 
 }

@@ -595,10 +595,8 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
         moveRegistration = addMouseMoveHandler(this);
         startX = event.getClientX();
         startY = event.getClientY();
-        startYrelative = event.getRelativeY(label.getParent().getElement())
-                % getHeigth();
-        startXrelative = event.getRelativeX(label.getParent().getElement())
-                % getWidth();
+        startYrelative = event.getRelativeY(label.getParent().getElement()) % getHeigth();
+        startXrelative = event.getRelativeX(label.getParent().getElement()) % getWidth();
 
         CalendarItem e = getItemByWidget(label);
         dndSourceDateFrom = (Date) e.getStart().clone();

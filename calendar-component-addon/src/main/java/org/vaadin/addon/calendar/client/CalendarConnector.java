@@ -128,40 +128,14 @@ public class CalendarConnector extends AbstractComponentConnector
         });
         getWidget().setListener((VCalendar.ItemMovedListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_MOVE)) {
-                rpc.itemMove(item.getIndex(),
-                            new CalDate(
-                                    item.getStartTime().getYear() + 1900,
-                                    item.getStartTime().getMonth() + 1,
-                                    item.getStartTime().getDate(),
-                                    new CalTime(
-                                            item.getStartTime().getHours(),
-                                            item.getStartTime().getMinutes(),
-                                            item.getStartTime().getSeconds()))
-                );
+                rpc.itemMove(item.getIndex(), DateConstants.toRPCDateTime(item.getStartTime()));
             }
         });
         getWidget().setListener((VCalendar.ItemResizeListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_RESIZE)) {
-
-                CalDate nStart = new CalDate(
-                        item.getStartTime().getYear() + 1900,
-                        item.getStartTime().getMonth() + 1,
-                        item.getStartTime().getDate(),
-                        new CalTime(
-                                item.getStartTime().getHours(),
-                                item.getStartTime().getMinutes(),
-                                item.getStartTime().getSeconds()));
-
-                CalDate nEnd = new CalDate(
-                        item.getEndTime().getYear() + 1900,
-                        item.getEndTime().getMonth() + 1,
-                        item.getEndTime().getDate(),
-                        new CalTime(
-                                item.getEndTime().getHours(),
-                                item.getEndTime().getMinutes(),
-                                item.getEndTime().getSeconds()));
-
-                rpc.itemResize(item.getIndex(), nStart, nEnd);
+                rpc.itemResize(item.getIndex(),
+                        DateConstants.toRPCDateTime(item.getStartTime()),
+                        DateConstants.toRPCDateTime(item.getEndTime()));
             }
         });
         getWidget().setListener((VCalendar.ScrollListener) scrollPosition -> {
@@ -397,7 +371,8 @@ public class CalendarConnector extends AbstractComponentConnector
                                  List<CalendarState.Item> items) {
         CalendarState state = getState();
         getWidget().updateMonthView(state.firstDayOfWeek,
-                getWidget().getDateTimeFormat().parse(state.now), days.size(),
+                DateConstants.toClientDate(state.now),
+                days.size(),
                 calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days));
     }
@@ -407,7 +382,7 @@ public class CalendarConnector extends AbstractComponentConnector
         CalendarState state = getState();
         getWidget().updateWeekView(
                 state.scroll,
-                getWidget().getDateTimeFormat().parse(state.now),
+                DateConstants.toClientDate(state.now),
                 state.firstDayOfWeek,
                 calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days)
@@ -594,8 +569,7 @@ public class CalendarConnector extends AbstractComponentConnector
         return getConnectorId();
     }
 
-    private List<CalendarItem> calendarEventListOf(
-            List<CalendarState.Item> items, boolean format24h) {
+    private List<CalendarItem> calendarEventListOf(List<CalendarState.Item> items, boolean format24h) {
 
         List<CalendarItem> list = new ArrayList<>(items.size());
 

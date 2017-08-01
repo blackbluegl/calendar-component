@@ -24,6 +24,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.WidgetUtil;
+import org.vaadin.addon.calendar.client.DateConstants;
 
 import java.util.*;
 
@@ -686,9 +687,10 @@ public class DateCell extends FocusableComplexPanel
                 SelectionRange weekSelection = new SelectionRange();
                 weekSelection.sMin = startMinutes;
                 weekSelection.eMin = endMinutes;
-                weekSelection.setStartDay(currentDate.getYear() + 1900,
-                        currentDate.getMonth() + 1,
-                        currentDate.getDate());
+                weekSelection.setStartDay(DateConstants.toRPCDate(
+                        currentDate.getYear(),
+                        currentDate.getMonth(),
+                        currentDate.getDate()));
 
                 weekgrid.getCalendar().getRangeSelectListener().rangeSelected(weekSelection);
             }

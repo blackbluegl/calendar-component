@@ -19,6 +19,7 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 import java.util.Date;
@@ -97,6 +98,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void setSelectionReady() {
         if (selectionStart != null && selectionEnd != null) {
 
@@ -111,8 +113,14 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
             if (calendar.getRangeSelectListener() != null) {
 
                 SelectionRange weekSelection = new SelectionRange();
-                weekSelection.setStartDay(startDate.getYear() +1900, startDate.getMonth() +1, startDate.getDate());
-                weekSelection.setEndDay(endDate.getYear() +1900, endDate.getMonth() +1, endDate.getDate());
+                weekSelection.setStartDay(DateConstants.toRPCDate(
+                        startDate.getYear(),
+                        startDate.getMonth(),
+                        startDate.getDate()));
+                weekSelection.setEndDay(DateConstants.toRPCDate(
+                        endDate.getYear(),
+                        endDate.getMonth(),
+                        endDate.getDate()));
 
                 calendar.getRangeSelectListener().rangeSelected(weekSelection);
             }
@@ -145,11 +153,11 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         int cells = getCellCount(0);
         int cellWidth = (totalWidthPX / cells) - 1;
         int widthRemainder = totalWidthPX % cells;
+
         // Division for cells might not be even. Distribute it evenly to
         // will whole space.
-        int heightPX = totalHeightPX;
-        int cellHeight = heightPX / rows;
-        int heightRemainder = heightPX % rows;
+        int cellHeight = totalHeightPX / rows;
+        int heightRemainder = totalHeightPX % rows;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cells; j++) {
@@ -183,6 +191,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     /**
      * Disable or enable possibility to select ranges
      */
+    @SuppressWarnings("unused")
     public void setRangeSelect(boolean b) {
         rangeSelectDisabled = !b;
     }

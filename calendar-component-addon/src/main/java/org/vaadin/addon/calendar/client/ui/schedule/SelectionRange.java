@@ -33,18 +33,19 @@ public class SelectionRange implements Serializable {
 
     public SelectionRange() { super(); }
 
-    public void setStartDay(int year, int month, int day) {
-        s = new CalDate();
-        s.y = year;
-        s.m = month;
-        s.d = day;
+    public void setStartDay(CalDate startDay) {
+        s = startDay;
     }
 
-    public void setEndDay(int year, int month, int day) {
-        e = new CalDate();
-        e.y = year;
-        e.m = month;
-        e.d = day;
+    public void setEndDay(CalDate endDay) {
+        e = endDay;
     }
 
+    public CalDate getStartDay() {
+        return s;
+    }
+
+    public CalDate getEndDay() {
+        return e;
+    }
 }

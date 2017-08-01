@@ -32,6 +32,7 @@ import org.vaadin.addon.calendar.client.CalendarServerRpc;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+import org.vaadin.addon.calendar.client.ui.schedule.CalTime;
 import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
 import org.vaadin.addon.calendar.handler.*;
 import org.vaadin.addon.calendar.item.BasicItemProvider;
@@ -604,7 +605,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         ZonedDateTime now = ZonedDateTime.now(zoneId);
 
-        state.now = actionDateTimeFormatter.format(now);
+        state.now = new CalDate(now.getYear(), now.getMonthValue(), now.getDayOfMonth(),
+                new CalTime(now.getHour(), now.getMinute(), now.getSecond()));
 
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't
@@ -624,7 +626,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             day.date = dateFormatter.format(dateToShow);
 
             day.localizedDateFormat = DateTimeFormatter.ofPattern(
-                    weeklyCaptionFormat == null ? "yyyy-MM-dd" : weeklyCaptionFormat, getLocale()).format(dateToShow);
+                    weeklyCaptionFormat == null ? "yyyy/MM/dd"
+                            : weeklyCaptionFormat, getLocale()).format(dateToShow);
 
             day.dayOfWeek = dateToShow.getDayOfWeek().getValue();
             day.week = (int) WeekFields.of(getLocale()).weekOfYear().getFrom(dateToShow);
