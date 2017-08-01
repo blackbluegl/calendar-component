@@ -42,9 +42,9 @@ public interface CalendarServerRpc extends ServerRpc {
 
     void weekClick(String eventValue);
 
-    void actionOnEmptyCell(String actionKey, String startDate, String endDate);
+    void actionOnEmptyCell(String actionKey, CalDate startDate, CalDate endDate);
 
-    void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex);
+    void actionOnItem(String actionKey, CalDate startDate, CalDate endDate, int itemIndex);
 
     @Delayed(lastOnly = true)
     void scroll(int scrollPosition);

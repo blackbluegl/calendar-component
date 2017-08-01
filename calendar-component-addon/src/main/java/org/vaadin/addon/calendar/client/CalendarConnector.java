@@ -544,8 +544,7 @@ public class CalendarConnector extends AbstractComponentConnector
                 a.setActionStartDate(getActionStartDate(actionKey));
                 a.setActionEndDate(getActionEndDate(actionKey));
             } catch (ParseException pe) {
-                Logger.getLogger(CalendarConnector.class.getName()).
-                        log(Level.SEVERE, "", pe);
+                Logger.getLogger(CalendarConnector.class.getName()).log(Level.SEVERE, "", pe);
             }
 
             actions.add(a);
@@ -577,19 +576,21 @@ public class CalendarConnector extends AbstractComponentConnector
             final String timeTo = item.timeTo;
 
             CalendarItem calendarItem = new CalendarItem();
+            calendarItem.setFormat24h(format24h);
             calendarItem.setAllDay(item.allDay);
             calendarItem.setCaption(item.caption);
             calendarItem.setDescription(item.description);
-            calendarItem.setStart(VCalendar.DATE_FORMAT.parse(dateFrom));
-            calendarItem.setEnd(VCalendar.DATE_FORMAT.parse(dateTo));
-            calendarItem.setFormat24h(format24h);
-            calendarItem.setStartTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateFrom + " " + timeFrom));
-            calendarItem.setEndTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateTo + " " + timeTo));
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
             calendarItem.setMoveable(item.moveable);
             calendarItem.setResizeable(item.resizeable);
             calendarItem.setClickable(item.clickable);
+
+            calendarItem.setStart(VCalendar.DATE_FORMAT.parse(dateFrom));
+            calendarItem.setEnd(VCalendar.DATE_FORMAT.parse(dateTo));
+            calendarItem.setStartTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateFrom + " " + timeFrom));
+            calendarItem.setEndTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateTo + " " + timeTo));
+
             list.add(calendarItem);
         }
         return list;

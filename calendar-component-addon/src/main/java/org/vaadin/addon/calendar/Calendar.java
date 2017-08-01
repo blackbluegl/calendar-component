@@ -46,16 +46,17 @@ import org.vaadin.addon.calendar.ui.CalendarTargetDetails;
 
 import java.lang.reflect.Method;
 import java.text.DateFormatSymbols;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -714,9 +715,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         List<CalendarState.Action> calendarActions = new ArrayList<>();
 
         for (Entry<CalendarDateRange, Set<Action>> entry : actionMap.entrySet()) {
+
             CalendarDateRange range = entry.getKey();
-            Set<Action> actions = entry.getValue();
-            for (Action action : actions) {
+
+            for (Action action : entry.getValue()) {
                 String key = actionMapper.key(action);
                 CalendarState.Action calendarAction = new CalendarState.Action();
                 calendarAction.actionKey = key;
@@ -1622,32 +1624,22 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
 
         @Override
-        public void actionOnEmptyCell(String actionKey, String startDate, String endDate) {
+        public void actionOnEmptyCell(String actionKey, CalDate startDate, CalDate endDate) {
 
             Action action = actionMapper.get(actionKey);
 
-            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
-            formatter.setTimeZone(getTimeZone());
-
-            try {
-
-                Date start = formatter.parse(startDate);
-                for (Action.Handler ah : actionHandlers) {
-                    ah.handleAction(action, Calendar.this, start);
-                }
-
-            } catch (ParseException e) {
-                getLogger().log(Level.WARNING,"Could not parse action date string");
+            for (Action.Handler ah : actionHandlers) {
+                ah.handleAction(action, Calendar.this,
+                        ZonedDateTime.of(startDate.y, startDate.m, startDate.d,
+                                startDate.t.h, startDate.t.m, startDate.t.s, 0, zoneId));
             }
 
         }
 
         @Override
-        public void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex) {
+        public void actionOnItem(String actionKey, CalDate startDate, CalDate endDate, int itemIndex) {
 
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
-            formatter.setTimeZone(getTimeZone());
 
             for (Action.Handler ah : actionHandlers) {
                 ah.handleAction(action, Calendar.this, items.get(itemIndex));
