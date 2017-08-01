@@ -22,8 +22,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
+import java.util.Date;
 import java.util.Iterator;
 
 /**
@@ -91,8 +93,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
     }
 
-    public void add(String dayName, final String date, String localized_date_format, String extraClass) {
-
+    public void add(String dayName, final Date date, String localized_date_format, String extraClass) {
+//TODO format of day header without the name of the day
         Label l = new Label(dayName + " " + localized_date_format);
         l.setStylePrimaryName("v-calendar-header-day");
 
@@ -109,7 +111,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
         l.addClickHandler(ce -> {
             if (calendar.getDateClickListener() != null) {
-                calendar.getDateClickListener().dateClick(date);
+                calendar.getDateClickListener().dateClick(DateConstants.toRPCDate(date));
             }
         });
 

@@ -1587,13 +1587,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
 
         @Override
-        public void dateClick(String dateUIDL) {
-            if (dateUIDL != null && dateUIDL.length() > 6) {
-
-                LocalDate date = LocalDate.from(DATE_FORMAT.parse(dateUIDL));
-
-                fireDateClick(ZonedDateTime.of(date, LocalTime.now(), zoneId));
-            }
+        public void dateClick(CalDate date) {
+            fireDateClick(ZonedDateTime.of(date.y, date.m, date.d, 0,0,0,0, zoneId));
         }
 
         @Override

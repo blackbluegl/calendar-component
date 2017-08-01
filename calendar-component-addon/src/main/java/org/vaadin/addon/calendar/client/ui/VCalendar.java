@@ -100,7 +100,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
          * @param date
          *            The date and time that was clicked
          */
-        void dateClick(String date);
+        void dateClick(CalDate date);
     }
 
     /**
@@ -517,8 +517,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
             String localized_date_format = day.getLocalizedDateFormat();
 
-            String dateStr = day.getDate();
-            Date date = DATE_FORMAT.parse(dateStr);
+            Date date = day.getDate();
 
             int dayOfWeek = day.getDayOfWeek();
 
@@ -534,7 +533,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
                 isToday = true;
             }
 
-            dayToolbar.add(realDayNames[dayOfWeek - 1], dateStr, localized_date_format, isToday ? "today" : null);
+            dayToolbar.add(realDayNames[dayOfWeek - 1], date, localized_date_format, isToday ? "today" : null);
             weeklyLongEvents.addDate(date);
             weekGrid.addDate(date, day.getBlockedSlots());
 
@@ -572,7 +571,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
         for (CalendarDay day : days) {
 
-            Date date = DATE_FORMAT.parse(day.getDate());
+            Date date = day.getDate();
 
             int dayOfWeek = day.getDayOfWeek();
             int week = day.getWeek();

@@ -38,7 +38,7 @@ public interface CalendarServerRpc extends ServerRpc {
 
     void backward();
 
-    void dateClick(String date);
+    void dateClick(CalDate date);
 
     void weekClick(String eventValue);
 

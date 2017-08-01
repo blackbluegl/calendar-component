@@ -15,6 +15,7 @@
  */
 package org.vaadin.addon.calendar.client.ui.schedule;
 
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -26,14 +27,14 @@ import java.util.Set;
  */
 public class CalendarDay {
 
-    private String date;
+    private Date date;
     private String localizedDateFormat;
     private int dayOfWeek;
     private int week;
     private int yearOfWeek;
     private Set<Long> blockedSlots;
 
-    public CalendarDay(String date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek, Set<Long> blockedSlots) {
+    public CalendarDay(Date date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek, Set<Long> blockedSlots) {
         super();
         this.date = date;
         this.localizedDateFormat = localizedDateFormat;
@@ -43,7 +44,7 @@ public class CalendarDay {
         this.blockedSlots = blockedSlots;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
