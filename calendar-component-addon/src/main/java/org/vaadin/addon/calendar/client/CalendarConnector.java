@@ -585,11 +585,11 @@ public class CalendarConnector extends AbstractComponentConnector
             calendarItem.setAllDay(item.allDay);
             calendarItem.setCaption(item.caption);
             calendarItem.setDescription(item.description);
-            calendarItem.setStart(getWidget().getDateFormat().parse(dateFrom));
-            calendarItem.setEnd(getWidget().getDateFormat().parse(dateTo));
+            calendarItem.setStart(VCalendar.DATEFORMAT_DATE.parse(dateFrom));
+            calendarItem.setEnd(VCalendar.DATEFORMAT_DATE.parse(dateTo));
             calendarItem.setFormat24h(format24h);
-            calendarItem.setStartTime(getWidget().getDateTimeFormat().parse(dateFrom + " " + timeFrom));
-            calendarItem.setEndTime(getWidget().getDateTimeFormat().parse(dateTo + " " + timeTo));
+            calendarItem.setStartTime(VCalendar.DATEFORMAT_DATETIME.parse(dateFrom + " " + timeFrom));
+            calendarItem.setEndTime(VCalendar.DATEFORMAT_DATETIME.parse(dateTo + " " + timeTo));
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
             calendarItem.setMoveable(item.moveable);

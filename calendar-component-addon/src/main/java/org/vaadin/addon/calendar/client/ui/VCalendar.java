@@ -69,8 +69,8 @@ public class VCalendar extends Composite implements VHasDropHandler {
     private int intWidth = 0;
     private int intHeight = 0;
 
-    private final DateTimeFormat dateformat_datetime = DateTimeFormat.getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-    private final DateTimeFormat dateformat_date = DateTimeFormat.getFormat(DateConstants.CLIENT_DATE_FORMAT_PATTERN);
+    public static final DateTimeFormat DATEFORMAT_DATETIME = DateTimeFormat.getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
+    public static final DateTimeFormat DATEFORMAT_DATE = DateTimeFormat.getFormat(DateConstants.CLIENT_DATE_FORMAT_PATTERN);
 
     protected final DateTimeFormat time12format_date = DateTimeFormat.getFormat("h:mm a");
     protected final DateTimeFormat time24format_date = DateTimeFormat.getFormat("HH:mm");
@@ -518,7 +518,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
             String localized_date_format = day.getLocalizedDateFormat();
 
             String dateStr = day.getDate();
-            Date date = getDateFormat().parse(dateStr);
+            Date date = DATEFORMAT_DATE.parse(dateStr);
 
             int dayOfWeek = day.getDayOfWeek();
 
@@ -572,7 +572,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
         for (CalendarDay day : days) {
             String date = day.getDate();
-            Date d = getDateFormat().parse(date);
+            Date d = DATEFORMAT_DATE.parse(date);
             int dayOfWeek = day.getDayOfWeek();
             int week = day.getWeek();
 
@@ -698,15 +698,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
     }
 
     /**
-     * Get the date format used to format dates only (excludes time)
-     *
-     * @return the date format used to format dates only (excludes time)
-     */
-    public DateTimeFormat getDateFormat() {
-        return dateformat_date;
-    }
-
-    /**
      * Get the time format used to format time only (excludes date)
      *
      * @return the time format used to format time only (excludes date)
@@ -716,17 +707,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
             return time24format_date;
         }
         return time12format_date;
-    }
-
-    /**
-     * Get the date and time format to format the dates (includes both date and
-     * time)
-     *
-     * @return the date and time format to format the dates (includes both date and
-     * time)
-     */
-    public DateTimeFormat getDateTimeFormat() {
-        return dateformat_datetime;
     }
 
     /**
