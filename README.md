@@ -8,13 +8,14 @@ Moved to BETA stage and testing for stable release. After that, a new feature-br
 (see issues -> tag:enhancements)
 
 ### Version 2.0-BETA2
-- individual time caption pattern for time added
+- Enhanced: individual time caption pattern for time added
+- Fix:      missing toolips in month view
 
 ### Version 2.0-BETA1
-- Java8 Date/Time-API
-- parsing of dates replaced by object states
-- weekly caption provider added
-- deprecated code removed
+- Change:   Java8 Date/Time-API
+- Change:   parsing of dates replaced by object states
+- Enhanced: weekly caption provider added
+- Change:   deprecated code removed
 
 ### Version 1.0
 - Fixed:    cell selection style is not added to calendar items anymore 
