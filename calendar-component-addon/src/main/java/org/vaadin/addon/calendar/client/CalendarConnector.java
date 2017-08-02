@@ -344,7 +344,12 @@ public class CalendarConnector extends AbstractComponentConnector
 
         TooltipInfo tooltipInfo = null;
 
-        Widget w = WidgetUtil.findWidget(element, DateCellDayItem.class);
+        Widget w;
+        if (showingMonthView()) {
+            w = WidgetUtil.findWidget(element, MonthItemLabel.class);
+        } else {
+            w = WidgetUtil.findWidget(element, DateCellDayItem.class);
+        }
 
         if (w instanceof HasTooltipKey) {
             String title = tooltips.get(((HasTooltipKey) w).getTooltipKey());
