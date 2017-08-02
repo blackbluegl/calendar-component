@@ -648,15 +648,15 @@ public class VCalendar extends Composite implements VHasDropHandler {
                 monthGrid.removeStyleDependentName("sizedheight");
             }
 
-            monthGrid.updateCellSizes(intWidth - weekToolbar.getOffsetWidth(),
+            monthGrid.updateCellSizes(
+                    intWidth - weekToolbar.getOffsetWidth(),
                     intHeight - nameToolbar.getOffsetHeight());
-            weekToolbar.setHeightPX((intHeight == -1) ? intHeight
-                    : intHeight - nameToolbar.getOffsetHeight());
+
+            weekToolbar.setHeightPX((intHeight == -1) ? intHeight : intHeight - nameToolbar.getOffsetHeight());
 
         } else if (weekGrid != null) {
             weekGrid.setHeightPX((intHeight == -1) ? intHeight
-                    : intHeight - weeklyLongEvents.getOffsetHeight()
-                            - dayToolbar.getOffsetHeight());
+                    : intHeight - weeklyLongEvents.getOffsetHeight()  - dayToolbar.getOffsetHeight());
         }
     }
 
@@ -672,6 +672,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
                 monthGrid.updateCellSizes(
                         intWidth - weekToolbar.getOffsetWidth(),
                         intHeight - nameToolbar.getOffsetHeight());
+
             } else if (weekGrid != null) {
                 weekGrid.setWidthPX(intWidth);
                 weeklyLongEvents.setWidthPX(weekGrid.getInternalWidth());

@@ -23,6 +23,7 @@ import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  *
@@ -147,41 +148,48 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     }
 
     public void updateCellSizes(int totalWidthPX, int totalHeightPX) {
+
+getLogger().warning("totalHeight: " + totalHeightPX);
+
         boolean setHeight = totalHeightPX > 0;
         boolean setWidth = totalWidthPX > 0;
+
         int rows = getRowCount();
         int cells = getCellCount(0);
+
         int cellWidth = (totalWidthPX / cells) - 1;
         int widthRemainder = totalWidthPX % cells;
 
-        // Division for cells might not be even. Distribute it evenly to
-        // will whole space.
+        // Division for cells might not be even. Distribute it evenly to will whole space.
         int cellHeight = totalHeightPX / rows;
         int heightRemainder = totalHeightPX % rows;
 
+getLogger().warning("cellHeight: " + cellHeight);
+
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cells; j++) {
-                SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+
+                SimpleDayCell dayCell = (SimpleDayCell) getWidget(i, j);
 
                 if (setWidth) {
                     if (widthRemainder > 0) {
-                        sdc.setWidth(cellWidth + 1 + "px");
+                        dayCell.setWidth(cellWidth + 1 + "px");
                         widthRemainder--;
 
                     } else {
-                        sdc.setWidth(cellWidth + "px");
+                        dayCell.setWidth(cellWidth + "px");
                     }
                 }
 
                 if (setHeight) {
                     if (heightRemainder > 0) {
-                        sdc.setHeightPX(cellHeight + 1, true);
+                        dayCell.setHeightPX(cellHeight + 1, true);
 
                     } else {
-                        sdc.setHeightPX(cellHeight, true);
+                        dayCell.setHeightPX(cellHeight, true);
                     }
                 } else {
-                    sdc.setHeightPX(-1, true);
+                    dayCell.setHeightPX(-1, true);
                 }
             }
             heightRemainder--;
@@ -225,5 +233,9 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
 
         return -1;
+    }
+
+    private static Logger getLogger() {
+        return Logger.getLogger(MonthGrid.class.getName());
     }
 }
