@@ -18,6 +18,7 @@ package org.vaadin.addon.calendar.client;
 import com.vaadin.shared.AbstractComponentState;
 import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -77,6 +78,11 @@ public class CalendarState extends AbstractComponentState {
         public Set<Long> blockedSlots;
     }
 
+    public static class TimeSlot implements Serializable {
+        public long slotStart;
+        public String styleName;
+    }
+
     public static class Action implements java.io.Serializable {
 
         public String caption;
@@ -96,8 +102,9 @@ public class CalendarState extends AbstractComponentState {
         public String styleName;
         public String description;
         public boolean allDay;
-        public boolean moveable = true;
-        public boolean resizeable = true;
-        public boolean clickable = true;
+        public boolean moveable;
+        public boolean resizeable;
+        public boolean clickable;
+        public String dateCaptionFormat;
     }
 }

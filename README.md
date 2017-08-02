@@ -7,6 +7,9 @@ Calendar-component is a UI component add-on for Vaadin 8.
 Moved to BETA stage and testing for stable release. After that, a new feature-branch will be opened.  
 (see issues -> tag:enhancements)
 
+### Version 2.0-BETA2
+- individual time caption pattern for time added
+
 ### Version 2.0-BETA1
 - Java8 Date/Time-API
 - parsing of dates replaced by object states

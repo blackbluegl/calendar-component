@@ -454,6 +454,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
                 item.description = calItem.getDescription() == null ? "" : calItem.getDescription();
                 item.styleName = calItem.getStyleName() == null ? "" : calItem.getStyleName();
+                item.dateCaptionFormat = calItem.getDateCaptionFormat();
                 item.allDay = calItem.isAllDay();
                 item.moveable = calItem.isMoveable();
                 item.resizeable = calItem.isResizeable();
@@ -1622,13 +1623,13 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         if (design.hasAttr("start-date")) {
             setStartDate(
                     ZonedDateTime.ofInstant(DesignAttributeHandler.readAttribute("start-date", attr, Date.class)
-                            .toInstant(), zoneId));
+                            .toInstant(), getZoneId()));
         }
 
         if (design.hasAttr("end-date")) {
             setEndDate(
                     ZonedDateTime.ofInstant(DesignAttributeHandler.readAttribute("end-date", attr, Date.class)
-                            .toInstant(), zoneId));
+                            .toInstant(), getZoneId()));
         }
     }
 
@@ -1637,8 +1638,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         super.writeDesign(design, designContext);
 
         if (currentTimeFormat != null) {
-            design.attr("time-format",
-                    currentTimeFormat == TimeFormat.Format12H ? "12h" : "24h");
+            design.attr("time-format", currentTimeFormat == TimeFormat.Format12H ? "12h" : "24h");
         }
         if (startDate != null) {
             design.attr("start-date", DATE_FORMAT.format(getStartDate()));
@@ -1654,6 +1654,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     @Override
     protected Collection<String> getCustomAttributes() {
         Collection<String> customAttributes = super.getCustomAttributes();
+        customAttributes.add("time-zone");
         customAttributes.add("time-format");
         customAttributes.add("start-date");
         customAttributes.add("end-date");

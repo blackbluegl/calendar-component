@@ -14,7 +14,6 @@ import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Random;
 
 
@@ -86,7 +85,7 @@ public class MeetingCalendar extends CustomComponent {
         calendar.setItemCaptionAsHtml(true);
         calendar.setContentMode(ContentMode.HTML);
 
-        calendar.setLocale(Locale.US);
+        //calendar.setLocale(Locale.US);
         //calendar.setZoneId(ZoneId.of("America/Chicago"));
         calendar.setWeeklyCaptionProvider(date -> DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 

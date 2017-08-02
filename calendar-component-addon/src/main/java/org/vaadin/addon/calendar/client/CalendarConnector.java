@@ -579,6 +579,7 @@ public class CalendarConnector extends AbstractComponentConnector
             calendarItem.setAllDay(item.allDay);
             calendarItem.setCaption(item.caption);
             calendarItem.setDescription(item.description);
+            calendarItem.setDateCaptionFormat(item.dateCaptionFormat);
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
             calendarItem.setMoveable(item.moveable);

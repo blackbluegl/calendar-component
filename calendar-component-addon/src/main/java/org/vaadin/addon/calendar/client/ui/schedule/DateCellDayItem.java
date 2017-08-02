@@ -29,6 +29,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.vaadin.client.WidgetUtil;
 import org.vaadin.addon.calendar.client.DateConstants;
+import org.vaadin.addon.calendar.client.ui.util.Strings;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -176,8 +177,12 @@ public class DateCellDayItem extends FocusableHTML
      */
     private void updateCaptions(boolean bigMode) {
         String innerHtml;
-        String timeAsText = calendarItem.getTimeAsText();
         String htmlOrText;
+
+        String timeAsText = Strings.format(
+                calendarItem.getDateCaptionFormat(),
+                calendarItem.getFormattedStartTime(),
+                calendarItem.getFormattedEndTime());
 
         if (dateCell.weekgrid.getCalendar().isItemCaptionAsHtml()) {
             htmlOrText = calendarItem.getCaption();
@@ -188,9 +193,9 @@ public class DateCellDayItem extends FocusableHTML
         if (bigMode) {
             innerHtml = "<span>" + timeAsText + "</span><br />" + htmlOrText;
         } else {
-            innerHtml = "<span>" + timeAsText + "<span>:</span></span> "
-                    + htmlOrText;
+            innerHtml = "<span>" + timeAsText + "<span></span></span> " + htmlOrText;
         }
+
         caption.setInnerHTML(innerHtml);
         eventContent.setInnerHTML("");
     }

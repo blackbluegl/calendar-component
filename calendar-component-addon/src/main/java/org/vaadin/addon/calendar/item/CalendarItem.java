@@ -113,4 +113,10 @@ public interface CalendarItem extends Serializable {
         return true;
     }
 
+    /**
+     * Get the time caption format. The default is only '%s'. The first placeholder is replaced with start time
+     * and the second with end time.
+     * @return @see {@link org.vaadin.addon.calendar.client.ui.schedule.CalendarItem}
+     */
+    default String getDateCaptionFormat() {return org.vaadin.addon.calendar.client.ui.schedule.CalendarItem.SINGLE_TIME;}
 }

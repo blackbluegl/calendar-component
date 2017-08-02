@@ -1,5 +1,6 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
+import com.vaadin.icons.VaadinIcons;
 import org.vaadin.addon.calendar.item.BasicItem;
 
 import java.time.ZonedDateTime;
@@ -80,6 +81,13 @@ public class MeetingItem extends BasicItem {
 	public void setStart(ZonedDateTime start) {
 		meeting.setStart(start);
 		super.setStart(start);
+	}
+
+    @Override
+    public String getDateCaptionFormat() {
+        //return CalendarItem.RANGE_TIME;
+        return VaadinIcons.CLOCK.getHtml()+" %s<br>" +
+               VaadinIcons.ARROW_CIRCLE_RIGHT_O.getHtml()+" %s";
 	}
 
 }
