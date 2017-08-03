@@ -8,10 +8,14 @@ import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
 import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
 import java.util.Random;
+
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 
 public class MeetingCalendar extends CustomComponent {
@@ -92,9 +96,11 @@ public class MeetingCalendar extends CustomComponent {
 
         calendar.setVisibleDayRange(1, 7);
 
+        ZonedDateTime s = ZonedDateTime.now().with(firstDayOfMonth());
+        ZonedDateTime e = ZonedDateTime.now().with(lastDayOfMonth());
 
-//        calendar.setStartDate(ZonedDateTime.now().plus(3, DAYS));
-//        calendar.setEndDate(ZonedDateTime.now().plus(10, DAYS));
+        calendar.setStartDate(s);
+        calendar.setEndDate(e);
 
         addCalendarEventListeners();
 

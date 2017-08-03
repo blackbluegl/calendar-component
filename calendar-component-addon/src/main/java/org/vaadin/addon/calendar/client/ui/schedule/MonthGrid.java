@@ -88,11 +88,14 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
                     if (startDate.compareTo(d) <= 0
                             && endDate.compareTo(d) >= 0) {
                         sdc.addStyleDependentName("selected");
+
                     } else if (startDate.compareTo(d) >= 0
                             && endDate.compareTo(d) <= 0) {
                         sdc.addStyleDependentName("selected");
+
                     } else {
                         sdc.removeStyleDependentName("selected");
+
                     }
                 }
             }
@@ -149,8 +152,6 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
 
     public void updateCellSizes(int totalWidthPX, int totalHeightPX) {
 
-getLogger().warning("totalHeight: " + totalHeightPX);
-
         boolean setHeight = totalHeightPX > 0;
         boolean setWidth = totalWidthPX > 0;
 
@@ -163,8 +164,6 @@ getLogger().warning("totalHeight: " + totalHeightPX);
         // Division for cells might not be even. Distribute it evenly to will whole space.
         int cellHeight = totalHeightPX / rows;
         int heightRemainder = totalHeightPX % rows;
-
-getLogger().warning("cellHeight: " + cellHeight);
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cells; j++) {

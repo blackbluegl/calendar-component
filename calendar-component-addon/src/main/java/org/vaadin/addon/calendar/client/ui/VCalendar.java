@@ -31,6 +31,7 @@ import org.vaadin.addon.calendar.client.ui.util.ItemDurationComparator;
 import org.vaadin.addon.calendar.client.ui.util.StartDateComparator;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Client side implementation for Calendar
@@ -42,6 +43,10 @@ import java.util.*;
 public class VCalendar extends Composite implements VHasDropHandler {
 
     public static final String PRIMARY_STYLE = "v-calendar";
+
+    private static Logger getLogger() {
+        return Logger.getLogger(VCalendar.class.getName());
+    }
 
 //    public static final String ATTR_FIRSTDAYOFWEEK = "firstDay";
 //    public static final String ATTR_LASTDAYOFWEEK = "lastDay";
@@ -628,6 +633,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
         intWidth = newWidth;
         intHeight = newHeight;
         isWidthUndefined = intWidth == -1;
+        isHeightUndefined = intHeight == -1;
         dayToolbar.setVerticalSized(isHeightUndefined);
         dayToolbar.setHorizontalSized(isWidthUndefined);
         recalculateWidths();
@@ -645,6 +651,9 @@ public class VCalendar extends Composite implements VHasDropHandler {
             } else {
                 monthGrid.removeStyleDependentName("sizedheight");
             }
+
+getLogger().warning("intheight: " +intHeight);
+getLogger().warning("namesHeight: " +nameToolbar.getOffsetHeight());
 
             monthGrid.updateCellSizes(
                     intWidth - weekToolbar.getOffsetWidth(),

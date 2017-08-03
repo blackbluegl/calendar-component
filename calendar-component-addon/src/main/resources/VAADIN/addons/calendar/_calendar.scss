@@ -23,7 +23,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
  * @group calendar
  */
 @mixin valo-calendar-global ($primary-stylename: v-calendar) {
-  .#{$primary-stylename}-month-day-scrollable {
+  .#{$primary-stylename}-month-day-extended {
     overflow-y: scroll;
   }
 
@@ -215,19 +215,42 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   }
 
   .#{$primary-stylename}-bottom-spacer,
+  .#{$primary-stylename}-bottom-spacer-expanded,
   .#{$primary-stylename}-spacer,
   .#{$primary-stylename}-bottom-spacer-empty {
     height: round($v-font-size * 1.2);
-    margin-bottom: round($v-unit-size/12);
+//     margin-bottom: round($v-unit-size/12); // produce invalid cell sizes
   }
 
-  .#{$primary-stylename}-bottom-spacer {
+  .#{$primary-stylename}-bottom-spacer,
+  .#{$primary-stylename}-bottom-spacer-expanded {
     font-size: 0.8em;
     padding: 0 round($v-unit-size/8);
     cursor: pointer;
 
+    width: 3em;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+
     &:hover {
       color: $v-focus-color;
+    }
+  }
+
+  .#{$primary-stylename}-bottom-spacer > span {
+    &:before {
+      content: "+";
+      margin-right: .2em;
+      color: $v-focus-color;
+    }
+  }
+
+  .#{$primary-stylename}-bottom-spacer-expanded > span {
+    &:before {
+        content: "-";
+        margin-right: .2em;
+        color:$v-focus-color;
     }
   }
 
@@ -266,7 +289,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
       background-color: #a8a8a8;
   }
 
-  .#{$primary-stylename}-month-day-scrollable {
+  .#{$primary-stylename}-month-day-extended {
     overflow-y: scroll;
   }
 
@@ -291,7 +314,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     .#{$primary-stylename}-event-all-day {
       height: round($v-font-size * 0.85 * 1.6);
       line-height: 1.6;
-      margin-bottom: round($v-unit-size/12);
+      border-top: 1px solid #FFF;
+      border-bottom: 1px solid #fff;
     }
   }
 
@@ -425,7 +449,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   .#{$primary-stylename}-event-month {
     padding: 0 round($v-unit-size/8);
     box-sizing: border-box;
-    margin-bottom: round($v-unit-size/12);
+//    margin-bottom: round($v-unit-size/12); // produce invalid cell sizes
+    border-bottom: 1px solid #FFF;
     white-space: nowrap;
     text-overflow: ellipsis;
     height: round($v-font-size * 1.2);
