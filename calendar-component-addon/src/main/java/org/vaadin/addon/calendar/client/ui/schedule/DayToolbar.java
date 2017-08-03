@@ -18,10 +18,7 @@ package org.vaadin.addon.calendar.client.ui.schedule;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
@@ -93,9 +90,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     public void add(String dayName, final Date date, String localized_date_format, String extraClass) {
-//TODO format of day header without the name of the day
 
-        Label l = new Label((dayName + " " + localized_date_format).trim());
+        HTML l = new HTML(("<span>" + dayName + "</span> " + localized_date_format).trim());
         l.setStylePrimaryName("v-calendar-header-day");
 
         if (extraClass != null) {
