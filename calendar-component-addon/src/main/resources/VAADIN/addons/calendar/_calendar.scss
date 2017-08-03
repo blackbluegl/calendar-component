@@ -218,7 +218,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   .#{$primary-stylename}-spacer,
   .#{$primary-stylename}-bottom-spacer-empty {
     height: round($v-font-size * 1.2);
-    margin-bottom: round($v-unit-size/12);
+//     margin-bottom: round($v-unit-size/12); // produce invalid cell sizes
   }
 
   .#{$primary-stylename}-bottom-spacer {
@@ -291,7 +291,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     .#{$primary-stylename}-event-all-day {
       height: round($v-font-size * 0.85 * 1.6);
       line-height: 1.6;
-      margin-bottom: round($v-unit-size/12);
+      border-top: 1px solid #FFF;
+      border-bottom: 1px solid #fff;
     }
   }
 
@@ -425,7 +426,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   .#{$primary-stylename}-event-month {
     padding: 0 round($v-unit-size/8);
     box-sizing: border-box;
-    margin-bottom: round($v-unit-size/12);
+//    margin-bottom: round($v-unit-size/12); // produce invalid cell sizes
+    border-bottom: 1px solid #FFF;
     white-space: nowrap;
     text-overflow: ellipsis;
     height: round($v-font-size * 1.2);
