@@ -88,16 +88,11 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
 
     private Widget clickedWidget;
     private MonthGrid monthGrid;
-//    private FocusableFlowPanel itemPanel;
 
     public SimpleDayCell(VCalendar calendar, int row, int cell) {
         this.calendar = calendar;
         this.row = row;
         this.cell = cell;
-
-//        itemPanel = new FocusableFlowPanel();
-//        itemPanel.setHeight("100%");
-//        itemPanel.setWidth("100%");
 
         setStylePrimaryName("v-calendar-month-day");
 

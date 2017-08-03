@@ -112,14 +112,18 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   }
 
   .#{$primary-stylename}-day-times-Vsized .v-datecellslot,
-  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-even {
+  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-even,
+  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-blocked,
+  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-blocked-even {
     height: 18px;
   }
 
   .#{$primary-stylename}-day-times-Hsized,
   .#{$primary-stylename}-day-times-Hsized .v-datecellslot,
-  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-even {
-    width: 200px;
+  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-even,
+  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-blocked,
+  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-blocked-even {
+      width: 200px;
   }
 }
 
@@ -146,7 +150,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     @include appearance(none);
     background: transparent;
     border: none;
-    padding: 0;
+    padding: 0 2px;
     margin: 0;
     cursor: pointer;
     outline: none;
@@ -523,6 +527,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
       white-space: nowrap;
     }
   }
+
+  .#{$primary-stylename}-week-wrapper.scrolled {}
 
   .#{$primary-stylename}-week-wrapper .#{$primary-stylename}-event {
     overflow: visible;

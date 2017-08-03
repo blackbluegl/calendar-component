@@ -69,7 +69,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         if (count > 0) {
             setCellWidth(backLabel, MARGINLEFT + "px");
             setCellWidth(nextLabel, MARGINRIGHT + "px");
-            setCellHorizontalAlignment(nextLabel, ALIGN_RIGHT);
+            setCellHorizontalAlignment(backLabel, ALIGN_RIGHT);
+            setCellHorizontalAlignment(nextLabel, ALIGN_LEFT);
             int cellw = width / (count - 2);
             if (cellw > 0) {
                 int[] cellWidths = VCalendar.distributeSize(width, count - 2,

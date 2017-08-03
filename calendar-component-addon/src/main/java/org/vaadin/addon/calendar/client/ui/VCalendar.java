@@ -652,9 +652,6 @@ public class VCalendar extends Composite implements VHasDropHandler {
                 monthGrid.removeStyleDependentName("sizedheight");
             }
 
-getLogger().warning("intheight: " +intHeight);
-getLogger().warning("namesHeight: " +nameToolbar.getOffsetHeight());
-
             monthGrid.updateCellSizes(
                     intWidth - weekToolbar.getOffsetWidth(),
                     intHeight - nameToolbar.getOffsetHeight());

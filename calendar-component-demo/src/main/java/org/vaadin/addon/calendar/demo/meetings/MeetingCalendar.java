@@ -39,7 +39,7 @@ public class MeetingCalendar extends CustomComponent {
         layout.setSizeFull();
 
         Panel panel = new Panel(calendar);
-        panel.setHeight(100, Unit.PERCENTAGE);
+        //panel.setHeight(100, Unit.PERCENTAGE);
         layout.addComponent(panel);
 
         setCompositionRoot(layout);
