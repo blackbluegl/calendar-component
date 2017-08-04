@@ -17,7 +17,6 @@ package org.vaadin.addon.calendar.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
@@ -51,7 +50,8 @@ import java.util.logging.Logger;
  */
 @Connect(value = org.vaadin.addon.calendar.Calendar.class, loadStyle = LoadStyle.LAZY)
 public class CalendarConnector extends AbstractComponentConnector
-        implements ActionOwner, SimpleManagedLayout , Paintable {
+        implements ActionOwner, SimpleManagedLayout, Paintable
+{
 
     private final HashMap<String, String> actionMap = new HashMap<>();
     private CalendarServerRpc rpc = RpcProxy.create(CalendarServerRpc.class, this);
@@ -115,9 +115,9 @@ public class CalendarConnector extends AbstractComponentConnector
                 rpc.backward();
             }
         });
-        getWidget().setListener((VCalendar.RangeSelectListener) value -> {
+        getWidget().setListener((VCalendar.RangeSelectListener) rangeSelection -> {
             if (hasEventListener(CalendarEventId.RANGESELECT)) {
-                rpc.rangeSelect(value);
+                rpc.rangeSelect(rangeSelection);
             }
         });
         getWidget().setListener((VCalendar.WeekClickListener) event -> {
@@ -128,36 +128,14 @@ public class CalendarConnector extends AbstractComponentConnector
         });
         getWidget().setListener((VCalendar.ItemMovedListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_MOVE)) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(DateUtil.formatClientSideDate(item.getStart()));
-                sb.append("-");
-                sb.append(DateUtil
-                        .formatClientSideTime(item.getStartTime()));
-                rpc.itemMove(item.getIndex(), sb.toString());
+                rpc.itemMove(item.getIndex(), DateConstants.toRPCDateTime(item.getStartTime()));
             }
         });
         getWidget().setListener((VCalendar.ItemResizeListener) item -> {
             if (hasEventListener(CalendarEventId.ITEM_RESIZE)) {
-                StringBuilder buffer = new StringBuilder();
-
-                buffer.append(
-                        DateUtil.formatClientSideDate(item.getStart()));
-                buffer.append("-");
-                buffer.append(DateUtil
-                        .formatClientSideTime(item.getStartTime()));
-
-                String newStartDate = buffer.toString();
-
-                buffer = new StringBuilder();
-                buffer.append(
-                        DateUtil.formatClientSideDate(item.getEnd()));
-                buffer.append("-");
-                buffer.append(
-                        DateUtil.formatClientSideTime(item.getEndTime()));
-
-                String newEndDate = buffer.toString();
-
-                rpc.itemResize(item.getIndex(), newStartDate, newEndDate);
+                rpc.itemResize(item.getIndex(),
+                        DateConstants.toRPCDateTime(item.getStartTime()),
+                        DateConstants.toRPCDateTime(item.getEndTime()));
             }
         });
         getWidget().setListener((VCalendar.ScrollListener) scrollPosition -> {
@@ -398,7 +376,8 @@ public class CalendarConnector extends AbstractComponentConnector
                                  List<CalendarState.Item> items) {
         CalendarState state = getState();
         getWidget().updateMonthView(state.firstDayOfWeek,
-                getWidget().getDateTimeFormat().parse(state.now), days.size(),
+                DateConstants.toClientDateTime(state.now),
+                days.size(),
                 calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days));
     }
@@ -408,7 +387,7 @@ public class CalendarConnector extends AbstractComponentConnector
         CalendarState state = getState();
         getWidget().updateWeekView(
                 state.scroll,
-                getWidget().getDateTimeFormat().parse(state.now),
+                DateConstants.toClientDateTime(state.now),
                 state.firstDayOfWeek,
                 calendarEventListOf(items, state.format24H),
                 calendarDayListOf(days)
@@ -481,8 +460,7 @@ public class CalendarConnector extends AbstractComponentConnector
         }
 
         for (CalendarState.Action action : actions) {
-            String id = action.actionKey + "-" + action.startDate + "-"
-                    + action.endDate;
+            String id = action.actionKey + "-" + action.startDate + "-" + action.endDate;
             actionMap.put(id + "_k", action.actionKey);
             actionMap.put(id + "_c", action.caption);
             actionMap.put(id + "_s", action.startDate);
@@ -503,7 +481,7 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the original action ID that was passed in from the shared state
      *
      * @param actionKey the unique action key
-     * @return
+     * @return The original action ID that was passed in from the shared state
      * @since 7.1.2
      */
     public String getActionID(String actionKey) {
@@ -514,7 +492,7 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the text that is displayed for a context menu item
      *
      * @param actionKey The unique action key
-     * @return
+     * @return The text that is displayed for a context menu item
      */
     public String getActionCaption(String actionKey) {
         return actionMap.get(actionKey + "_c");
@@ -524,7 +502,7 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the icon url for a context menu item
      *
      * @param actionKey The unique action key
-     * @return
+     * @return The icon url for a context menu item
      */
     public String getActionIcon(String actionKey) {
         return actionMap.get(actionKey + "_i");
@@ -534,28 +512,24 @@ public class CalendarConnector extends AbstractComponentConnector
      * Get the start date for an action item
      *
      * @param actionKey The unique action key
-     * @return
-     * @throws ParseException
+     * @return The start date for an action item
+     * @throws ParseException on parse
      */
     public Date getActionStartDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_s");
-        DateTimeFormat formatter = DateTimeFormat
-                .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-        return formatter.parse(dateStr);
+        return VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateStr);
     }
 
     /**
      * Get the end date for an action item
      *
      * @param actionKey The unique action key
-     * @return
-     * @throws ParseException
+     * @return The end date for an action item
+     * @throws ParseException on parse
      */
     public Date getActionEndDate(String actionKey) throws ParseException {
         String dateStr = actionMap.get(actionKey + "_e");
-        DateTimeFormat formatter = DateTimeFormat
-                .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-        return formatter.parse(dateStr);
+        return VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateStr);
     }
 
     /**
@@ -564,9 +538,9 @@ public class CalendarConnector extends AbstractComponentConnector
 
     @Override
     public Action[] getActions() {
-        List<Action> actions = new ArrayList<Action>();
-        for (int i = 0; i < actionKeys.size(); i++) {
-            final String actionKey = actionKeys.get(i);
+        List<Action> actions = new ArrayList<>();
+
+        for (final String actionKey : actionKeys) {
             final VCalendarAction a = new VCalendarAction(this, rpc, actionKey);
             a.setCaption(getActionCaption(actionKey));
             a.setIconUrl(getActionIcon(actionKey));
@@ -575,12 +549,12 @@ public class CalendarConnector extends AbstractComponentConnector
                 a.setActionStartDate(getActionStartDate(actionKey));
                 a.setActionEndDate(getActionEndDate(actionKey));
             } catch (ParseException pe) {
-                Logger.getLogger(CalendarConnector.class.getName()).
-                        log(Level.SEVERE,"", pe);
+                Logger.getLogger(CalendarConnector.class.getName()).log(Level.SEVERE, "", pe);
             }
 
             actions.add(a);
         }
+
         return actions.toArray(new Action[actions.size()]);
     }
 
@@ -594,32 +568,35 @@ public class CalendarConnector extends AbstractComponentConnector
         return getConnectorId();
     }
 
-    private List<CalendarItem> calendarEventListOf(
-            List<CalendarState.Item> items, boolean format24h) {
+    private List<CalendarItem> calendarEventListOf(List<CalendarState.Item> items, boolean format24h) {
 
         List<CalendarItem> list = new ArrayList<>(items.size());
 
         for (CalendarState.Item item : items) {
+
+            // TODO replace with timestamps or object states
             final String dateFrom = item.dateFrom;
             final String dateTo = item.dateTo;
             final String timeFrom = item.timeFrom;
             final String timeTo = item.timeTo;
+
             CalendarItem calendarItem = new CalendarItem();
+            calendarItem.setFormat24h(format24h);
             calendarItem.setAllDay(item.allDay);
             calendarItem.setCaption(item.caption);
             calendarItem.setDescription(item.description);
-            calendarItem.setStart(getWidget().getDateFormat().parse(dateFrom));
-            calendarItem.setEnd(getWidget().getDateFormat().parse(dateTo));
-            calendarItem.setFormat24h(format24h);
-            calendarItem.setStartTime(getWidget().getDateTimeFormat()
-                    .parse(dateFrom + " " + timeFrom));
-            calendarItem.setEndTime(getWidget().getDateTimeFormat()
-                    .parse(dateTo + " " + timeTo));
+            calendarItem.setDateCaptionFormat(item.dateCaptionFormat);
             calendarItem.setStyleName(item.styleName);
             calendarItem.setIndex(item.index);
             calendarItem.setMoveable(item.moveable);
             calendarItem.setResizeable(item.resizeable);
             calendarItem.setClickable(item.clickable);
+
+            calendarItem.setStart(VCalendar.DATE_FORMAT.parse(dateFrom));
+            calendarItem.setEnd(VCalendar.DATE_FORMAT.parse(dateTo));
+            calendarItem.setStartTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateFrom + " " + timeFrom));
+            calendarItem.setEndTime(VCalendar.ACTION_DATE_TIME_FORMAT.parse(dateTo + " " + timeTo));
+
             list.add(calendarItem);
         }
         return list;
@@ -629,7 +606,8 @@ public class CalendarConnector extends AbstractComponentConnector
         List<CalendarDay> list = new ArrayList<>(days.size());
         for (CalendarState.Day day : days) {
             CalendarDay d = new CalendarDay(
-                    day.date, day.localizedDateFormat,day.dayOfWeek, day.week, day.yearOfWeek, day.blockedSlots);
+                    DateConstants.toClientDate(day.date),
+                    day.localizedDateFormat, day.dayOfWeek, day.week, day.yearOfWeek, day.blockedSlots);
             list.add(d);
         }
         return list;

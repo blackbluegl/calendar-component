@@ -17,8 +17,12 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 
 /**
  * Implements basic functionality needed to enable forward navigation.
@@ -42,41 +46,47 @@ public class BasicForwardHandler implements CalendarComponentEvents.ForwardHandl
 
         int firstDay = event.getComponent().getFirstVisibleDayOfWeek();
         int lastDay = event.getComponent().getLastVisibleDayOfWeek();
-        Date start = event.getComponent().getStartDate();
-        Date end = event.getComponent().getEndDate();
 
-        int durationInDays = 0;
+        ZonedDateTime start = event.getComponent().getStartDate();
+        ZonedDateTime end = event.getComponent().getEndDate();
+
+        long durationInDays;
 
         // for week view durationInDays = 7, for day view durationInDays = 1
         if (event.getComponent().isDayMode()) { // day view
             durationInDays = 1;
         } else if (event.getComponent().isWeeklyMode()) {
             durationInDays = 7;
+        } else {
+            durationInDays = Duration.between(start, end).toDays() +1;
         }
 
-        // set new start and end times
-        Calendar javaCalendar = Calendar.getInstance(event.getComponent().getInternalCalendar().getTimeZone());
-        javaCalendar.setTime(start);
-        javaCalendar.add(Calendar.DAY_OF_MONTH, durationInDays);
-        Date newStart = javaCalendar.getTime();
-
-        javaCalendar.setTime(end);
-        javaCalendar.add(Calendar.DAY_OF_MONTH, durationInDays);
-        Date newEnd = javaCalendar.getTime();
+        start = start.plus(durationInDays, ChronoUnit.DAYS);
+        end = end.plus(durationInDays, ChronoUnit.DAYS);
 
         if (event.getComponent().isDayMode()) { // day view
 
-            int dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
+            int dayOfWeek = start.get(ChronoField.DAY_OF_WEEK);
 
+            ZonedDateTime newDate = start;
             while (!(firstDay <= dayOfWeek && dayOfWeek <= lastDay)) {
-                javaCalendar.add(Calendar.DAY_OF_MONTH, 1);
-                dayOfWeek = javaCalendar.get(Calendar.DAY_OF_WEEK);
+
+                newDate = newDate.plus(1, ChronoUnit.DAYS);
+
+                dayOfWeek = start.get(ChronoField.DAY_OF_WEEK);
             }
 
-            newStart = newEnd = javaCalendar.getTime();
+            setDates(event, newDate, newDate);
+
+            return;
         }
 
-        setDates(event, newStart, newEnd);
+        if (durationInDays < 28) {
+            setDates(event, start, end);
+        } else {
+            // go 7 days forth and get the first day from month
+            setDates(event, start.with(firstDayOfMonth()), end.plus(7, ChronoUnit.DAYS).with(firstDayOfMonth()));
+        }
 
     }
 
@@ -90,7 +100,7 @@ public class BasicForwardHandler implements CalendarComponentEvents.ForwardHandl
      * @param end
      *            The end date
      */
-    protected void setDates(CalendarComponentEvents.ForwardEvent event, Date start, Date end) {
+    protected void setDates(CalendarComponentEvents.ForwardEvent event, ZonedDateTime start, ZonedDateTime end) {
         event.getComponent().setStartDate(start);
         event.getComponent().setEndDate(end);
     }

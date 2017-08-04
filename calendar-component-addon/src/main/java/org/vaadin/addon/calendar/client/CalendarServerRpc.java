@@ -17,6 +17,8 @@ package org.vaadin.addon.calendar.client;
 
 import com.vaadin.shared.annotations.Delayed;
 import com.vaadin.shared.communication.ServerRpc;
+import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
 
 /**
  * @since 7.1
@@ -24,25 +26,25 @@ import com.vaadin.shared.communication.ServerRpc;
  */
 public interface CalendarServerRpc extends ServerRpc {
 
-    void itemMove(int itemIndex, String newDate);
+    void itemMove(int itemIndex, CalDate date);
 
     void itemClick(int itemIndex);
 
-    void itemResize(int itemIndex, String newStartDate, String newEndDate);
+    void itemResize(int itemIndex, CalDate newStartDate, CalDate newEndDate);
 
-    void rangeSelect(String range);
+    void rangeSelect(SelectionRange dateSelectionRange);
 
     void forward();
 
     void backward();
 
-    void dateClick(String date);
+    void dateClick(CalDate date);
 
     void weekClick(String eventValue);
 
-    void actionOnEmptyCell(String actionKey, String startDate, String endDate);
+    void actionOnEmptyCell(String actionKey, CalDate startDate, CalDate endDate);
 
-    void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex);
+    void actionOnItem(String actionKey, CalDate startDate, CalDate endDate, int itemIndex);
 
     @Delayed(lastOnly = true)
     void scroll(int scrollPosition);

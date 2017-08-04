@@ -29,6 +29,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.vaadin.client.WidgetUtil;
 import org.vaadin.addon.calendar.client.DateConstants;
+import org.vaadin.addon.calendar.client.ui.util.Strings;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -176,8 +177,12 @@ public class DateCellDayItem extends FocusableHTML
      */
     private void updateCaptions(boolean bigMode) {
         String innerHtml;
-        String timeAsText = calendarItem.getTimeAsText();
         String htmlOrText;
+
+        String timeAsText = Strings.format(
+                calendarItem.getDateCaptionFormat(),
+                calendarItem.getFormattedStartTime(),
+                calendarItem.getFormattedEndTime());
 
         if (dateCell.weekgrid.getCalendar().isItemCaptionAsHtml()) {
             htmlOrText = calendarItem.getCaption();
@@ -188,9 +193,9 @@ public class DateCellDayItem extends FocusableHTML
         if (bigMode) {
             innerHtml = "<span>" + timeAsText + "</span><br />" + htmlOrText;
         } else {
-            innerHtml = "<span>" + timeAsText + "<span>:</span></span> "
-                    + htmlOrText;
+            innerHtml = "<span>" + timeAsText + "<span></span></span> " + htmlOrText;
         }
+
         caption.setInnerHTML(innerHtml);
         eventContent.setInnerHTML("");
     }
@@ -559,25 +564,6 @@ public class DateCellDayItem extends FocusableHTML
      */
     private long getMinTimeRange() {
         return DateConstants.MINUTEINMILLIS * 30;
-    }
-
-    /**
-     * Build the string for sending resize items to server
-     *
-     * @param event The calendar event
-     * @return The string with resizeing information
-     */
-    private String buildResizeString(CalendarItem event) {
-
-        return String.valueOf(event.getIndex()) +
-                "," +
-                DateUtil.formatClientSideDate(event.getStart()) +
-                "-" +
-                DateUtil.formatClientSideTime(event.getStartTime()) +
-                "," +
-                DateUtil.formatClientSideDate(event.getEnd()) +
-                "-" +
-                DateUtil.formatClientSideTime(event.getEndTime());
     }
 
     private Date getTargetDateByCurrentPosition(int left) {

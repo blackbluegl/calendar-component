@@ -15,7 +15,6 @@
  */
 package org.vaadin.addon.calendar.client;
 
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.vaadin.client.ui.Action;
 import org.vaadin.addon.calendar.client.ui.schedule.CalendarItem;
 
@@ -39,9 +38,6 @@ public class VCalendarAction extends Action {
 
     private CalendarItem event;
 
-    private final DateTimeFormat dateformat_datetime = DateTimeFormat
-            .getFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-
     /**
      *
      * @param owner
@@ -60,8 +56,7 @@ public class VCalendarAction extends Action {
      * @param key
      *            The unique action key which identifies this particular action
      */
-    public VCalendarAction(CalendarConnector owner, CalendarServerRpc rpc,
-            String key) {
+    public VCalendarAction(CalendarConnector owner, CalendarServerRpc rpc, String key) {
         this(owner);
         this.rpc = rpc;
         actionKey = key;
@@ -74,13 +69,16 @@ public class VCalendarAction extends Action {
      */
     @Override
     public void execute() {
-        String startDate = dateformat_datetime.format(actionStartDate);
-        String endDate = dateformat_datetime.format(actionEndDate);
 
         if (event == null) {
-            rpc.actionOnEmptyCell(actionKey.split("-")[0], startDate, endDate);
+            rpc.actionOnEmptyCell(actionKey.split("-")[0],
+                    DateConstants.toRPCDateTime(actionStartDate),
+                    DateConstants.toRPCDateTime(actionEndDate));
         } else {
-            rpc.actionOnItem(actionKey.split("-")[0], startDate, endDate, event.getIndex());
+            rpc.actionOnItem(actionKey.split("-")[0],
+                    DateConstants.toRPCDateTime(actionStartDate),
+                    DateConstants.toRPCDateTime(actionEndDate),
+                    event.getIndex());
         }
 
         owner.getClient().getContextMenu().hide();

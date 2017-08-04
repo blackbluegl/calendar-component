@@ -28,6 +28,9 @@ import java.util.Date;
  */
 public class CalendarItem {
 
+    public static final String SINGLE_TIME = "%s";
+    public static final String RANGE_TIME = "%s - %s";
+
     private int index;
     private String caption;
     private Date start, end;
@@ -37,13 +40,31 @@ public class CalendarItem {
     private int slotIndex = -1;
     private boolean format24h;
 
-    DateTimeFormat dateformat_date = DateTimeFormat.getFormat("h:mm a");
-    DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm");
+    private String dateCaptionFormat = SINGLE_TIME;
+
+    DateTimeFormat dateformat_date = DateTimeFormat.getFormat("h:mm a"); // TODO make user adjustable
+    DateTimeFormat dateformat_date24 = DateTimeFormat.getFormat("H:mm"); // TODO make user adjustable
     private boolean allDay;
 
     private boolean moveable = true;
     private boolean resizeable = true;
     private boolean clickable = true;
+
+    /**
+     * @return The time caption format (eg. ['%s'] )
+     */
+    public String getDateCaptionFormat() {
+        return dateCaptionFormat;
+    }
+
+    /**
+     * Set the time caption format. Only the '%s' placeholder is supported.
+     *
+     * @param dateCaptionFormat The time caption format
+     */
+    public void setDateCaptionFormat(String dateCaptionFormat) {
+        this.dateCaptionFormat = dateCaptionFormat;
+    }
 
     /**
      * @see org.vaadin.addon.calendar.item.CalendarItem#getStyleName()
@@ -61,7 +82,7 @@ public class CalendarItem {
 
     /**
      * @see org.vaadin.addon.calendar.item.CalendarItem#getStyleName()
-     * @param style
+     * @param style  The stylename
      */
     public void setStyleName(String style) {
         styleName = style;
@@ -69,7 +90,7 @@ public class CalendarItem {
 
     /**
      * @see org.vaadin.addon.calendar.item.CalendarItem#getStart()
-     * @param start
+     * @param start The start date
      */
     public void setStart(Date start) {
         this.start = start;
@@ -77,7 +98,7 @@ public class CalendarItem {
 
     /**
      * @see org.vaadin.addon.calendar.item.CalendarItem#getEnd()
-     * @return
+     * @return The end date
      */
     public Date getEnd() {
         return end;
@@ -85,7 +106,7 @@ public class CalendarItem {
 
     /**
      * @see org.vaadin.addon.calendar.item.CalendarItem#getEnd()
-     * @param end
+     * @param end The end date
      */
     public void setEnd(Date end) {
         this.end = end;
@@ -133,7 +154,7 @@ public class CalendarItem {
     /**
      * Get the (server side) index of the event
      *
-     * @return
+     * @return the (server side) index of the event
      */
     public int getIndex() {
         return index;
@@ -142,7 +163,7 @@ public class CalendarItem {
     /**
      * Get the index of the slot where the event in rendered
      *
-     * @return
+     * @return the index of the slot where the event in rendered
      */
     public int getSlotIndex() {
         return slotIndex;
@@ -172,7 +193,7 @@ public class CalendarItem {
      * Get the caption of the event. The caption is the text displayed in the
      * calendar on the event.
      *
-     * @return
+     * @return The visible caption of the event
      */
     public String getCaption() {
         return caption;
@@ -193,7 +214,8 @@ public class CalendarItem {
      * Get the description of the event. The description is the text displayed
      * when hoovering over the event with the mouse
      *
-     * @return
+     * @return The description is the text displayed
+     *                      when hoovering over the event with the mouse
      */
     public String getDescription() {
         return description;
@@ -203,7 +225,8 @@ public class CalendarItem {
      * Set the description of the event. The description is the text displayed
      * when hoovering over the event with the mouse
      *
-     * @param description
+     * @param description The description is the text displayed
+     *                      when hoovering over the event with the mouse
      */
     public void setDescription(String description) {
         this.description = description;
@@ -233,29 +256,42 @@ public class CalendarItem {
     /**
      * Is the event an all day event.
      *
-     * @return
+     * @return The event an all day event.
      */
     public boolean isAllDay() {
         return allDay;
     }
 
     /**
-     * Get the time as a formatted string
+     * Get the start time as a formatted string
      *
-     * @return
+     * @return The start time as a formatted string
      */
-    public String getTimeAsText() {
+    public String getFormattedStartTime() {
         if (format24h) {
             return dateformat_date24.format(startTime);
         } else {
             return dateformat_date.format(startTime);
         }
     }
+    /**
+     * Get the end time as a formatted string
+     *
+     * @return The end time as a formatted string
+     */
+    public String getFormattedEndTime() {
+        if (format24h) {
+            return dateformat_date24.format(endTime);
+        } else {
+            return dateformat_date.format(endTime);
+        }
+    }
+
 
     /**
      * Get the amount of milliseconds between the start and end of the event
      *
-     * @return
+     * @return the amount of milliseconds between the start and end of the event
      */
     public long getRangeInMilliseconds() {
         return getEndTime().getTime() - getStartTime().getTime();
@@ -264,7 +300,7 @@ public class CalendarItem {
     /**
      * Get the amount of minutes between the start and end of the event
      *
-     * @return
+     * @return the amount of minutes between the start and end of the event
      */
     public long getRangeInMinutes() {
         return (getRangeInMilliseconds() / DateConstants.MINUTEINMILLIS);
@@ -276,10 +312,13 @@ public class CalendarItem {
      *
      * @param targetDay
      *            The date to check
-     * @return
+     * @return the amount of minutes for the event on a specific day. This is useful
+     * if the event spans several days.
      */
     public long getRangeInMinutesForDay(Date targetDay) {
-        long rangeInMinutesForDay = 0;
+
+        long rangeInMinutesForDay;
+
         // we must take into account that here can be not only 1 and 2 days, but
         // 1, 2, 3, 4... days first and last days - special cases all another
         // days between first and last - have range "ALL DAY"
@@ -287,10 +326,13 @@ public class CalendarItem {
             if (targetDay.compareTo(getStart()) == 0) { // for first day
                 rangeInMinutesForDay = DateConstants.DAYINMINUTES
                         - (getStartTime().getTime() - getStart().getTime())
-                                / DateConstants.MINUTEINMILLIS;
+                        / DateConstants.MINUTEINMILLIS;
+
             } else if (targetDay.compareTo(getEnd()) == 0) { // for last day
                 rangeInMinutesForDay = (getEndTime().getTime()
-                        - getEnd().getTime()) / DateConstants.MINUTEINMILLIS;
+                        - getEnd().getTime())
+                        / DateConstants.MINUTEINMILLIS;
+
             } else { // for in-between days
                 rangeInMinutesForDay = DateConstants.DAYINMINUTES;
             }
@@ -301,25 +343,18 @@ public class CalendarItem {
     }
 
     /**
-     * Does the event span several days
+     * Does the item span several days
      *
-     * @return
+     * @return  true, if the item span several days
      */
     @SuppressWarnings("deprecation")
     public boolean isTimeOnDifferentDays() {
-        boolean isSeveralDays = false;
-
         // if difference between start and end times is more than day - of
         // course it is not one day, but several days
-        if (getEndTime().getTime()
-                - getStartTime().getTime() > DateConstants.DAYINMILLIS) {
-            isSeveralDays = true;
-        } else { // if difference <= day ->
-            isSeveralDays = (getStart().compareTo(getEnd()) != 0)
-                    && !((getEndTime().getHours() == 0
-                            && getEndTime().getMinutes() == 0));
-        }
-        return isSeveralDays;
+
+        return getEndTime().getTime() - getStartTime().getTime() > DateConstants.DAYINMILLIS
+                || getStart().compareTo(getEnd()) != 0
+                && !((getEndTime().getHours() == 0 && getEndTime().getMinutes() == 0));
     }
 
     public boolean isMoveable() {

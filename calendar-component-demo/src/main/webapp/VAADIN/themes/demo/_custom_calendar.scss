@@ -1,7 +1,17 @@
 @mixin meetings_calendar {
 
 .meetings {
+/*
+    .v-calendar-month-day.firstDay {
+        outline: none;
+        box-sizing: border-box;
+        line-height: 1.2;
 
+         .v-calendar-day-number {
+          color: darken($v-focus-color, 10%);
+        }
+      }
+*/
     .v-calendar-header-day {
         font-size: 14px;
     }
@@ -41,5 +51,6 @@
             background-color: rgba(190, 239, 190, 0.65);
         }
     }
+
 }
 }

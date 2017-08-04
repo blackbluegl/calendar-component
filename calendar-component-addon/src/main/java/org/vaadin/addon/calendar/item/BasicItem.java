@@ -15,8 +15,8 @@
  */
 package org.vaadin.addon.calendar.item;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,8 +32,8 @@ public class BasicItem implements EditableCalendarItem {
 
     private String caption;
     private String description;
-    private Date end;
-    private Date start;
+    private ZonedDateTime end;
+    private ZonedDateTime start;
     private String styleName;
 
     private boolean isAllDay;
@@ -53,7 +53,7 @@ public class BasicItem implements EditableCalendarItem {
      * @param date
      *            The date the event occurred
      */
-    public BasicItem(String caption, String description, Date date) {
+    public BasicItem(String caption, String description, ZonedDateTime date) {
         this.caption = caption;
         this.description = description;
         start = date;
@@ -73,8 +73,7 @@ public class BasicItem implements EditableCalendarItem {
      * @param endDate
      *            The end date of the event
      */
-    public BasicItem(String caption, String description, Date startDate,
-                     Date endDate) {
+    public BasicItem(String caption, String description, ZonedDateTime startDate, ZonedDateTime endDate) {
         this.caption = caption;
         this.description = description;
         start = startDate;
@@ -107,7 +106,7 @@ public class BasicItem implements EditableCalendarItem {
      * @see org.vaadin.addon.calendar.event.CalendarItem#getEnd()
      */
     @Override
-    public Date getEnd() {
+    public ZonedDateTime getEnd() {
         return end;
     }
 
@@ -117,7 +116,7 @@ public class BasicItem implements EditableCalendarItem {
      * @see org.vaadin.addon.calendar.event.CalendarItem#getStart()
      */
     @Override
-    public Date getStart() {
+    public ZonedDateTime getStart() {
         return start;
     }
 
@@ -175,7 +174,7 @@ public class BasicItem implements EditableCalendarItem {
      * Date)
      */
     @Override
-    public void setEnd(Date end) {
+    public void setEnd(ZonedDateTime end) {
         this.end = end;
         fireEventChange();
     }
@@ -188,7 +187,7 @@ public class BasicItem implements EditableCalendarItem {
      * .Date)
      */
     @Override
-    public void setStart(Date start) {
+    public void setStart(ZonedDateTime start) {
         this.start = start;
         fireEventChange();
     }

@@ -1,8 +1,9 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
+import com.vaadin.icons.VaadinIcons;
 import org.vaadin.addon.calendar.item.BasicItem;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 /**
  * Meeting Pojo
@@ -52,7 +53,7 @@ public class MeetingItem extends BasicItem {
 
 	@Override
 	public boolean isAllDay() {
-		return false;
+		return meeting.isLongTimeEvent();
 	}
 
     @Override
@@ -65,21 +66,28 @@ public class MeetingItem extends BasicItem {
         return meeting.isEditable();
     }
 
-    @Override
-    public boolean isClickable() {
-        return meeting.isEditable();
-    }
+//    @Override
+//    public boolean isClickable() {
+//        return meeting.isEditable();
+//    }
 
     @Override
-	public void setEnd(Date end) {
+	public void setEnd(ZonedDateTime end) {
 		meeting.setEnd(end);
 		super.setEnd(end);
 	}
 
 	@Override
-	public void setStart(Date start) {
+	public void setStart(ZonedDateTime start) {
 		meeting.setStart(start);
 		super.setStart(start);
+	}
+
+    @Override
+    public String getDateCaptionFormat() {
+        //return CalendarItem.RANGE_TIME;
+        return VaadinIcons.CLOCK.getHtml()+" %s<br>" +
+               VaadinIcons.ARROW_CIRCLE_RIGHT_O.getHtml()+" %s";
 	}
 
 }

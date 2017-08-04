@@ -15,10 +15,11 @@
  */
 package org.vaadin.addon.calendar.item;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -51,26 +52,23 @@ public class BasicItemProvider<ITEM extends BasicItem> implements
      * util.Date, java.util.Date)
      */
     @Override
-    public List<ITEM> getItems(Date startDate, Date endDate) {
-        ArrayList<ITEM> activeEvents = new ArrayList<>();
+    public List<ITEM> getItems(ZonedDateTime startDate, ZonedDateTime endDate) {
 
-        for (ITEM ev : itemList) {
-            long from = startDate.getTime();
-            long to = endDate.getTime();
+        final long startRange = startDate.toEpochSecond();
+        final long endRange = endDate.toEpochSecond();
 
-            if (ev.getStart() != null && ev.getEnd() != null) {
-                long f = ev.getStart().getTime();
-                long t = ev.getEnd().getTime();
-                // Select only items that overlaps with startDate and
-                // endDate.
-                if ((f <= to && f >= from) || (t >= from && t <= to)
-                        || (f <= from && t >= to)) {
-                    activeEvents.add(ev);
-                }
-            }
-        }
+        return itemList.parallelStream().filter(i -> {
 
-        return activeEvents;
+            long itemStart = i.getStart().toEpochSecond();
+            long itemEnd = i.getEnd().toEpochSecond();
+
+            // Select only items that overlaps with startDate and endDate.
+
+            return ((itemStart >= startRange && itemStart <= endRange)
+                    || (itemEnd >= startRange && itemEnd <= endRange)
+                    || (itemStart <= startRange && itemEnd >= endRange));
+
+        }).collect(Collectors.toList());
     }
 
     /**

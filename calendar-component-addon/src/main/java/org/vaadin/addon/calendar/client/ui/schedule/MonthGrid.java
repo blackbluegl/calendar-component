@@ -19,9 +19,11 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  *
@@ -86,20 +88,24 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
                     if (startDate.compareTo(d) <= 0
                             && endDate.compareTo(d) >= 0) {
                         sdc.addStyleDependentName("selected");
+
                     } else if (startDate.compareTo(d) >= 0
                             && endDate.compareTo(d) <= 0) {
                         sdc.addStyleDependentName("selected");
+
                     } else {
                         sdc.removeStyleDependentName("selected");
+
                     }
                 }
             }
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void setSelectionReady() {
         if (selectionStart != null && selectionEnd != null) {
-            String value = "";
+
             Date startDate = selectionStart.getDate();
             Date endDate = selectionEnd.getDate();
             if (startDate.compareTo(endDate) > 0) {
@@ -109,9 +115,18 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
             }
 
             if (calendar.getRangeSelectListener() != null) {
-                value = calendar.getDateFormat().format(startDate) + "TO"
-                        + calendar.getDateFormat().format(endDate);
-                calendar.getRangeSelectListener().rangeSelected(value);
+
+                SelectionRange weekSelection = new SelectionRange();
+                weekSelection.setStartDay(DateConstants.toRPCDate(
+                        startDate.getYear(),
+                        startDate.getMonth(),
+                        startDate.getDate()));
+                weekSelection.setEndDay(DateConstants.toRPCDate(
+                        endDate.getYear(),
+                        endDate.getMonth(),
+                        endDate.getDate()));
+
+                calendar.getRangeSelectListener().rangeSelected(weekSelection);
             }
             selectionStart = null;
             selectionEnd = null;
@@ -136,41 +151,44 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     }
 
     public void updateCellSizes(int totalWidthPX, int totalHeightPX) {
+
         boolean setHeight = totalHeightPX > 0;
         boolean setWidth = totalWidthPX > 0;
+
         int rows = getRowCount();
         int cells = getCellCount(0);
+
         int cellWidth = (totalWidthPX / cells) - 1;
         int widthRemainder = totalWidthPX % cells;
-        // Division for cells might not be even. Distribute it evenly to
-        // will whole space.
-        int heightPX = totalHeightPX;
-        int cellHeight = heightPX / rows;
-        int heightRemainder = heightPX % rows;
+
+        // Division for cells might not be even. Distribute it evenly to will whole space.
+        int cellHeight = totalHeightPX / rows;
+        int heightRemainder = totalHeightPX % rows;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cells; j++) {
-                SimpleDayCell sdc = (SimpleDayCell) getWidget(i, j);
+
+                SimpleDayCell dayCell = (SimpleDayCell) getWidget(i, j);
 
                 if (setWidth) {
                     if (widthRemainder > 0) {
-                        sdc.setWidth(cellWidth + 1 + "px");
+                        dayCell.setWidth(cellWidth + 1 + "px");
                         widthRemainder--;
 
                     } else {
-                        sdc.setWidth(cellWidth + "px");
+                        dayCell.setWidth(cellWidth + "px");
                     }
                 }
 
                 if (setHeight) {
                     if (heightRemainder > 0) {
-                        sdc.setHeightPX(cellHeight + 1, true);
+                        dayCell.setHeightPX(cellHeight + 1, true);
 
                     } else {
-                        sdc.setHeightPX(cellHeight, true);
+                        dayCell.setHeightPX(cellHeight, true);
                     }
                 } else {
-                    sdc.setHeightPX(-1, true);
+                    dayCell.setHeightPX(-1, true);
                 }
             }
             heightRemainder--;
@@ -180,6 +198,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
     /**
      * Disable or enable possibility to select ranges
      */
+    @SuppressWarnings("unused")
     public void setRangeSelect(boolean b) {
         rangeSelectDisabled = !b;
     }
@@ -213,5 +232,9 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         }
 
         return -1;
+    }
+
+    private static Logger getLogger() {
+        return Logger.getLogger(MonthGrid.class.getName());
     }
 }

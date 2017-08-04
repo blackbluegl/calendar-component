@@ -28,7 +28,7 @@ public abstract class AbstractEventComparator implements Comparator<CalendarItem
     }
 
     protected int indexCompare(CalendarItem e1, CalendarItem e2) {
-        return ((Integer) e2.getIndex()).compareTo(e1.getIndex());
+        return Integer.compare(e2.getIndex(), e1.getIndex());
     }
 
     protected abstract int doCompare(CalendarItem o1, CalendarItem o2);

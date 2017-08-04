@@ -1,19 +1,20 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
 import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Notification;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
+import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.Month;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 import java.util.Random;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 
 public class MeetingCalendar extends CustomComponent {
@@ -23,6 +24,8 @@ public class MeetingCalendar extends CustomComponent {
     private MeetingDataProvider eventProvider;
 
     private Calendar<MeetingItem> calendar;
+
+    public Panel panel;
 
     public MeetingCalendar() {
 
@@ -35,25 +38,31 @@ public class MeetingCalendar extends CustomComponent {
         layout.setMargin(false);
         layout.setSpacing(false);
         layout.setSizeFull();
-        layout.addComponent(calendar);
+
+        panel = new Panel(calendar);
+        panel.setHeight(100, Unit.PERCENTAGE);
+        layout.addComponent(panel);
+
         setCompositionRoot(layout);
 
     }
 
-    public void setWeekDayRange(int from, int to) {
-        assert (from >= 1 && from < to && to <= 7);
-        calendar.setFirstVisibleDayOfWeek(1); // XXX reset to week
-        calendar.setLastVisibleDayOfWeek(7); // XXX reset to week
-        calendar.setFirstVisibleDayOfWeek(from);
-        calendar.setLastVisibleDayOfWeek(to);
+    public void switchToMonth(Month month) {
+        calendar.withMonth(month);
+    }
+
+    public Calendar<MeetingItem> getCalendar() {
+        return calendar;
     }
 
     private void onCalendarRangeSelect(CalendarComponentEvents.RangeSelectEvent event) {
 
-        Meeting meeting = new Meeting();
+        Meeting meeting = new Meeting(
+                !event.getStart().truncatedTo(DAYS).equals(event.getEnd().truncatedTo(DAYS)));
 
         meeting.setStart(event.getStart());
         meeting.setEnd(event.getEnd());
+
         meeting.setName("A Name");
         meeting.setDetails("A Detail");
 
@@ -79,16 +88,23 @@ public class MeetingCalendar extends CustomComponent {
         calendar = new Calendar<>(eventProvider);
 
         calendar.addStyleName("meetings");
-        calendar.setLocale(Locale.getDefault());
         calendar.setWidth(100.0f, Unit.PERCENTAGE);
         calendar.setHeight(100.0f, Unit.PERCENTAGE);
-        calendar.setItemCaptionAsHtml(true);
         calendar.setResponsive(true);
 
+        calendar.setItemCaptionAsHtml(true);
         calendar.setContentMode(ContentMode.HTML);
 
-        calendar.setFirstVisibleDayOfWeek(1);
-        calendar.setLastVisibleDayOfWeek(7);
+        //calendar.setLocale(Locale.US);
+        //calendar.setZoneId(ZoneId.of("America/Chicago"));
+        calendar.setWeeklyCaptionProvider(date ->  "<br>" + DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
+
+        calendar.setVisibleDayRange(1, 7);
+
+        calendar.withMonth(ZonedDateTime.now().getMonth());
+
+//        calendar.setStartDate(ZonedDateTime.now().plus(3, DAYS));
+//        calendar.setEndDate(ZonedDateTime.now().plus(10, DAYS));
 
         addCalendarEventListeners();
 
@@ -97,14 +113,13 @@ public class MeetingCalendar extends CustomComponent {
 
     private void setupBlockedTimeSlots() {
 
-        java.util.Calendar cal = (java.util.Calendar)calendar.getInternalCalendar().clone();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.set(java.util.Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
         cal.clear(java.util.Calendar.MINUTE);
         cal.clear(java.util.Calendar.SECOND);
         cal.clear(java.util.Calendar.MILLISECOND);
 
         GregorianCalendar bcal = new GregorianCalendar(UI.getCurrent().getLocale());
-
         bcal.clear();
 
         long start = bcal.getTimeInMillis();
@@ -130,63 +145,10 @@ public class MeetingCalendar extends CustomComponent {
     }
 
     private void addCalendarEventListeners() {
-//        calendar.setHandler(new ExtendedForwardHandler());
-//        calendar.setHandler(new ExtendedBackwardHandler());
-//        calendar.setHandler(new ExtendedBasicItemMoveHandler());
-//        calendar.setHandler(new ExtendedItemResizeHandler());
-        calendar.setHandler(new BasicDateClickHandler(false));
+        calendar.setHandler(new BasicDateClickHandler(true));
         calendar.setHandler(this::onCalendarClick);
         calendar.setHandler(this::onCalendarRangeSelect);
     }
-
-//    private final class ExtendedBasicItemMoveHandler extends BasicItemMoveHandler {
-//
-//        @Override
-//        public void itemMove(CalendarComponentEvents.ItemMoveEvent event) {
-//
-//            MeetingItem item = (MeetingItem) event.getCalendarItem();
-//            long length = item.getEnd().getTime() - item.getStart().getTime();
-//            Date newStart = event.getNewStart();
-//            Date newEnd = new Date(newStart.getTime() + length);
-//            updateMeeting(item, newStart, newEnd);
-//        }
-//    }
-
-//    private final class ExtendedItemResizeHandler extends BasicItemResizeHandler {
-//
-//        @Override
-//        public void itemResize(CalendarComponentEvents.ItemResizeEvent event) {
-//
-//            MeetingItem item = (MeetingItem) event.getCalendarItem();
-//            updateMeeting(item, event.getNewStart(), event.getNewEnd());
-//        }
-//    }
-
-//    private final class ExtendedForwardHandler extends BasicForwardHandler {
-//
-//        @Override
-//        protected void setDates(CalendarComponentEvents.ForwardEvent event, Date start, Date end) {
-//
-//            /*
-//             * TODO Load entities from next week here
-//             */
-//
-//            super.setDates(event, start, end);
-//        }
-//    }
-
-//    private final class ExtendedBackwardHandler extends BasicBackwardHandler {
-//
-//        @Override
-//        protected void setDates(CalendarComponentEvents.BackwardEvent event, Date start, Date end) {
-//
-//            /*
-//             * TODO Load entities from prev week here
-//             */
-//
-//            super.setDates(event, start, end);
-//        }
-//    }
 
     private final class MeetingDataProvider extends BasicItemProvider<MeetingItem> {
 

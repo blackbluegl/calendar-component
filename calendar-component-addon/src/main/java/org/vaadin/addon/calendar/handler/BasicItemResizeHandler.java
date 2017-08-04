@@ -19,7 +19,7 @@ import org.vaadin.addon.calendar.item.CalendarItem;
 import org.vaadin.addon.calendar.item.EditableCalendarItem;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 /**
  * Implements basic functionality needed to enable event resizing.
@@ -44,12 +44,10 @@ public class BasicItemResizeHandler implements CalendarComponentEvents.EventResi
         CalendarItem calendarItem = event.getCalendarItem();
 
         if (calendarItem instanceof EditableCalendarItem) {
-            Date newStartTime = event.getNewStart();
-            Date newEndTime = event.getNewEnd();
+            ZonedDateTime newStartTime = event.getNewStart();
+            ZonedDateTime newEndTime = event.getNewEnd();
 
-            EditableCalendarItem editableItem = (EditableCalendarItem) calendarItem;
-
-            setDates(editableItem, newStartTime, newEndTime);
+            setDates((EditableCalendarItem) calendarItem, newStartTime, newEndTime);
         }
     }
 
@@ -63,7 +61,7 @@ public class BasicItemResizeHandler implements CalendarComponentEvents.EventResi
      * @param end
      *            The end date
      */
-    protected void setDates(EditableCalendarItem event, Date start, Date end) {
+    protected void setDates(EditableCalendarItem event, ZonedDateTime start, ZonedDateTime end) {
         event.setStart(start);
         event.setEnd(end);
     }

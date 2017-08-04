@@ -1,6 +1,6 @@
 package org.vaadin.addon.calendar.demo.meetings;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 import static org.vaadin.addon.calendar.demo.meetings.Meeting.State.empty;
 
@@ -16,9 +16,9 @@ public class Meeting {
         confirmed
     }
 
-    private Date start;
+    private ZonedDateTime start;
 
-    private Date end;
+    private ZonedDateTime end;
 
     private String name;
 
@@ -26,8 +26,10 @@ public class Meeting {
 
     private State state = empty;
 
-    public Meeting() {
+    private boolean longTime;
 
+    public Meeting(boolean longTime) {
+        this.longTime = longTime;
     }
 
     public String getName() {
@@ -46,19 +48,19 @@ public class Meeting {
         this.details = details;
     }
 
-    public Date getStart() {
+    public ZonedDateTime getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
+    public void setStart(ZonedDateTime start) {
         this.start = start;
     }
 
-    public Date getEnd() {
+    public ZonedDateTime getEnd() {
         return end;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(ZonedDateTime end) {
         this.end = end;
     }
 
@@ -72,6 +74,10 @@ public class Meeting {
 
     public boolean isEditable() {
         return state != State.confirmed;
+    }
+
+    public boolean isLongTimeEvent() {
+        return longTime;
     }
 
 }

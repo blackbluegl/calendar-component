@@ -21,11 +21,9 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetails;
 import com.vaadin.server.KeyMapper;
-import com.vaadin.server.PaintException;
-import com.vaadin.server.PaintTarget;
+import com.vaadin.shared.Registration;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.LegacyComponent;
 import com.vaadin.ui.declarative.DesignAttributeHandler;
 import com.vaadin.ui.declarative.DesignContext;
 import org.jsoup.nodes.Attributes;
@@ -34,22 +32,27 @@ import org.vaadin.addon.calendar.client.CalendarEventId;
 import org.vaadin.addon.calendar.client.CalendarServerRpc;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.item.*;
+import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+import org.vaadin.addon.calendar.client.ui.schedule.CalTime;
+import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
 import org.vaadin.addon.calendar.handler.*;
-import org.vaadin.addon.calendar.ui.CalendarComponentEvent;
-import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
-import org.vaadin.addon.calendar.ui.CalendarDateRange;
-import org.vaadin.addon.calendar.ui.CalendarTargetDetails;
+import org.vaadin.addon.calendar.item.*;
+import org.vaadin.addon.calendar.ui.*;
 
 import java.lang.reflect.Method;
-import java.text.DateFormat;
 import java.text.DateFormatSymbols;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 /**
  * <p>
@@ -58,8 +61,8 @@ import java.util.logging.Logger;
  * dates.
  * </p>
  *
- * <li>You can set the viewable date range with the {@link #setStartDate(Date)}
- * and {@link #setEndDate(Date)} methods. Calendar has a default date range of
+ * <li>You can set the viewable date range with the {@link #setStartDate(ZonedDateTime)}
+ * and {@link #setEndDate(ZonedDateTime)} methods. Calendar has a default date range of
  * one week</li>
  *
  * <li>Calendar has two kind of views: monthly and weekly view</li>
@@ -73,7 +76,7 @@ import java.util.logging.Logger;
  * @author Vaadin Ltd.
  *
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial","unused"})
 
 public class Calendar<ITEM extends EditableCalendarItem> extends AbstractComponent implements
         CalendarComponentEvents.NavigationNotifier,
@@ -82,14 +85,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         CalendarComponentEvents.ItemResizeNotifier,
         CalendarItemProvider.ItemSetChangedListener,
         DropTarget,
-        Action.Container,
-        LegacyComponent,
-        CalendarItemProvider<ITEM> {
+        Action.Container
+        //,LegacyComponent
+        //,CalendarItemProvider<ITEM>
+{
 
     /**
      * Calendar can use either 12 hours clock or 24 hours clock.
      */
-    @Deprecated
     public enum TimeFormat {
         Format12H(), Format24H()
     }
@@ -97,17 +100,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     /** Defines currently active format for time. 12H/24H. */
     protected TimeFormat currentTimeFormat;
 
-    /** Internal calendar data source. */
-    protected java.util.Calendar currentCalendar = java.util.Calendar.getInstance();
-
     /** Defines the component's active time zone. */
-    protected TimeZone timezone;
+    protected ZoneId zoneId = ZoneId.systemDefault();
 
     /** Defines the calendar's date range starting point. */
-    protected Date startDate = null;
+    protected ZonedDateTime startDate = null;
 
     /** Defines the calendar's date range ending point. */
-    protected Date endDate = null;
+    protected ZonedDateTime endDate = null;
 
     /** Item provider. */
     private CalendarItemProvider<ITEM> calendarItemProvider;
@@ -117,28 +117,21 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     protected List<? extends CalendarItem> items;
 
+
     /** Date format that will be used in the UIDL for dates. */
-    protected DateFormat df_date = new SimpleDateFormat("yyyy-MM-dd");
+    private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(DateConstants.DATE_FORMAT_PATTERN);
 
     /** Time format that will be used in the UIDL for time. */
-    protected DateFormat df_time = new SimpleDateFormat("HH:mm:ss");
+    private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.TIME_FORMAT_PATTERN);
 
-    /** Date format that will be used in the UIDL for both date and time. */
-    protected DateFormat df_date_time = new SimpleDateFormat(
-            DateConstants.CLIENT_DATE_FORMAT + "-"
-                    + DateConstants.CLIENT_TIME_FORMAT);
+    /** Time format that will be used in the UIDL for time. */
+    protected final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
 
-    /**
-     * Week view's scroll position. Client sends updates to this value so that
-     * scroll position wont reset all the time.
-     */
-    private int scrollTop = 0;
-
-    /** Caption format for the weekly view */
-    private String weeklyCaptionFormat = null;
+    /** Caption format provuder for the weekly view */
+    private WeeklyCaptionProvider weeklyCaptionFormatProvider = date -> DateTimeFormatter.ofPattern("yyyy/MM/dd", getLocale()).format(date);
 
     /** Map from event ids to event handlers */
-    private final Map<String, EventListener> handlers;
+    private final Map<String, Registration> handlers;
 
     /**
      * Drop Handler for Vaadin DD. By default null.
@@ -176,11 +169,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private KeyMapper<Action> actionMapper = null;
 
     /**
-     *
-     */
-    private CalendarServerRpcImpl rpc = new CalendarServerRpcImpl();
-
-    /**
      * The cached minimum minute shown when using
      * {@link #autoScaleVisibleHoursOfDay()}.
      */
@@ -191,8 +179,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * {@link #autoScaleVisibleHoursOfDay()}.
      */
     private Integer maxTimeInMinutes;
-
-    private Integer customFirstDayOfWeek;
 
     /**
      * A map with blocked timeslots.<br>
@@ -217,17 +203,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * Default date range is one week.
      */
     public Calendar() {
-        this(null, new BasicItemProvider());
+        this(null, null);
     }
 
     /**
      * Construct a Vaadin Calendar with a BasicItemProvider and the provided
      * caption. Default date range is one week.
      *
-     * @param caption
+     * @param caption A caption
      */
     public Calendar(String caption) {
-        this(caption, new BasicItemProvider());
+        this(caption, null);
     }
 
     /**
@@ -239,8 +225,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * <p>
      * By default, Vaadin Calendar will show dates from the start of the current
-     * week to the end of the current week. Use {@link #setStartDate(Date)} and
-     * {@link #setEndDate(Date)} to change this.
+     * week to the end of the current week. Use {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)} to change this.
      * </p>
      *
      * @param dataProvider
@@ -259,26 +245,29 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * <p>
      * By default, Vaadin Calendar will show dates from the start of the current
-     * week to the end of the current week. Use {@link #setStartDate(Date)} and
-     * {@link #setEndDate(Date)} to change this.
+     * week to the end of the current week. Use {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)} to change this.
      * </p>
      *
+     * @param caption
+     *            A caption
      * @param dataProvider
      *            Item provider, cannot be null.
      */
     // this is the constructor every other constructor calls
     public Calendar(String caption, CalendarItemProvider<ITEM> dataProvider) {
-        registerRpc(rpc);
+        registerRpc(new CalendarServerRpcImpl());
         setCaption(caption);
         handlers = new HashMap<>();
         setDefaultHandlers();
-        currentCalendar.setTime(new Date());
-        setDataProvider(dataProvider);
+        setDataProvider(dataProvider != null ? dataProvider : new BasicItemProvider());
         getState().firstDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
         getState().firstHourOfDay = firstHour;
         getState().lastHourOfDay = lastHour;
         setTimeFormat(null);
+
+        withWeek(ZonedDateTime.now(getZoneId()));
     }
 
     @Override
@@ -295,12 +284,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     public void beforeClientResponse(boolean initial) {
         super.beforeClientResponse(initial);
 
-        initCalendarWithLocale();
-
         getState().format24H = TimeFormat.Format24H == getTimeFormat();
         setupDaysAndActions();
         setupCalendarItems();
-        rpc.scroll(scrollTop);
     }
 
     /**
@@ -338,27 +324,31 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * @return First visible date.
      */
-    public Date getStartDate() {
+    public ZonedDateTime getStartDate() {
         if (startDate == null) {
-            currentCalendar.set(java.util.Calendar.MILLISECOND, 0);
-            currentCalendar.set(java.util.Calendar.SECOND, 0);
-            currentCalendar.set(java.util.Calendar.MINUTE, 0);
-            currentCalendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
-            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK, currentCalendar.getFirstDayOfWeek());
-            return currentCalendar.getTime();
+            // A new datetime with components zone id
+            startDate = ZonedDateTime.now(getZoneId())
+                    // and first day in week
+                    .with(ChronoField.DAY_OF_WEEK, 1)
+                    // with a time of 00:00:00:000
+                    .with(LocalTime.MIN);
         }
         return startDate;
     }
 
     /**
-     * Sets start date for the calendar. This and {@link #setEndDate(Date)}
+     * Sets start date for the calendar. This and {@link #setEndDate(ZonedDateTime)}
      * control the range of dates visible on the component. The default range is
      * one week.
      *
      * @param date
      *            First visible date to show.
      */
-    public void setStartDate(Date date) {
+    public void setStartDate(ZonedDateTime date) {
+        // reset all time information
+        date = date.with(LocalTime.MIN);
+
+        // and update, if the given date is not the same as current date
         if (!date.equals(startDate)) {
             startDate = date;
             markAsDirty();
@@ -370,14 +360,13 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * @return Last visible date.
      */
-    public Date getEndDate() {
+    public ZonedDateTime getEndDate() {
         if (endDate == null) {
-            currentCalendar.set(java.util.Calendar.MILLISECOND, 0);
-            currentCalendar.set(java.util.Calendar.SECOND, 59);
-            currentCalendar.set(java.util.Calendar.MINUTE, 59);
-            currentCalendar.set(java.util.Calendar.HOUR_OF_DAY, 23);
-            currentCalendar.set(java.util.Calendar.DAY_OF_WEEK, currentCalendar.getFirstDayOfWeek() + 6);
-            return currentCalendar.getTime();
+            endDate = ZonedDateTime.now(getZoneId())
+                    // and last day of week
+                    .with(ChronoField.DAY_OF_WEEK, 7)
+                    // with a time of 23:59:59.999999999
+                    .with(LocalTime.MAX);
         }
         return endDate;
     }
@@ -386,17 +375,24 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * Sets end date for the calendar. Starting from startDate, only six weeks
      * will be shown if duration to endDate is longer than six weeks.
      *
-     * This and {@link #setStartDate(Date)} control the range of dates visible
+     * This and {@link #setStartDate(ZonedDateTime)} control the range of dates visible
      * on the component. The default range is one week.
      *
      * @param date
      *            Last visible date to show.
      */
-    public void setEndDate(Date date) {
-        if (startDate != null && startDate.after(date)) {
-            startDate = (Date) date.clone();
+    public void setEndDate(ZonedDateTime date) {
+        // reset all time information
+        date = date.with(LocalTime.MIN);
+
+        // check start after end
+        if (startDate != null && startDate.isAfter(date)) {
+            startDate = date;
             markAsDirty();
-        } else if (!date.equals(endDate)) {
+        } else
+
+            // and end is not the same as current end
+            if (!date.equals(endDate)) {
             endDate = date;
             markAsDirty();
         }
@@ -410,29 +406,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     @Override
     public void setLocale(Locale newLocale) {
         super.setLocale(newLocale);
-        initCalendarWithLocale();
-    }
-
-    /**
-     * Initialize the java calendar instance with the current locale and
-     * timezone.
-     */
-    private void initCalendarWithLocale() {
-        if (timezone != null) {
-            currentCalendar = java.util.Calendar.getInstance(timezone, getLocale());
-
-        } else {
-            currentCalendar = java.util.Calendar.getInstance(getLocale());
-        }
-
-        if (customFirstDayOfWeek != null) {
-            currentCalendar.setFirstDayOfWeek(customFirstDayOfWeek);
-        }
+        markAsDirty();
     }
 
     private void setupCalendarItems() {
 
-        int durationInDays = (int) ((endDate.getTime() - startDate.getTime()) / DateConstants.DAYINMILLIS);
+        long durationInDays = Duration.between(startDate, endDate).toDays();
         durationInDays++;
 
         if (durationInDays > 60) {
@@ -440,10 +419,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                     "Daterange is too big (max 60) = " + durationInDays);
         }
 
-        Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
-        Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
+        ZonedDateTime firstDateToShow = expandStartDate(startDate, durationInDays > 7);
+        ZonedDateTime lastDateToShow = expandEndDate(endDate, durationInDays > 7);
 
-        currentCalendar.setTime(firstDateToShow);
         items = getDataProvider().getItems(firstDateToShow, lastDateToShow);
         cacheMinMaxTimeOfDay(items);
 
@@ -454,12 +432,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 CalendarState.Item item = new CalendarState.Item();
                 item.index = i;
                 item.caption = calItem.getCaption() == null ? "" : calItem.getCaption();
-                item.dateFrom = df_date.format(calItem.getStart());
-                item.dateTo = df_date.format(calItem.getEnd());
-                item.timeFrom = df_time.format(calItem.getStart());
-                item.timeTo = df_time.format(calItem.getEnd());
+
+// XXX STRING FORMATTER yyyy-MM-dd
+                item.dateFrom = DATE_FORMAT.format(calItem.getStart());
+                item.dateTo = DATE_FORMAT.format(calItem.getEnd());
+// XXX STRING FORMATTER HH:mm:ss
+                item.timeFrom = TIME_FORMAT.format(calItem.getStart());
+                item.timeTo = TIME_FORMAT.format(calItem.getEnd());
+
                 item.description = calItem.getDescription() == null ? "" : calItem.getDescription();
                 item.styleName = calItem.getStyleName() == null ? "" : calItem.getStyleName();
+                item.dateCaptionFormat = calItem.getDateCaptionFormat();
                 item.allDay = calItem.isAllDay();
                 item.moveable = calItem.isMoveable();
                 item.resizeable = calItem.isResizeable();
@@ -498,11 +481,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
     }
 
-    private static int getMinuteOfDay(Date date) {
-        java.util.Calendar calendar = java.util.Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(java.util.Calendar.HOUR_OF_DAY) * 60
-                + calendar.get(java.util.Calendar.MINUTE);
+    private static int getMinuteOfDay(ZonedDateTime date) {
+        return date.getHour() * 60 + date.getMinute();
     }
 
     /**
@@ -541,12 +521,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     private void setupDaysAndActions() {
-        // Make sure we have a up-to-date locale
-        initCalendarWithLocale();
 
         CalendarState state = getState();
 
-        state.firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
+        state.firstDayOfWeek = java.util.Calendar.getInstance(getLocale()).getFirstDayOfWeek();
 
         // If only one is null, throw exception
         // If both are null, set defaults
@@ -567,63 +545,52 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             endDate = getEndDate();
         }
 
-        int durationInDays = (int) ((endDate.getTime() - startDate.getTime())/ DateConstants.DAYINMILLIS);
+        long durationInDays = Duration.between(startDate, endDate).toDays();
         durationInDays++;
         if (durationInDays > 60) {
             throw new RuntimeException( "Daterange is too big (max 60) = " + durationInDays);
         }
 
+        boolean monthView = durationInDays > 7;
+
         state.dayNames = getDayNamesShort();
         state.monthNames = getMonthNamesShort();
 
-        // Use same timezone in all dates this component handles.
         // Show "now"-marker in browser within given timezone.
-        Date now = new Date();
-        currentCalendar.setTime(now);
-        now = currentCalendar.getTime();
-
-        // Reset time zones for custom date formats
-        df_date.setTimeZone(currentCalendar.getTimeZone());
-        df_time.setTimeZone(currentCalendar.getTimeZone());
-
-        state.now = df_date.format(now) + " " + df_time.format(now);
-
-        Date firstDateToShow = expandStartDate(startDate, durationInDays > 7);
-        Date lastDateToShow = expandEndDate(endDate, durationInDays > 7);
-
-        currentCalendar.setTime(firstDateToShow);
-
-        DateFormat weeklyCaptionFormatter = getWeeklyCaptionFormatter();
-        weeklyCaptionFormatter.setTimeZone(currentCalendar.getTimeZone());
-
-        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<>();
-
-        List<CalendarState.Day> days = new ArrayList<>();
+        final ZonedDateTime now = ZonedDateTime.now(getZoneId());
+        state.now = new CalDate(now.getYear(), now.getMonthValue(), now.getDayOfMonth(),
+                new CalTime(now.getHour(), now.getMinute(), now.getSecond()));
 
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't
         // support date localization properly.
-        while (currentCalendar.getTime().compareTo(lastDateToShow) < 1) {
+        ZonedDateTime firstDateToShow = expandStartDate(startDate, monthView);
+        ZonedDateTime lastDateToShow = expandEndDate(endDate, monthView);
+        ZonedDateTime dateToShow = firstDateToShow;
 
-            final Date date = currentCalendar.getTime();
+        Map<CalendarDateRange, Set<Action>> actionMap = new HashMap<>();
+        List<CalendarState.Day> days = new ArrayList<>();
+
+        while (dateToShow.compareTo(lastDateToShow) < 1) {
 
             final CalendarState.Day day = new CalendarState.Day();
 
-            day.date = df_date.format(date);
-            day.localizedDateFormat = weeklyCaptionFormatter.format(date);
-            day.dayOfWeek = getDowByLocale(currentCalendar);
-            day.week = currentCalendar.get(java.util.Calendar.WEEK_OF_YEAR);
-            day.yearOfWeek = currentCalendar.getWeekYear();
+            day.date = new CalDate(dateToShow.getYear(), dateToShow.getMonthValue(), dateToShow.getDayOfMonth());
 
-            // XXX block time slots
+            day.localizedDateFormat = weeklyCaptionFormatProvider.captionFrom(dateToShow);
+
+            day.dayOfWeek = dateToShow.getDayOfWeek().getValue();
+            day.week = (int) WeekFields.of(getLocale()).weekOfYear().getFrom(dateToShow);
+            day.yearOfWeek = dateToShow.getYear();
+
             day.blockedSlots = new HashSet<>();
 
             if (blockedTimes.containsKey(allOverDate)) {
                 day.blockedSlots.addAll(blockedTimes.get(allOverDate));
             }
 
-            if (blockedTimes.containsKey(date)) {
-                day.blockedSlots.addAll(blockedTimes.get(date));
+            if (blockedTimes.containsKey(Date.from(dateToShow.toInstant()))) {
+                day.blockedSlots.addAll(blockedTimes.get(Date.from(dateToShow.toInstant())));
             }
 
             days.add(day);
@@ -633,20 +600,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
                 for (Action.Handler actionHandler : actionHandlers) {
 
-                    // Create calendar which omits time
-                    GregorianCalendar cal = new GregorianCalendar(getTimeZone(), getLocale());
-                    cal.clear();
-                    cal.set(currentCalendar.get(java.util.Calendar.YEAR),
-                            currentCalendar.get(java.util.Calendar.MONTH),
-                            currentCalendar.get(java.util.Calendar.DATE));
-
                     // Get day start and end times
-                    Date start = cal.getTime();
-                    cal.add(java.util.Calendar.DATE, 1);
-                    cal.add(java.util.Calendar.SECOND, -1);
-                    Date end = cal.getTime();
-
-                    boolean monthView = durationInDays > 7;
+                    ZonedDateTime start = dateToShow.with(LocalTime.MIN);
+                    ZonedDateTime end = dateToShow.with(LocalTime.MAX);
 
                     /*
                      * If in day or week view add actions for each half-an-hour.
@@ -662,7 +618,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 }
             }
 
-            currentCalendar.add(java.util.Calendar.DATE, 1);
+            dateToShow = dateToShow.plus(1, ChronoUnit.DAYS);
         }
 
         state.days = days;
@@ -670,31 +626,29 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     private void setActionsForEachHalfHour(Map<CalendarDateRange, Set<Action>> actionMap,
-                                           Date start, Date end, Action.Handler actionHandler) {
+                                           ZonedDateTime start, ZonedDateTime end, Action.Handler actionHandler) {
 
-        GregorianCalendar cal = new GregorianCalendar(getTimeZone(),  getLocale());
-        cal.setTime(start);
+        ZonedDateTime actionTime = start;
+        while (actionTime.isBefore(end)) {
 
-        while (cal.getTime().before(end)) {
+            ZonedDateTime endTime = actionTime.plus(30, ChronoUnit.MINUTES);
 
-            Date s = cal.getTime();
-            cal.add(java.util.Calendar.MINUTE, 30);
-
-            Date e = cal.getTime();
-            CalendarDateRange range = new CalendarDateRange(s, e, getTimeZone());
+            CalendarDateRange range = new CalendarDateRange(actionTime, endTime);
 
             Action[] actions = actionHandler.getActions(range, this);
             if (actions != null) {
                 Set<Action> actionSet = new LinkedHashSet<>(Arrays.asList(actions));
                 actionMap.put(range, actionSet);
             }
+
+            actionTime = endTime;
         }
     }
 
     private void setActionsForDay(Map<CalendarDateRange, Set<Action>> actionMap,
-                                  Date start, Date end, Action.Handler actionHandler) {
+                                  ZonedDateTime start, ZonedDateTime end, Action.Handler actionHandler) {
 
-        CalendarDateRange range = new CalendarDateRange(start, end, getTimeZone());
+        CalendarDateRange range = new CalendarDateRange(start, end);
         Action[] actions = actionHandler.getActions(range, this);
         if (actions != null) {
             Set<Action> actionSet = new LinkedHashSet<>(Arrays.asList(actions));
@@ -702,31 +656,27 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
     }
 
-    private List<CalendarState.Action> createActionsList(
-            Map<CalendarDateRange, Set<Action>> actionMap) {
+    private List<CalendarState.Action> createActionsList(Map<CalendarDateRange, Set<Action>> actionMap) {
+
         if (actionMap.isEmpty()) {
             return null;
         }
 
         List<CalendarState.Action> calendarActions = new ArrayList<>();
 
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                DateConstants.ACTION_DATE_FORMAT_PATTERN);
-        formatter.setTimeZone(getTimeZone());
+        for (Entry<CalendarDateRange, Set<Action>> entry : actionMap.entrySet()) {
 
-        for (Entry<CalendarDateRange, Set<Action>> entry : actionMap
-                .entrySet()) {
             CalendarDateRange range = entry.getKey();
-            Set<Action> actions = entry.getValue();
-            for (Action action : actions) {
+
+            for (Action action : entry.getValue()) {
                 String key = actionMapper.key(action);
                 CalendarState.Action calendarAction = new CalendarState.Action();
                 calendarAction.actionKey = key;
                 calendarAction.caption = action.getCaption();
                 setResource(key, action.getIcon());
                 calendarAction.iconKey = key;
-                calendarAction.startDate = formatter.format(range.getStart());
-                calendarAction.endDate = formatter.format(range.getEnd());
+                calendarAction.startDate = ACTION_DATE_TIME_FORMAT.format(range.getStart());
+                calendarAction.endDate = ACTION_DATE_TIME_FORMAT.format(range.getEnd());
                 calendarActions.add(calendarAction);
             }
         }
@@ -776,11 +726,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * @return Component's Time zone
      */
-    public TimeZone getTimeZone() {
-        if (timezone == null) {
-            return currentCalendar.getTimeZone();
-        }
-        return timezone;
+    public ZoneId getZoneId() {
+        return zoneId;
     }
 
     /**
@@ -790,27 +737,16 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param zone
      *            Time zone to use
      */
-    public void setTimeZone(TimeZone zone) {
-        timezone = zone;
-        if (!currentCalendar.getTimeZone().equals(zone)) {
-            if (zone == null) {
-                zone = TimeZone.getDefault();
-            }
-            currentCalendar.setTimeZone(zone);
-            df_date_time.setTimeZone(zone);
+    public void setZoneId(ZoneId zone) {
+
+        if (!zoneId.equals(zone)) {
+            zoneId = zone;
+
+            setStartDate(ZonedDateTime.ofInstant(getStartDate().toInstant(), zone));
+            setEndDate(ZonedDateTime.ofInstant(getEndDate().toInstant(), zone));
+
             markAsDirty();
         }
-    }
-
-    /**
-     * Get the internally used Calendar instance. This is the currently used
-     * instance of {@link java.util.Calendar} but is bound to change during the
-     * lifetime of the component.
-     *
-     * @return the currently used java calendar
-     */
-    public java.util.Calendar getInternalCalendar() {
-        return currentCalendar;
     }
 
     /**
@@ -822,18 +758,24 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * <p>
      * Note that this only affects the rendering process. Items are still
-     * requested by the dates set by {@link #setStartDate(Date)} and
-     * {@link #setEndDate(Date)}.
+     * requested by the dates set by {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)}.
      * </p>
      *
      * @param firstDay
      *            the first day of the week to show, between 1 and 7
+     * @param lastDay
+     *            the first day of the week to show, between 1 and 7
      */
-    public void setFirstVisibleDayOfWeek(int firstDay) {
-        if (this.firstDay != firstDay && firstDay >= 1 && firstDay <= 7 && getLastVisibleDayOfWeek() >= firstDay) {
-            this.firstDay = firstDay;
-            getState().firstVisibleDayOfWeek = firstDay;
-        }
+    public void setVisibleDayRange(int firstDay, int lastDay) {
+        assert (firstDay >= 1 && firstDay < lastDay && lastDay <= 7);
+
+        this.firstDay = firstDay;
+        this.lastDay = lastDay;
+
+        getState(false).firstVisibleDayOfWeek = firstDay;
+        getState().lastVisibleDayOfWeek = lastDay;
+
     }
 
     /**
@@ -845,29 +787,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public int getFirstVisibleDayOfWeek() {
         return firstDay;
-    }
-
-    /**
-     * <p>
-     * This method restricts the weekdays that are shown. This affects both the
-     * monthly and the weekly view. The general contract is that <b>firstDay <
-     * lastDay</b>.
-     * </p>
-     *
-     * <p>
-     * Note that this only affects the rendering process. Items are still
-     * requested by the dates set by {@link #setStartDate(Date)} and
-     * {@link #setEndDate(Date)}.
-     * </p>
-     *
-     * @param lastDay
-     *            the first day of the week to show, between 1 and 7
-     */
-    public void setLastVisibleDayOfWeek(int lastDay) {
-        if (this.lastDay != lastDay && lastDay >= 1 && lastDay <= 7 && getFirstVisibleDayOfWeek() <= lastDay) {
-            this.lastDay = lastDay;
-            getState().lastVisibleDayOfWeek = lastDay;
-        }
     }
 
     /**
@@ -889,8 +808,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *
      * <p>
      * Note that this only affects the rendering process. Items are still
-     * requested by the dates set by {@link #setStartDate(Date)} and
-     * {@link #setEndDate(Date)}.
+     * requested by the dates set by {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)}.
      * </p>
      * You can use {@link #autoScaleVisibleHoursOfDay()} for automatic scaling
      * of the visible hours based on current items.
@@ -920,8 +839,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * weekly view. The general contract is that <b>firstHour < lastHour</b>.
      * <p>
      * Note that this only affects the rendering process. Items are still
-     * requested by the dates set by {@link #setStartDate(Date)} and
-     * {@link #setEndDate(Date)}.
+     * requested by the dates set by {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)}.
      * <p>
      * You can use {@link #autoScaleVisibleHoursOfDay()} for automatic scaling
      * of the visible hours based on current items.
@@ -947,25 +866,24 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     /**
-     * Gets the date caption format for the weekly view.
+     * Gets the custom date caption provider for the weekly view.
      *
-     * @return The pattern used in caption of dates in weekly view.
+     * @return The custom date caption provider for the weekly view.
      */
-    public String getWeeklyCaptionFormat() {
-        return weeklyCaptionFormat;
+    public WeeklyCaptionProvider getWeeklyCaptionProvider() {
+        return weeklyCaptionFormatProvider;
     }
 
     /**
-     * Sets custom date format for the weekly view. This is the caption of the
+     * Sets custom date caption provider for the weekly view. This is the caption of the
      * date. Format could be like "mmm MM/dd".
      *
-     * @param dateFormatPattern
-     *            The date caption pattern.
+     * @param captionProvider
+     *            The caption provider.
      */
-    public void setWeeklyCaptionFormat(String dateFormatPattern) {
-        if (weeklyCaptionFormat == null && dateFormatPattern != null
-                || weeklyCaptionFormat != null && !weeklyCaptionFormat.equals(dateFormatPattern)) {
-            weeklyCaptionFormat = dateFormatPattern;
+    public void setWeeklyCaptionProvider(WeeklyCaptionProvider captionProvider) {
+        if (captionProvider != null) {
+            weeklyCaptionFormatProvider = captionProvider;
             markAsDirty();
         }
     }
@@ -997,32 +915,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         } else {
             return order;
         }
-    }
-
-    private DateFormat getWeeklyCaptionFormatter() {
-        if (weeklyCaptionFormat != null) {
-            return new SimpleDateFormat(weeklyCaptionFormat, getLocale());
-        } else {
-            return SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT, getLocale());
-        }
-    }
-
-    /**
-     * Get the day of week by the given calendar and its locale
-     *
-     * @param calendar
-     *            The calendar to use
-     * @return
-     */
-    private static int getDowByLocale(java.util.Calendar calendar) {
-        int fow = calendar.get(java.util.Calendar.DAY_OF_WEEK);
-
-        // monday first
-        if (calendar.getFirstDayOfWeek() == java.util.Calendar.MONDAY) {
-            fow = fow == java.util.Calendar.SUNDAY ? 7 : fow - 1;
-        }
-
-        return fow;
     }
 
     /**
@@ -1057,11 +949,13 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param newFromDatetime
      *            The changed from date time
      */
-    protected void fireItemMove(int index, Date newFromDatetime) {
-        CalendarComponentEvents.ItemMoveEvent event = new CalendarComponentEvents.ItemMoveEvent(this, items.get(index),
-                newFromDatetime);
+    protected void fireItemMove(int index, ZonedDateTime newFromDatetime) {
+
+        CalendarComponentEvents.ItemMoveEvent event =
+                new CalendarComponentEvents.ItemMoveEvent(this, items.get(index), newFromDatetime);
 
         if (calendarItemProvider instanceof CalendarComponentEvents.ItemMoveHandler) {
+
             // Notify event provider if it is an event move handler
             ((CalendarComponentEvents.ItemMoveHandler) calendarItemProvider).itemMove(event);
         }
@@ -1101,7 +995,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param date
      *            The date and time that was clicked
      */
-    protected void fireDateClick(Date date) {
+    protected void fireDateClick(ZonedDateTime date) {
         fireEvent(new CalendarComponentEvents.DateClickEvent(this, date));
     }
 
@@ -1115,7 +1009,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param to
      *            The end date and time of the highlighted area
      */
-    protected void fireRangeSelect(Date from, Date to) {
+    protected void fireRangeSelect(ZonedDateTime from, ZonedDateTime to) {
         fireEvent(new CalendarComponentEvents.RangeSelectEvent(this, from, to));
     }
 
@@ -1132,7 +1026,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param endTime
      *            The new end date and time of the item
      */
-    protected void fireItemResize(int index, Date startTime, Date endTime) {
+    protected void fireItemResize(int index, ZonedDateTime startTime, ZonedDateTime endTime) {
 
         CalendarComponentEvents.ItemResizeEvent event =
                 new CalendarComponentEvents.ItemResizeEvent(this, items.get(index), startTime, endTime);
@@ -1177,16 +1071,11 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            Target date
      * @return Date that is first date in same week that given date is.
      */
-    protected Date getFirstDateForWeek(Date date) {
-        int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
 
-        currentCalendar.setTime(date);
-        while (firstDayOfWeek != currentCalendar.get(java.util.Calendar.DAY_OF_WEEK)) {
-            currentCalendar.add(java.util.Calendar.DATE, -1);
-        }
-
-        return currentCalendar.getTime();
+    public ZonedDateTime getfirstDayOfWeek(ZonedDateTime date) {
+        return date.with(ChronoField.DAY_OF_WEEK, 1);
     }
+
 
     /**
      * Gets a date that is last day in the week that target given date belongs
@@ -1196,71 +1085,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            Target date
      * @return Date that is last date in same week that given date is.
      */
-    protected Date getLastDateForWeek(Date date) {
-
-        currentCalendar.setTime(date);
-        currentCalendar.add(java.util.Calendar.DATE, 1);
-
-        int firstDayOfWeek = currentCalendar.getFirstDayOfWeek();
-
-        // Roll to weeks last day using firstdayofweek. Roll until FDofW is
-        // found and then roll back one day.
-        while (firstDayOfWeek != currentCalendar.get(java.util.Calendar.DAY_OF_WEEK)) {
-            currentCalendar.add(java.util.Calendar.DATE, 1);
-        }
-
-        currentCalendar.add(java.util.Calendar.DATE, -1);
-
-        return currentCalendar.getTime();
-    }
-
-    /**
-     * Calculates the end time of the day using the given calendar and date
-     *
-     * @param date
-     * @param calendar
-     *            the calendar instance to be used in the calculation. The given
-     *            instance is unchanged in this operation.
-     * @return the given date, with time set to the end of the day
-     */
-    private static Date getEndOfDay(java.util.Calendar calendar, Date date) {
-        java.util.Calendar calendarClone = (java.util.Calendar) calendar.clone();
-
-        calendarClone.setTime(date);
-        calendarClone.set(java.util.Calendar.MILLISECOND,
-                calendarClone.getActualMaximum(java.util.Calendar.MILLISECOND));
-        calendarClone.set(java.util.Calendar.SECOND,
-                calendarClone.getActualMaximum(java.util.Calendar.SECOND));
-        calendarClone.set(java.util.Calendar.MINUTE,
-                calendarClone.getActualMaximum(java.util.Calendar.MINUTE));
-        calendarClone.set(java.util.Calendar.HOUR,
-                calendarClone.getActualMaximum(java.util.Calendar.HOUR));
-        calendarClone.set(java.util.Calendar.HOUR_OF_DAY,
-                calendarClone.getActualMaximum(java.util.Calendar.HOUR_OF_DAY));
-
-        return calendarClone.getTime();
-    }
-
-    /**
-     * Calculates the end time of the day using the given calendar and date
-     *
-     * @param date
-     * @param calendar
-     *            the calendar instance to be used in the calculation. The given
-     *            instance is unchanged in this operation.
-     * @return the given date, with time set to the end of the day
-     */
-    private static Date getStartOfDay(java.util.Calendar calendar, Date date) {
-        java.util.Calendar calendarClone = (java.util.Calendar) calendar.clone();
-
-        calendarClone.setTime(date);
-        calendarClone.set(java.util.Calendar.MILLISECOND, 0);
-        calendarClone.set(java.util.Calendar.SECOND, 0);
-        calendarClone.set(java.util.Calendar.MINUTE, 0);
-        calendarClone.set(java.util.Calendar.HOUR, 0);
-        calendarClone.set(java.util.Calendar.HOUR_OF_DAY, 0);
-
-        return calendarClone.getTime();
+    public ZonedDateTime getLastDayOfWeek(ZonedDateTime date) {
+        return date.with(ChronoField.DAY_OF_WEEK, 7);
     }
 
     /**
@@ -1275,23 +1101,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *         week, else it returns a clone of the actual date with the time
      *         set to the start of the day
      */
-    protected Date expandStartDate(Date start, boolean expandToFullWeek) {
-        // If the duration is more than week, use monthly view and get startweek
-        // and endweek. Example if views daterange is from tuesday to next weeks
-        // wednesday->expand to monday to nextweeks sunday. If firstdayofweek =
-        // monday
+    protected ZonedDateTime expandStartDate(ZonedDateTime start, boolean expandToFullWeek) {
+
         if (expandToFullWeek) {
-            start = getFirstDateForWeek(start);
+            start = getfirstDayOfWeek(start);
 
         } else {
-            start = (Date) start.clone();
+            start = ZonedDateTime.from(start);
         }
 
-        // Always expand to the start of the first day to the end of the last
-        // day
-        start = getStartOfDay(currentCalendar, start);
-
-        return start;
+        // Always expand to the start of the first day to the end of the last day
+        return start.with(LocalTime.MIN);
     }
 
     /**
@@ -1306,22 +1126,16 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *         week, else it returns a clone of the actual date with the time
      *         set to the end of the day
      */
-    protected Date expandEndDate(Date end, boolean expandToFullWeek) {
-
-        // If the duration is more than week, use monthly view and get startweek and endweek.
-        // Example: if views daterange is from tuesday to next weeks
-        // wednesday -> expand to monday to nextweeks sunday.
-        // If firstdayofweek = monday
+    protected ZonedDateTime expandEndDate(ZonedDateTime end, boolean expandToFullWeek) {
 
         if (expandToFullWeek) {
-            end = getLastDateForWeek(end);
+            end = getLastDayOfWeek(end);
         } else {
-            end = (Date) end.clone();
+            end = ZonedDateTime.from(end);
         }
 
         // Always expand to the start of the first day to the end of the last day
-        end = getEndOfDay(currentCalendar, end);
-        return end;
+        return end.with(LocalTime.MAX);
     }
 
     /**
@@ -1341,14 +1155,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         // remove old listener
         if (getDataProvider() instanceof CalendarItemProvider.ItemSetChangedNotifier) {
-            ((ItemSetChangedNotifier) getDataProvider()).removeItemSetChangedListener(this);
+            ((CalendarItemProvider.ItemSetChangedNotifier) getDataProvider()).removeItemSetChangedListener(this);
         }
 
         this.calendarItemProvider = calendarItemProvider;
 
         // add new listener
         if (calendarItemProvider instanceof CalendarItemProvider.ItemSetChangedNotifier) {
-            ((ItemSetChangedNotifier) calendarItemProvider).addItemSetChangedListener(this);
+            ((CalendarItemProvider.ItemSetChangedNotifier) calendarItemProvider).addItemSetChangedListener(this);
         }
     }
 
@@ -1360,7 +1174,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     @Override
-    public void itemSetChanged(ItemSetChangedEvent changeEvent) {
+    public void itemSetChanged(CalendarItemProvider.ItemSetChangedEvent changeEvent) {
         // sanity check
         if (calendarItemProvider == changeEvent.getProvider()) {
             markAsDirty();
@@ -1382,71 +1196,77 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            A listener that listens to the given event
      * @param listenerMethod
      *            The method on the lister to call when the event is triggered
+     * @return handler registration
      */
-    protected void setHandler(String eventId, Class<?> eventType,
-            EventListener listener, Method listenerMethod) {
+    protected Registration setHandler(String eventId, Class<?> eventType, EventListener listener, Method listenerMethod) {
+
         if (handlers.get(eventId) != null) {
-            removeListener(eventId, eventType, handlers.get(eventId));
+            handlers.get(eventId).remove();
             handlers.remove(eventId);
         }
 
         if (listener != null) {
-            addListener(eventId, eventType, listener, listenerMethod);
-            handlers.put(eventId, listener);
+            Registration registration = addListener(eventId, eventType, listener, listenerMethod);
+            handlers.put(eventId, registration);
+            return registration;
         }
+
+        return null;
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.ForwardHandler listener) {
-        setHandler(CalendarComponentEvents.ForwardEvent.EVENT_ID, CalendarComponentEvents.ForwardEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.ForwardHandler listener) {
+        return setHandler(CalendarComponentEvents.ForwardEvent.EVENT_ID, CalendarComponentEvents.ForwardEvent.class, listener,
                 CalendarComponentEvents.ForwardHandler.forwardMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.BackwardHandler listener) {
-        setHandler(CalendarComponentEvents.BackwardEvent.EVENT_ID, CalendarComponentEvents.BackwardEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.BackwardHandler listener) {
+        return setHandler(CalendarComponentEvents.BackwardEvent.EVENT_ID,
+                CalendarComponentEvents.BackwardEvent.class, listener,
                 CalendarComponentEvents.BackwardHandler.backwardMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.DateClickHandler listener) {
-        setHandler(CalendarComponentEvents.DateClickEvent.EVENT_ID, CalendarComponentEvents.DateClickEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.DateClickHandler listener) {
+        return setHandler(CalendarComponentEvents.DateClickEvent.EVENT_ID,
+                CalendarComponentEvents.DateClickEvent.class, listener,
                 CalendarComponentEvents.DateClickHandler.dateClickMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.ItemClickHandler listener) {
-        setHandler(CalendarComponentEvents.ItemClickEvent.EVENT_ID, CalendarComponentEvents.ItemClickEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.ItemClickHandler listener) {
+        return setHandler(CalendarComponentEvents.ItemClickEvent.EVENT_ID,
+                CalendarComponentEvents.ItemClickEvent.class, listener,
                 CalendarComponentEvents.ItemClickHandler.itemClickMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.WeekClickHandler listener) {
-        setHandler(CalendarComponentEvents.WeekClick.EVENT_ID, CalendarComponentEvents.WeekClick.class, listener,
+    public Registration setHandler(CalendarComponentEvents.WeekClickHandler listener) {
+        return setHandler(CalendarComponentEvents.WeekClick.EVENT_ID,
+                CalendarComponentEvents.WeekClick.class, listener,
                 CalendarComponentEvents.WeekClickHandler.weekClickMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.EventResizeHandler listener) {
-        setHandler(CalendarComponentEvents.ItemResizeEvent.EVENT_ID, CalendarComponentEvents.ItemResizeEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.EventResizeHandler listener) {
+        return setHandler(CalendarComponentEvents.ItemResizeEvent.EVENT_ID,
+                CalendarComponentEvents.ItemResizeEvent.class, listener,
                 CalendarComponentEvents.EventResizeHandler.itemResizeMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.RangeSelectHandler listener) {
-        setHandler(CalendarComponentEvents.RangeSelectEvent.EVENT_ID, CalendarComponentEvents.RangeSelectEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.RangeSelectHandler listener) {
+        return setHandler(CalendarComponentEvents.RangeSelectEvent.EVENT_ID,
+                CalendarComponentEvents.RangeSelectEvent.class, listener,
                 CalendarComponentEvents.RangeSelectHandler.rangeSelectMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.ItemMoveHandler listener) {
-        setHandler(CalendarComponentEvents.ItemMoveEvent.EVENT_ID, CalendarComponentEvents.ItemMoveEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.ItemMoveHandler listener) {
+        return setHandler(CalendarComponentEvents.ItemMoveEvent.EVENT_ID,
+                CalendarComponentEvents.ItemMoveEvent.class, listener,
                 CalendarComponentEvents.ItemMoveHandler.itemMoveMethod);
-    }
-
-    @Override
-    public EventListener getHandler(String eventId) {
-        return handlers.get(eventId);
     }
 
     /**
@@ -1476,19 +1296,20 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             int slotIndex = (Integer) clientVariables.get("dropSlotIndex");
             int dayIndex = (Integer) clientVariables.get("dropDayIndex");
 
-            currentCalendar.setTime(getStartOfDay(currentCalendar, startDate));
-            currentCalendar.add(java.util.Calendar.DATE, dayIndex);
+            ZonedDateTime dropTime = startDate
+                    .with(LocalTime.MIN)
+                    .plus(dayIndex, ChronoUnit.DAYS)
+                    .plus(slotIndex * 30, ChronoUnit.MINUTES);
 
-            // change this if slot length is modified
-            currentCalendar.add(java.util.Calendar.MINUTE, slotIndex * 30);
-
-            serverVariables.put("dropTime", currentCalendar.getTime());
+            serverVariables.put("dropTime", dropTime.toEpochSecond() * 1000);
 
         } else {
             int dayIndex = (Integer) clientVariables.get("dropDayIndex");
-            currentCalendar.setTime(expandStartDate(startDate, true));
-            currentCalendar.add(java.util.Calendar.DATE, dayIndex);
-            serverVariables.put("dropDay", currentCalendar.getTime());
+
+            ZonedDateTime dropTime = expandStartDate(startDate, true)
+                    .plus(dayIndex, ChronoUnit.DAYS);
+
+            serverVariables.put("dropDay", dropTime.toEpochSecond() * 1000);
         }
         serverVariables.put("mouseEvent", clientVariables.get("mouseEvent"));
 
@@ -1498,8 +1319,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         return td;
     }
 
-    @Override
-    public List<ITEM> getItems(Date startDate, Date endDate) {
+    /**
+     * Return the calendar items from current data provider
+     *
+     * @param startDate The start of the date range
+     * @param endDate The end of the date range
+     * @return A list of calendar items
+     */
+    public List<ITEM> getItems(ZonedDateTime startDate, ZonedDateTime endDate) {
         List<ITEM> events = getDataProvider().getItems(startDate, endDate);
         cacheMinMaxTimeOfDay(events);
         return events;
@@ -1598,94 +1425,85 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private class CalendarServerRpcImpl implements CalendarServerRpc {
 
         @Override
-        public void itemMove(int itemIndex, String newDate) {
+        public void itemResize(int itemIndex, CalDate newStartDate, CalDate newEndDate) {
 
             if (!isClientChangeAllowed()) {
                 return;
             }
 
-            if (newDate != null) {
-                try {
-                    Date d = df_date_time.parse(newDate);
-                    if (itemIndex >= 0 && itemIndex < items.size()
-                            && items.get(itemIndex) != null) {
-                        fireItemMove(itemIndex, d);
-                    }
-                } catch (ParseException e) {
-                    getLogger().log(Level.WARNING, e.getMessage());
-                }
+            fireItemResize(itemIndex,
+                    ZonedDateTime.of(
+                            newStartDate.y, newStartDate.m, newStartDate.d,
+                            newStartDate.t.h, newStartDate.t.m, newStartDate.t.s, 0, getZoneId()),
+                    ZonedDateTime.of(
+                            newEndDate.y, newEndDate.m, newEndDate.d,
+                            newEndDate.t.h, newEndDate.t.m, newEndDate.t.s, 0, getZoneId()));
+        }
+
+        @Override
+        public void itemMove(int itemIndex, CalDate newDate) {
+
+            if (!isClientChangeAllowed()) {
+                return;
+            }
+
+            if (itemIndex >= 0 && itemIndex < items.size() && items.get(itemIndex) != null) {
+                fireItemMove(itemIndex, ZonedDateTime.of(
+                        newDate.y, newDate.m, newDate.d, newDate.t.h, newDate.t.m, newDate.t.s, 0, getZoneId()));
             }
         }
 
         @Override
-        public void rangeSelect(String range) {
+        public void rangeSelect(SelectionRange selectionRange) {
 
             if (!isClientChangeAllowed()) {
                 return;
             }
 
-            // two dates transmitted
-            if (range != null && range.length() > 14 && range.contains("TO")) {
+            // MounthSelection
+            if (selectionRange.s != null && selectionRange.e != null) {
 
-                String[] dates = range.split("TO");
-                try {
+                fireRangeSelect(
+                        ZonedDateTime.of(
+                                selectionRange.s.y,
+                                selectionRange.s.m,
+                                selectionRange.s.d,
+                                0,0,0,0, getZoneId()),
+                        ZonedDateTime.of(
+                                selectionRange.e.y,
+                                selectionRange.e.m,
+                                selectionRange.e.d,
+                                23, 59, 59, 999999, getZoneId()));
 
-                    fireRangeSelect(
-                            df_date.parse(dates[0]),
-                            df_date.parse(dates[1]));
+            } else if (selectionRange.s != null) {
 
-                } catch (ParseException e) {
-                    // NOP
-                }
+                ZonedDateTime dateTime = ZonedDateTime.of(
+                        selectionRange.s.y,
+                        selectionRange.s.m,
+                        selectionRange.s.d,
+                        0,0,0,0, getZoneId());
 
-            } else
+                ZonedDateTime start = ZonedDateTime.from(dateTime.plus(selectionRange.sMin, ChronoUnit.MINUTES));
+                ZonedDateTime end   = ZonedDateTime.from(dateTime.plus(selectionRange.eMin, ChronoUnit.MINUTES));
 
-                // A date with start time and end time transmitted
-                if (range != null && range.length() > 12 && range.contains(":")) {
+                fireRangeSelect(start, end);
 
-                String[] dates = range.split(":");
-                if (dates.length == 3) {
-                    try {
-
-                        currentCalendar.setTime(df_date.parse(dates[0]));
-
-                        int startMinutes = Integer.parseInt(dates[1]);
-                        int endMinutes = Integer.parseInt(dates[2]);
-
-                        currentCalendar.add(java.util.Calendar.MINUTE, startMinutes);
-                        Date start = currentCalendar.getTime();
-
-                        currentCalendar.add(java.util.Calendar.MINUTE, endMinutes - startMinutes);
-                        Date end = currentCalendar.getTime();
-
-                        fireRangeSelect(start, end);
-
-                    } catch (ParseException | NumberFormatException e) {
-                        // NOP
-                    }
-                }
             }
         }
 
         @Override
         public void forward() {
-            fireEvent(new CalendarComponentEvents.ForwardEvent(Calendar.this));
+            fireNavigationEvent(true);
         }
 
         @Override
         public void backward() {
-            fireEvent(new CalendarComponentEvents.BackwardEvent(Calendar.this));
+            fireNavigationEvent(false);
         }
 
         @Override
-        public void dateClick(String date) {
-            if (date != null && date.length() > 6) {
-                try {
-                    fireDateClick(df_date.parse(date));
-                } catch (ParseException e) {
-                    // NOP
-                }
-            }
+        public void dateClick(CalDate date) {
+            fireDateClick(ZonedDateTime.of(date.y, date.m, date.d, 0,0,0,0, getZoneId()));
         }
 
         @Override
@@ -1713,58 +1531,27 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
 
         @Override
-        public void itemResize(int itemIndex, String newStartDate, String newEndDate) {
-
-            if (!isClientChangeAllowed()) {
-                return;
-            }
-
-            if (newStartDate != null && !"".equals(newStartDate)
-                    && newEndDate != null && !"".equals(newEndDate)) {
-
-                try {
-                    Date newStartTime = df_date_time.parse(newStartDate);
-                    Date newEndTime = df_date_time.parse(newEndDate);
-
-                    fireItemResize(itemIndex, newStartTime, newEndTime);
-                } catch (ParseException e) {
-                    // NOOP
-                }
-            }
-        }
-
-        @Override
         public void scroll(int scrollPosition) {
-            scrollTop = scrollPosition;
-            markAsDirty();
+            getState().scroll = scrollPosition;
         }
 
         @Override
-        public void actionOnEmptyCell(String actionKey, String startDate, String endDate) {
+        public void actionOnEmptyCell(String actionKey, CalDate startDate, CalDate endDate) {
 
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-            formatter.setTimeZone(getTimeZone());
 
-            try {
-                Date start = formatter.parse(startDate);
-                for (Action.Handler ah : actionHandlers) {
-                    ah.handleAction(action, Calendar.this, start);
-                }
-
-            } catch (ParseException e) {
-                getLogger().log(Level.WARNING,
-                        "Could not parse action date string");
+            for (Action.Handler ah : actionHandlers) {
+                ah.handleAction(action, Calendar.this,
+                        ZonedDateTime.of(startDate.y, startDate.m, startDate.d,
+                                startDate.t.h, startDate.t.m, startDate.t.s, 0, getZoneId()));
             }
 
         }
 
         @Override
-        public void actionOnItem(String actionKey, String startDate, String endDate, int itemIndex) {
+        public void actionOnItem(String actionKey, CalDate startDate, CalDate endDate, int itemIndex) {
 
             Action action = actionMapper.get(actionKey);
-            SimpleDateFormat formatter = new SimpleDateFormat(DateConstants.ACTION_DATE_FORMAT_PATTERN);
-            formatter.setTimeZone(getTimeZone());
 
             for (Action.Handler ah : actionHandlers) {
                 ah.handleAction(action, Calendar.this, items.get(itemIndex));
@@ -1772,20 +1559,20 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         }
     }
 
-    @Override
-    public void changeVariables(Object source, Map<String, Object> variables) {
-        /*
-         * Only defined to fulfill the LegacyComponent interface used for
-         * calendar drag & drop. No implementation required.
-         */
-    }
-
-    @Override
-    public void paintContent(PaintTarget target) throws PaintException {
-        if (dropHandler != null) {
-            dropHandler.getAcceptCriterion().paint(target);
-        }
-    }
+//    @Override
+//    public void changeVariables(Object source, Map<String, Object> variables) {
+//        /*
+//         * Only defined to fulfill the LegacyComponent interface used for
+//         * calendar drag & drop. No implementation required.
+//         */
+//    }
+//
+//    @Override
+//    public void paintContent(PaintTarget target) throws PaintException {
+//        if (dropHandler != null) {
+//            dropHandler.getAcceptCriterion().paint(target);
+//        }
+//    }
 
     /**
      * Sets whether the item captions are rendered as HTML.
@@ -1821,50 +1608,58 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         super.readDesign(design, designContext);
 
         Attributes attr = design.attributes();
+
+        if (design.hasAttr("time-zone")) {
+            setZoneId(ZoneId.of(DesignAttributeHandler.readAttribute("end-date", attr, String.class)));
+        }
+
         if (design.hasAttr("time-format")) {
             setTimeFormat(TimeFormat.valueOf(
                     "Format" + design.attr("time-format").toUpperCase()));
         }
 
         if (design.hasAttr("start-date")) {
-            setStartDate(DesignAttributeHandler.readAttribute("start-date",
-                    attr, Date.class));
+            setStartDate(
+                    ZonedDateTime.ofInstant(DesignAttributeHandler.readAttribute("start-date", attr, Date.class)
+                            .toInstant(), getZoneId()));
         }
+
         if (design.hasAttr("end-date")) {
-            setEndDate(DesignAttributeHandler.readAttribute("end-date", attr,
-                    Date.class));
+            setEndDate(
+                    ZonedDateTime.ofInstant(DesignAttributeHandler.readAttribute("end-date", attr, Date.class)
+                            .toInstant(), getZoneId()));
         }
-    };
+    }
 
     @Override
     public void writeDesign(Element design, DesignContext designContext) {
         super.writeDesign(design, designContext);
 
         if (currentTimeFormat != null) {
-            design.attr("time-format",
-                    currentTimeFormat == TimeFormat.Format12H ? "12h" : "24h");
+            design.attr("time-format", currentTimeFormat == TimeFormat.Format12H ? "12h" : "24h");
         }
         if (startDate != null) {
-            design.attr("start-date", df_date.format(getStartDate()));
+            design.attr("start-date", DATE_FORMAT.format(getStartDate()));
         }
         if (endDate != null) {
-            design.attr("end-date", df_date.format(getEndDate()));
+            design.attr("end-date", DATE_FORMAT.format(getEndDate()));
         }
-        if (!getTimeZone().equals(TimeZone.getDefault())) {
-            design.attr("time-zone", getTimeZone().getID());
+        if (!getZoneId().equals(ZoneId.systemDefault())) {
+            design.attr("time-zone", getZoneId().getId());
         }
     }
 
     @Override
     protected Collection<String> getCustomAttributes() {
         Collection<String> customAttributes = super.getCustomAttributes();
+        customAttributes.add("time-zone");
         customAttributes.add("time-format");
         customAttributes.add("start-date");
         customAttributes.add("end-date");
         return customAttributes;
     }
 
-    /**
+    /*
      * Allow setting first day of week independent of Locale. Set to null if you
      * want first day of week being defined by the locale
      *
@@ -1872,7 +1667,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param dayOfWeek
      *            any of java.util.Calendar.SUNDAY..java.util.Calendar.SATURDAY
      *            or null to revert to default first day of week by locale
-     */
+
     public void setFirstDayOfWeek(Integer dayOfWeek) {
 
         int minimalSupported = java.util.Calendar.SUNDAY;
@@ -1886,7 +1681,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         customFirstDayOfWeek = dayOfWeek;
         markAsDirty();
-    }
+    } */
 
     /**
      * Add a time block start index. Time steps are half hour beginning at 0
@@ -1973,6 +1768,38 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             blockedTimes.remove(day);
         }
         markAsDirty();
+    }
+
+    public void withDay(ZonedDateTime today) {
+        setStartDate(today);
+        setEndDate(today);
+    }
+
+    public void withDayInMonth(ZonedDateTime today) {
+        withMonth(today.getMonth());
+    }
+
+    public void withWeek(ZonedDateTime today) {
+        setStartDate(today.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
+        setEndDate(today.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+    }
+
+    public void withWeekInYear(int weekInYear) {
+        ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(ChronoField.ALIGNED_WEEK_OF_YEAR, weekInYear);
+        setStartDate(dateTime.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
+        setEndDate(dateTime.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+    }
+
+    public void withMonth(Month month) {
+        ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(month);
+        setStartDate(dateTime.with(firstDayOfMonth()));
+        setEndDate(dateTime.with(lastDayOfMonth()));
+    }
+
+    public void withMonthInYear(Month month, int year) {
+        ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(month).withYear(year);
+        setStartDate(dateTime.with(firstDayOfMonth()));
+        setEndDate(dateTime.with(lastDayOfMonth()));
     }
 
 }

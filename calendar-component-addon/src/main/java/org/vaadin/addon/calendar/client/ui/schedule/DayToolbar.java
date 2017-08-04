@@ -18,13 +18,11 @@ package org.vaadin.addon.calendar.client.ui.schedule;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.VCalendar;
 
-import java.util.Iterator;
+import java.util.Date;
 
 /**
  *
@@ -35,8 +33,8 @@ import java.util.Iterator;
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
     private int width = 0;
-    protected static final int MARGINLEFT = 50;
-    protected static final int MARGINRIGHT = 20;
+    public static final int MARGINLEFT = 50;
+    public static final int MARGINRIGHT = 15;
     protected Button backLabel;
     protected Button nextLabel;
     private boolean verticalSized;
@@ -47,18 +45,21 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         calendar = vcalendar;
 
         setStylePrimaryName("v-calendar-header-week");
+
         backLabel = new Button();
         backLabel.setStylePrimaryName("v-calendar-back");
+        backLabel.addClickHandler(this);
+
         nextLabel = new Button();
         nextLabel.addClickHandler(this);
         nextLabel.setStylePrimaryName("v-calendar-next");
-        backLabel.addClickHandler(this);
+
         setBorderWidth(0);
         setSpacing(0);
     }
 
     public void setWidthPX(int width) {
-        this.width = (width - MARGINLEFT) - MARGINRIGHT;
+        this.width = width - MARGINLEFT - MARGINRIGHT;
         // super.setWidth(this.width + "px");
         if (getWidgetCount() == 0) {
             return;
@@ -71,7 +72,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         if (count > 0) {
             setCellWidth(backLabel, MARGINLEFT + "px");
             setCellWidth(nextLabel, MARGINRIGHT + "px");
-            setCellHorizontalAlignment(nextLabel, ALIGN_RIGHT);
+            setCellHorizontalAlignment(backLabel, ALIGN_RIGHT);
+            setCellHorizontalAlignment(nextLabel, ALIGN_LEFT);
             int cellw = width / (count - 2);
             if (cellw > 0) {
                 int[] cellWidths = VCalendar.distributeSize(width, count - 2,
@@ -91,9 +93,9 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         }
     }
 
-    public void add(String dayName, final String date, String localized_date_format, String extraClass) {
+    public void add(String dayName, final Date date, String localized_date_format, String extraClass) {
 
-        Label l = new Label(dayName + " " + localized_date_format);
+        HTML l = new HTML(("<span>" + dayName + "</span> " + localized_date_format).trim());
         l.setStylePrimaryName("v-calendar-header-day");
 
         if (extraClass != null) {
@@ -109,7 +111,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
         l.addClickHandler(ce -> {
             if (calendar.getDateClickListener() != null) {
-                calendar.getDateClickListener().dateClick(date);
+                calendar.getDateClickListener().dateClick(DateConstants.toRPCDate(date));
             }
         });
 
@@ -156,9 +158,8 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     private void updateDayLabelSizedStyleNames() {
-        Iterator<Widget> it = iterator();
-        while (it.hasNext()) {
-            updateWidgetSizedStyleName(it.next());
+        for (Widget widget : this) {
+            updateWidgetSizedStyleName(widget);
         }
     }
 
