@@ -33,8 +33,8 @@ import java.util.Date;
 public class DayToolbar extends HorizontalPanel implements ClickHandler {
 
     private int width = 0;
-    protected static final int MARGINLEFT = 50;
-    protected static final int MARGINRIGHT = 20;
+    public static final int MARGINLEFT = 50;
+    public static final int MARGINRIGHT = 15;
     protected Button backLabel;
     protected Button nextLabel;
     private boolean verticalSized;
@@ -56,7 +56,7 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
     }
 
     public void setWidthPX(int width) {
-        this.width = (width - MARGINLEFT) - MARGINRIGHT;
+        this.width = width - MARGINLEFT - MARGINRIGHT;
         // super.setWidth(this.width + "px");
         if (getWidgetCount() == 0) {
             return;

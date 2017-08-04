@@ -313,6 +313,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
 
   .#{$primary-stylename}-weekly-longevents {
     margin-left: $_times-column-width; // Seems to be a fixed number
+    margin-bottom: round($v-unit-size/12);
     border-bottom: round($v-unit-size/12) solid darken($v-background-color, 10%);
 
     .#{$primary-stylename}-event-all-day {
@@ -376,7 +377,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   .#{$primary-stylename} .v-datecellslot-blocked {
     border-top-style: dotted;
   }
-
+/*
   .#{$primary-stylename} .v-datecellslot,
   .#{$primary-stylename} .v-datecellslot-even,
   .#{$primary-stylename} .v-datecellslot-blocked,
@@ -384,7 +385,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     margin-left: round($v-unit-size/16);
     margin-right: round($v-unit-size/16);
   }
-
+*/
   .#{$primary-stylename} .v-datecellslot-blocked,
   .#{$primary-stylename} .v-datecellslot-blocked-even {
     background: #d6d6d6;

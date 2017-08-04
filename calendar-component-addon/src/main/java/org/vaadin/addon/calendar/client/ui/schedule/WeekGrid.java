@@ -156,8 +156,7 @@ public class WeekGrid extends SimplePanel {
 
             // Otherwise the scroll wrapper is somehow too narrow = horizontal
             // scroll
-            wrapper.setWidth(content.getOffsetWidth()
-                    + WidgetUtil.getNativeScrollbarSize() + "px");
+            wrapper.setWidth(content.getOffsetWidth() + WidgetUtil.getNativeScrollbarSize() + "px");
 
             this.width = content.getOffsetWidth() - timebar.getOffsetWidth();
 
@@ -212,18 +211,23 @@ public class WeekGrid extends SimplePanel {
     }
 
     public void updateCellWidths() {
+
         if (!isHorizontalScrollable() && width != -1) {
+
             int count = content.getWidgetCount();
-            int datesWidth = width;
+            int scrollOffset = isVerticalScrollable() ? 0 : DayToolbar.MARGINRIGHT;
+            int datesWidth = width - scrollOffset;
+
             if (datesWidth > 0 && count > 1) {
-                cellWidths = VCalendar.distributeSize(datesWidth, count - 1,
-                        -1);
+                cellWidths = VCalendar.distributeSize(datesWidth, count - 1,-1);
+
 
                 for (int i = 1; i < count; i++) {
+
                     DateCell dc = (DateCell) content.getWidget(i);
-                    dc.setHorizontalSized(
-                            isHorizontalScrollable() || width < 0);
+                    dc.setHorizontalSized( isHorizontalScrollable() || width < 0);
                     dc.setWidthPX(cellWidths[i - 1]);
+
                     if (dc.isToday()) {
                         dc.setTimeBarWidth(getOffsetWidth());
                     }
@@ -231,12 +235,12 @@ public class WeekGrid extends SimplePanel {
             }
 
         } else {
+
             int count = content.getWidgetCount();
             if (count > 1) {
                 for (int i = 1; i < count; i++) {
                     DateCell dc = (DateCell) content.getWidget(i);
-                    dc.setHorizontalSized(
-                            isHorizontalScrollable() || width < 0);
+                    dc.setHorizontalSized( isHorizontalScrollable() || width < 0);
                 }
             }
         }

@@ -26,6 +26,8 @@ public class MeetingCalendar extends CustomComponent {
 
     private Calendar<MeetingItem> calendar;
 
+    public Panel panel;
+
     public MeetingCalendar() {
 
         setId("meeting-meetings");
@@ -38,7 +40,7 @@ public class MeetingCalendar extends CustomComponent {
         layout.setSpacing(false);
         layout.setSizeFull();
 
-        Panel panel = new Panel(calendar);
+        panel = new Panel(calendar);
         //panel.setHeight(100, Unit.PERCENTAGE);
         layout.addComponent(panel);
 

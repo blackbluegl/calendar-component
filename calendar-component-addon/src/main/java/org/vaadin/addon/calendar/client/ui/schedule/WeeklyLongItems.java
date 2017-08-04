@@ -29,12 +29,6 @@ import java.util.List;
  */
 public class WeeklyLongItems extends HorizontalPanel implements HasTooltipKey {
 
-    public static final int EVENT_HEIGTH = 15;
-
-    public static final int EVENT_MARGIN = 1;
-
-    private int rowCount = 0;
-
     private VCalendar calendar;
 
     private boolean undefinedWidth;
@@ -92,7 +86,7 @@ public class WeeklyLongItems extends HorizontalPanel implements HasTooltipKey {
                 if (comp2 == 0) {
                     eventLabel.addStyleDependentName("end");
                 }
-                if (!started && comp > 0 && comp2 <= 0) {
+                if (!started && comp > 0) {
                     eventLabel.addStyleDependentName("continued-from");
                 } else if (i == (dateCount - 1)) {
                     eventLabel.addStyleDependentName("continued-to");
@@ -150,34 +144,26 @@ public class WeeklyLongItems extends HorizontalPanel implements HasTooltipKey {
         return true;
     }
 
-    public int getRowCount() {
-        return rowCount;
-    }
-
     public void updateCellWidths() {
         int cells = getWidgetCount();
         if (cells <= 0) {
             return;
         }
 
-        int cellWidth = -1;
-
-        // if width is undefined, use the width of the first cell
-        // otherwise use distributed sizes
-        if (undefinedWidth) {
-            cellWidth = calendar.getWeekGrid().getDateCellWidth()
-                    - calendar.getWeekGrid().getDateSlotBorder();
-        }
-
         for (int i = 0; i < cells; i++) {
             DateCellContainer dc = (DateCellContainer) getWidget(i);
 
             if (undefinedWidth) {
-                dc.setWidth(cellWidth + "px");
+
+                // if width is undefined, use the width of the first cell
+                // otherwise use distributed sizes
+
+                dc.setWidth(calendar.getWeekGrid().getDateCellWidth()
+                        - calendar.getWeekGrid().getDateSlotBorder() + "px");
 
             } else {
-                dc.setWidth(
-                        calendar.getWeekGrid().getDateCellWidths()[i] + "px");
+                dc.setWidth(calendar.getWeekGrid().getDateCellWidths()[i]
+                        + calendar.getWeekGrid().getDateSlotBorder() + "px");
             }
         }
     }

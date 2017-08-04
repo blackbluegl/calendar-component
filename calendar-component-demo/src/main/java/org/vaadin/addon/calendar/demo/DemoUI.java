@@ -3,12 +3,10 @@ package org.vaadin.addon.calendar.demo;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 import org.vaadin.addon.calendar.demo.meetings.MeetingCalendar;
 
 import javax.servlet.annotation.WebServlet;
@@ -41,8 +39,14 @@ public class DemoUI extends UI
         calActionComboBox.addValueChangeListener(e -> e.getValue().act());
         calActionComboBox.setEmptySelectionAllowed(false);
 
-        HorizontalLayout nav = new HorizontalLayout(calActionComboBox);
-        nav.setWidth("100%");
+        Button fixedSize = new Button("fixed Size", (Button.ClickEvent clickEvent) -> calendar.panel.setHeightUndefined());
+        fixedSize.setIcon(VaadinIcons.LINK);
+
+        Button fullSize = new Button("full Size", (Button.ClickEvent clickEvent) -> calendar.panel.setHeight(100, Unit.PERCENTAGE));
+        fullSize.setIcon(VaadinIcons.UNLINK);
+
+        HorizontalLayout nav = new HorizontalLayout(calActionComboBox, fixedSize, fullSize);
+        //nav.setWidth("100%");
 
         // Show it in the middle of the screen
         final VerticalLayout layout = new VerticalLayout();

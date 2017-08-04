@@ -759,8 +759,8 @@ public class VCalendar extends Composite implements VHasDropHandler {
      *            the overflow
      * @return an integer array that contains the correct size for each cell
      */
-    public static int[] distributeSize(int totalSize, int numberOfCells,
-            int sizeModifier) {
+    public static int[] distributeSize(int totalSize, int numberOfCells, int sizeModifier) {
+
         int[] cellSizes = new int[numberOfCells];
         int startingSize = totalSize / numberOfCells;
         int cellSizeOverFlow = totalSize % numberOfCells;
