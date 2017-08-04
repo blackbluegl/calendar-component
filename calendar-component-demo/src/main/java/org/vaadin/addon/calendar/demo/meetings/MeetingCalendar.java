@@ -8,12 +8,13 @@ import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
 import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.Month;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
@@ -48,6 +49,10 @@ public class MeetingCalendar extends CustomComponent {
 
     }
 
+    public void switchToMonth(Month month) {
+        calendar.withMonth(month);
+    }
+
     public Calendar<MeetingItem> getCalendar() {
         return calendar;
     }
@@ -55,7 +60,7 @@ public class MeetingCalendar extends CustomComponent {
     private void onCalendarRangeSelect(CalendarComponentEvents.RangeSelectEvent event) {
 
         Meeting meeting = new Meeting(
-                !event.getStart().truncatedTo(ChronoUnit.DAYS).equals(event.getEnd().truncatedTo(ChronoUnit.DAYS)));
+                !event.getStart().truncatedTo(DAYS).equals(event.getEnd().truncatedTo(DAYS)));
 
         meeting.setStart(event.getStart());
         meeting.setEnd(event.getEnd());
@@ -100,6 +105,9 @@ public class MeetingCalendar extends CustomComponent {
 
         ZonedDateTime s = ZonedDateTime.now().with(firstDayOfMonth());
         ZonedDateTime e = ZonedDateTime.now().with(lastDayOfMonth());
+
+//        calendar.setStartDate(ZonedDateTime.now().plus(3, DAYS));
+//        calendar.setEndDate(ZonedDateTime.now().plus(10, DAYS));
 
         calendar.setStartDate(s);
         calendar.setEndDate(e);

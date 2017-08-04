@@ -124,12 +124,19 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
 
     @SuppressWarnings("deprecation")
     public void setDate(Date date) {
-        int dateOfMonth = date.getDate();
+        int dayOfMonth = date.getDate();
         if (monthNameVisible) {
-            caption.setText(dateOfMonth + " " + calendar.getMonthNames()[date.getMonth()]);
+            caption.setText(dayOfMonth + " " + calendar.getMonthNames()[date.getMonth()]);
         } else {
-            caption.setText("" + dateOfMonth);
+            caption.setText("" + dayOfMonth);
         }
+
+        if (dayOfMonth == 1) {
+            addStyleName("firstDay");
+        } else {
+            removeStyleName("firstDay");
+        }
+
         this.date = date;
     }
 

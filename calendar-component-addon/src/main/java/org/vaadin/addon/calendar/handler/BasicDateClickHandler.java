@@ -18,11 +18,6 @@ package org.vaadin.addon.calendar.handler;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-
-import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
-import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 /**
  * Implements basic functionality needed to switch to day view when a single day
@@ -60,7 +55,7 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
 
             switchToWeek(event);
 
-        } else if (monthInCycle && comp.isWeeklyMode()) {
+        } else if (isMonthInCycle() && comp.isWeeklyMode()) {
 
             switchToMonth(event);
 
@@ -99,24 +94,14 @@ public class BasicDateClickHandler implements CalendarComponentEvents.DateClickH
      */
 
     protected void switchToDay(CalendarComponentEvents.DateClickEvent event) {
-        setDates(event, event.getDate(), event.getDate());
+        event.getComponent().withDay(event.getDate());
     }
 
     protected void switchToWeek(CalendarComponentEvents.DateClickEvent event) {
-
-        ZonedDateTime dateTime = event.getDate().truncatedTo(ChronoUnit.DAYS);
-
-        setDates(event,
-                dateTime.with(ChronoField.DAY_OF_WEEK,event.getComponent().getFirstVisibleDayOfWeek()),
-                dateTime.with(ChronoField.DAY_OF_WEEK,event.getComponent().getLastVisibleDayOfWeek()));
+        event.getComponent().withWeek(event.getDate());
     }
 
     protected void switchToMonth(CalendarComponentEvents.DateClickEvent event) {
-
-        ZonedDateTime s = event.getDate().with(firstDayOfMonth());
-        ZonedDateTime e = event.getDate().with(lastDayOfMonth());
-
-        setDates(event, s, e);
-
+        event.getComponent().withMonth(event.getDate().getMonth());
     }
 }

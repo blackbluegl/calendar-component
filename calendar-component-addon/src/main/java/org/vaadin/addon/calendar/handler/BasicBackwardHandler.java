@@ -17,6 +17,7 @@ package org.vaadin.addon.calendar.handler;
 
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -48,13 +49,15 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
         ZonedDateTime start = event.getComponent().getStartDate();
         ZonedDateTime end = event.getComponent().getEndDate();
 
-        int durationInDays = 0;
+        long durationInDays = 0;
 
         // for week view durationInDays = 7, for day view durationInDays = 1
         if (event.getComponent().isDayMode()) { // day view
             durationInDays = 1;
         } else if (event.getComponent().isWeeklyMode()) {
             durationInDays = 7;
+        } else {
+            durationInDays = Duration.between(start, end).toDays();
         }
 
         start = start.minus(durationInDays, ChronoUnit.DAYS);

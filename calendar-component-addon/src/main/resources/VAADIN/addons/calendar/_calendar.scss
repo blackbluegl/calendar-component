@@ -65,8 +65,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   // TODO Try to find out what these actually do, and how to make them dissappear
 
   .#{$primary-stylename}-header-month td:first-child {
-    padding-left: 20px;
-    // Same as VCalendar.MONTHLY_WEEKTOOLBARWIDTH - .#{$primary-stylename}-week-numbers border
+    padding-left: 0; //20px
+    // Same as VCalendar.STYLE_MONTHLY_WEEKTOOLBARWIDTH - .#{$primary-stylename}-week-numbers border
   }
 
   .#{$primary-stylename}-week-numbers {
@@ -86,7 +86,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   }
 
   .#{$primary-stylename}-header-month-Hsized td:first-child {
-    padding-left: 21px;
+    padding-left: 1px; // 21px
   }
 
   .#{$primary-stylename}-header-day-Hsized {
@@ -146,11 +146,13 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
 
   // Prev/next week buttons
   .#{$primary-stylename}-header-week .#{$primary-stylename}-back,
-  .#{$primary-stylename}-header-week .#{$primary-stylename}-next {
+  .#{$primary-stylename}-header-week .#{$primary-stylename}-next,
+  .#{$primary-stylename}-header-month .#{$primary-stylename}-back,
+  .#{$primary-stylename}-header-month .#{$primary-stylename}-next {
     @include appearance(none);
     background: transparent;
     border: none;
-    padding: 0 2px;
+    padding: 7px 2px;
     margin: 0;
     cursor: pointer;
     outline: none;
@@ -170,11 +172,13 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     }
   }
 
-  .#{$primary-stylename}-header-week .#{$primary-stylename}-back {
+  .#{$primary-stylename}-header-week .#{$primary-stylename}-back,
+  .#{$primary-stylename}-header-month .#{$primary-stylename}-back {
     @include valo-calendar-prev-style;
   }
 
-  .#{$primary-stylename}-header-week .#{$primary-stylename}-next {
+  .#{$primary-stylename}-header-week .#{$primary-stylename}-next,
+  .#{$primary-stylename}-header-month .#{$primary-stylename}-next {
     @include valo-calendar-next-style;
   }
 
@@ -213,6 +217,14 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     box-sizing: border-box;
     line-height: 1.2;
   }
+
+  .#{$primary-stylename}-month-day.firstDay {
+
+      .#{$primary-stylename}-day-number {
+        color: darken($v-focus-color, 10%);
+        background: #f9fbfd;
+      }
+    }
 
   .#{$primary-stylename}-month tr:not(:first-child) .#{$primary-stylename}-month-day {
     //width: auto !important;
@@ -262,7 +274,8 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     line-height: round($v-unit-size/1.5);
     font-size: $v-font-size;
     text-align: right;
-    margin: 0 round($v-unit-size/8);
+    margin: 0;
+    padding-right: round($v-unit-size/8);
     white-space: nowrap;
     border-top: 1px solid darken($v-background-color, 3%);
     cursor: pointer;

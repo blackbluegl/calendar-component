@@ -15,9 +15,14 @@
  */
 package org.vaadin.addon.calendar.client.ui.schedule;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import org.vaadin.addon.calendar.client.ui.VCalendar;
 
 /**
  *
@@ -25,22 +30,48 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Vaadin Ltd.
  *
  */
-public class SimpleDayToolbar extends HorizontalPanel {
+public class SimpleDayToolbar extends HorizontalPanel implements ClickHandler {
+
+    public static int STYLE_BACK_PIXEL_WIDTH = 20;
+    public static int STYLE_NEXT_PIXEL_WIDTH = 15;
 
     private int width = 0;
     private boolean isWidthUndefined = false;
 
-    public SimpleDayToolbar() {
+    protected Button backLabel;
+    protected Button nextLabel;
+
+    private VCalendar calendar;
+
+    public SimpleDayToolbar(VCalendar calendar) {
+
+        this.calendar = calendar;
+
         setStylePrimaryName("v-calendar-header-month");
+
+        backLabel = new Button();
+        backLabel.setStylePrimaryName("v-calendar-back");
+        backLabel.addClickHandler(this);
+
+        nextLabel = new Button();
+        nextLabel.addClickHandler(this);
+        nextLabel.setStylePrimaryName("v-calendar-next");
+
     }
 
     public void setDayNames(String[] dayNames) {
         clear();
-        for (int i = 0; i < dayNames.length; i++) {
-            Label l = new Label(dayNames[i]);
+
+        addBackButton();
+
+        for (String dayName : dayNames) {
+            Label l = new Label(dayName);
             l.setStylePrimaryName("v-calendar-header-day");
             add(l);
         }
+
+        addNextButton();
+
         updateCellWidth();
     }
 
@@ -74,24 +105,71 @@ public class SimpleDayToolbar extends HorizontalPanel {
     }
 
     private void updateCellWidth() {
+
+        setCellWidth(backLabel, STYLE_BACK_PIXEL_WIDTH + "px");
+        setCellWidth(nextLabel, STYLE_NEXT_PIXEL_WIDTH + "px");
+        setCellHorizontalAlignment(backLabel, ALIGN_LEFT);
+        setCellHorizontalAlignment(nextLabel, ALIGN_RIGHT);
+
         int cellw = -1;
         int widgetCount = getWidgetCount();
         if (widgetCount <= 0) {
             return;
         }
+
         if (isWidthUndefined()) {
-            Widget widget = getWidget(0);
+
+            Widget widget = getWidget(1);
             String w = widget.getElement().getStyle().getWidth();
+
             if (w.length() > 2) {
                 cellw = Integer.parseInt(w.substring(0, w.length() - 2));
             }
+
         } else {
             cellw = width / getWidgetCount();
         }
+
         if (cellw > 0) {
-            for (int i = 0; i < getWidgetCount(); i++) {
+
+            int cW;
+
+            for (int i = 1; i < getWidgetCount() -1; i++) {
+
                 Widget widget = getWidget(i);
-                setCellWidth(widget, cellw + "px");
+
+                cW = cellw - (i == getWidgetCount() -2 ? STYLE_NEXT_PIXEL_WIDTH : 0);
+
+                setCellWidth(widget, cW + "px");
+            }
+        }
+    }
+
+    private void addBackButton() {
+        if (!calendar.isBackwardNavigationEnabled()) {
+            nextLabel.getElement().getStyle().setHeight(0, Style.Unit.PX);
+        }
+        add(backLabel);
+    }
+
+    private void addNextButton() {
+        if (!calendar.isForwardNavigationEnabled()) {
+            backLabel.getElement().getStyle().setHeight(0, Style.Unit.PX);
+        }
+        add(nextLabel);
+    }
+
+    @Override
+    public void onClick(ClickEvent event) {
+        if (!calendar.isDisabled()) {
+            if (event.getSource() == nextLabel) {
+                if (calendar.getForwardListener() != null) {
+                    calendar.getForwardListener().forward();
+                }
+            } else if (event.getSource() == backLabel) {
+                if (calendar.getBackwardListener() != null) {
+                    calendar.getBackwardListener().backward();
+                }
             }
         }
     }

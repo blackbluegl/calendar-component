@@ -42,10 +42,7 @@ import org.vaadin.addon.calendar.ui.*;
 import java.lang.reflect.Method;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -53,6 +50,9 @@ import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
+
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 /**
  * <p>
@@ -1766,6 +1766,38 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             blockedTimes.remove(day);
         }
         markAsDirty();
+    }
+
+    public void withDay(ZonedDateTime today) {
+        setStartDate(today);
+        setEndDate(today);
+    }
+
+    public void withDayInMonth(ZonedDateTime today) {
+        withMonth(today.getMonth());
+    }
+
+    public void withWeek(ZonedDateTime today) {
+        setStartDate(today.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
+        setEndDate(today.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+    }
+
+    public void withWeekInYear(int weekInYear) {
+        ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(ChronoField.ALIGNED_WEEK_OF_YEAR, weekInYear);
+        setStartDate(dateTime.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
+        setEndDate(dateTime.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+    }
+
+    public void withMonth(Month month) {
+        ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(month);
+        setStartDate(dateTime.with(firstDayOfMonth()));
+        setEndDate(dateTime.with(lastDayOfMonth()));
+    }
+
+    public void withMonthInYear(Month month, int year) {
+        ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(month).withYear(year);
+        setStartDate(dateTime.with(firstDayOfMonth()));
+        setEndDate(dateTime.with(lastDayOfMonth()));
     }
 
 }

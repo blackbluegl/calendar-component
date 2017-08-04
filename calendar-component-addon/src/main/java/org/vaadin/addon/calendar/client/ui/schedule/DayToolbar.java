@@ -45,12 +45,15 @@ public class DayToolbar extends HorizontalPanel implements ClickHandler {
         calendar = vcalendar;
 
         setStylePrimaryName("v-calendar-header-week");
+
         backLabel = new Button();
         backLabel.setStylePrimaryName("v-calendar-back");
+        backLabel.addClickHandler(this);
+
         nextLabel = new Button();
         nextLabel.addClickHandler(this);
         nextLabel.setStylePrimaryName("v-calendar-next");
-        backLabel.addClickHandler(this);
+
         setBorderWidth(0);
         setSpacing(0);
     }

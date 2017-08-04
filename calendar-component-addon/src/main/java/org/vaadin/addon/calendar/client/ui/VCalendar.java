@@ -64,8 +64,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
     private boolean itemResizeAllowed = true;
     private boolean itemMoveAllowed = true;
 
-    private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar();
-
+    private final SimpleDayToolbar nameToolbar = new SimpleDayToolbar(this);
     private final DayToolbar dayToolbar = new DayToolbar(this);
     private final SimpleWeekToolbar weekToolbar;
     private WeeklyLongItems weeklyLongEvents;

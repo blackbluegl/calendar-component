@@ -10,6 +10,9 @@ import com.vaadin.ui.*;
 import org.vaadin.addon.calendar.demo.meetings.MeetingCalendar;
 
 import javax.servlet.annotation.WebServlet;
+import java.time.Month;
+import java.time.ZonedDateTime;
+import java.time.format.TextStyle;
 
 @Theme("demo")
 @Title("Calendar Add-on Demo")
@@ -45,7 +48,16 @@ public class DemoUI extends UI
         Button fullSize = new Button("full Size", (Button.ClickEvent clickEvent) -> calendar.panel.setHeight(100, Unit.PERCENTAGE));
         fullSize.setIcon(VaadinIcons.UNLINK);
 
-        HorizontalLayout nav = new HorizontalLayout(calActionComboBox, fixedSize, fullSize);
+        ComboBox<Month> months = new ComboBox<>();
+        months.setItems(Month.values());
+        months.setItemCaptionGenerator(month -> month.getDisplayName(TextStyle.FULL, calendar.getCalendar().getLocale()));
+        months.setEmptySelectionAllowed(false);
+        months.addValueChangeListener(me -> calendar.switchToMonth(me.getValue()));
+
+        Button today = new Button("today", (Button.ClickEvent clickEvent) -> calendar.getCalendar().withDay(ZonedDateTime.now()));
+        Button week = new Button("week", (Button.ClickEvent clickEvent) -> calendar.getCalendar().withWeek(ZonedDateTime.now()));
+
+        HorizontalLayout nav = new HorizontalLayout(calActionComboBox, fixedSize, fullSize, months, today, week);
         //nav.setWidth("100%");
 
         // Show it in the middle of the screen

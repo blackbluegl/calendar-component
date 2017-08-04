@@ -8,11 +8,19 @@ Moved to BETA stage and testing for stable release. After that, a new feature-br
 (see issues -> tag:enhancements)
 
 ### Version 2.0-BETA2
-- Enhanced: individual time caption pattern for time added
 - Fix:      [Issue#1] missing toolips in month view
 - Fix:      [Issue#6] SetHeight to 100% gives wrong height
 - Fix:      [Issue#9] items are moveable still even with isMoveable()=false, again only in monthly View
 - Fix:      [Issue#10] Calendar scroll not work
+- Fix:      Get handler registration
+- Fix:      Styling issues
+- Fix:      Wrong heights with time blocks added (Experimental feature)
+- Fix:      Item not clickable in month view
+- Enhanced: individual time caption pattern for time added
+- Enhanced: new api to set date ranges added
+    - withDay, withDayInMonth, withWeek, withWeekInYear, withMonth, withMonthInYear
+- Enhanced: new controls for switching forth and back on month view.
+- Enhanced: extended styling of first day in month
 
 ### Version 2.0-BETA1
 - Change:   Java8 Date/Time-API
