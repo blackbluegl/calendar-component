@@ -298,7 +298,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         getState().format24H = TimeFormat.Format24H == getTimeFormat();
         setupDaysAndActions();
         setupCalendarItems();
-        rpc.scroll(scrollTop);
     }
 
     /**
@@ -1532,7 +1531,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         @Override
         public void scroll(int scrollPosition) {
             scrollTop = scrollPosition;
-            markAsDirty();
+            getState().scroll = scrollPosition;
         }
 
         @Override

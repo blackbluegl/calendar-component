@@ -36,7 +36,7 @@ public class CalendarState extends AbstractComponentState {
     public int firstHourOfDay = 0;
     public int lastHourOfDay = 23;
     public int firstDayOfWeek;
-    public int scroll;
+    public int scroll = 0;
     public CalDate now;
     public List<Day> days;
     public List<Item> items;

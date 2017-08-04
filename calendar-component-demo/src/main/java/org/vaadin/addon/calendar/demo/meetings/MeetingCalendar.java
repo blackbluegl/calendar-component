@@ -94,7 +94,7 @@ public class MeetingCalendar extends CustomComponent {
 
         //calendar.setLocale(Locale.US);
         //calendar.setZoneId(ZoneId.of("America/Chicago"));
-        calendar.setWeeklyCaptionProvider(date ->  DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
+        calendar.setWeeklyCaptionProvider(date ->  "<br>" + DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 
         calendar.setVisibleDayRange(1, 7);
 

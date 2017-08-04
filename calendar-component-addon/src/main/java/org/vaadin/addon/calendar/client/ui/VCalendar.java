@@ -1001,6 +1001,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
         outer.add(dayToolbar, DockPanel.NORTH);
         outer.add(weeklyLongEvents, DockPanel.NORTH);
         outer.add(weekGrid, DockPanel.SOUTH);
+
         weekGrid.setVerticalScrollPosition(scroll);
     }
 
