@@ -50,7 +50,8 @@ import java.util.logging.Logger;
  */
 @Connect(value = org.vaadin.addon.calendar.Calendar.class, loadStyle = LoadStyle.LAZY)
 public class CalendarConnector extends AbstractComponentConnector
-        implements ActionOwner, SimpleManagedLayout , Paintable {
+        implements ActionOwner, SimpleManagedLayout, Paintable
+{
 
     private final HashMap<String, String> actionMap = new HashMap<>();
     private CalendarServerRpc rpc = RpcProxy.create(CalendarServerRpc.class, this);

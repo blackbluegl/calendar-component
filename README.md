@@ -9,8 +9,10 @@ Moved to BETA stage and testing for stable release. After that, a new feature-br
 
 ### Version 2.0-BETA2
 - Enhanced: individual time caption pattern for time added
-- Fix:      missing toolips in month view
-- Fix: [Issue#6] SetHeight to 100% gives wrong height
+- Fix:      [Issue#1] missing toolips in month view
+- Fix:      [Issue#6] SetHeight to 100% gives wrong height
+- Fix:      [Issue#9] items are moveable still even with isMoveable()=false, again only in monthly View
+- Fix:      [Issue#10] Calendar scroll not work
 
 ### Version 2.0-BETA1
 - Change:   Java8 Date/Time-API

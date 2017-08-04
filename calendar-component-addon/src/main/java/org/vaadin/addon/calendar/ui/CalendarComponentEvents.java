@@ -15,6 +15,7 @@
  */
 package org.vaadin.addon.calendar.ui;
 
+import com.vaadin.shared.Registration;
 import com.vaadin.util.ReflectTools;
 import org.vaadin.addon.calendar.Calendar;
 import org.vaadin.addon.calendar.client.CalendarEventId;
@@ -33,26 +34,11 @@ import java.util.EventListener;
  *
  */
 public interface CalendarComponentEvents extends Serializable {
-
-    /**
-     * Notifier interface for notifying listener of calendar items
-     */
-
-    interface CalendarEventNotifier extends Serializable {
-        /**
-         * Get the assigned event handler for the given eventId.
-         *
-         * @param eventId
-         * @return the assigned eventHandler, or null if no handler is assigned
-         */
-        EventListener getHandler(String eventId);
-    }
-
     /**
      * Handler interface for day or time cell drag-marking with mouse.
      */
 
-    interface RangeSelectNotifier extends Serializable, CalendarEventNotifier {
+    interface RangeSelectNotifier extends Serializable {
 
         /**
          * Set the RangeSelectHandler that listens for drag-marking.
@@ -60,7 +46,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param listener
          *            RangeSelectHandler to be added.
          */
-        void setHandler(RangeSelectHandler listener);
+        Registration setHandler(RangeSelectHandler listener);
     }
 
     /**
@@ -140,7 +126,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            ForwardHandler to be added.
          */
-        void setHandler(ForwardHandler handler);
+        Registration setHandler(ForwardHandler handler);
 
         /**
          * Add a backward navigation listener.
@@ -148,7 +134,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            BackwardHandler to be added.
          */
-        void setHandler(BackwardHandler handler);
+        Registration setHandler(BackwardHandler handler);
 
         /**
          * Add a date click listener.
@@ -156,7 +142,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            DateClickHandler to be added.
          */
-        void setHandler(DateClickHandler handler);
+        Registration setHandler(DateClickHandler handler);
 
         /**
          * Add a item click listener.
@@ -164,7 +150,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            ItemClickHandler to be added.
          */
-        void setHandler(ItemClickHandler handler);
+        Registration setHandler(ItemClickHandler handler);
 
         /**
          * Add a week click listener.
@@ -172,7 +158,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            WeekClickHandler to be added.
          */
-        void setHandler(WeekClickHandler handler);
+        Registration setHandler(WeekClickHandler handler);
     }
 
     /**
@@ -434,7 +420,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param handler
          *            ItemResizeHandler to be set
          */
-        void setHandler(EventResizeHandler handler);
+        Registration setHandler(EventResizeHandler handler);
     }
 
     /**
@@ -452,7 +438,7 @@ public interface CalendarComponentEvents extends Serializable {
     /**
      * Notifier interface for item drag & drops.
      */
-    interface ItemMoveNotifier extends CalendarEventNotifier {
+    interface ItemMoveNotifier {
 
         /**
          * Set the ItemMoveHandler.
@@ -460,7 +446,7 @@ public interface CalendarComponentEvents extends Serializable {
          * @param listener
          *            ItemMoveHandler to be added
          */
-        void setHandler(ItemMoveHandler listener);
+        Registration setHandler(ItemMoveHandler listener);
 
     }
 

@@ -66,10 +66,10 @@ public class MeetingItem extends BasicItem {
         return meeting.isEditable();
     }
 
-    @Override
-    public boolean isClickable() {
-        return meeting.isEditable();
-    }
+//    @Override
+//    public boolean isClickable() {
+//        return meeting.isEditable();
+//    }
 
     @Override
 	public void setEnd(ZonedDateTime end) {

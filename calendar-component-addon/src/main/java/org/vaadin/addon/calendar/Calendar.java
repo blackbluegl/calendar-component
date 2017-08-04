@@ -21,6 +21,7 @@ import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetails;
 import com.vaadin.server.KeyMapper;
+import com.vaadin.shared.Registration;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.declarative.DesignAttributeHandler;
@@ -35,10 +36,7 @@ import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
 import org.vaadin.addon.calendar.client.ui.schedule.CalTime;
 import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
 import org.vaadin.addon.calendar.handler.*;
-import org.vaadin.addon.calendar.item.BasicItemProvider;
-import org.vaadin.addon.calendar.item.CalendarItem;
-import org.vaadin.addon.calendar.item.CalendarItemProvider;
-import org.vaadin.addon.calendar.item.EditableCalendarItem;
+import org.vaadin.addon.calendar.item.*;
 import org.vaadin.addon.calendar.ui.*;
 
 import java.lang.reflect.Method;
@@ -78,7 +76,7 @@ import java.util.logging.Logger;
  * @author Vaadin Ltd.
  *
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"serial","unused"})
 
 public class Calendar<ITEM extends EditableCalendarItem> extends AbstractComponent implements
         CalendarComponentEvents.NavigationNotifier,
@@ -89,7 +87,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         DropTarget,
         Action.Container
         //,LegacyComponent
-        ,CalendarItemProvider<ITEM>
+        //,CalendarItemProvider<ITEM>
 {
 
     /**
@@ -129,17 +127,11 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     /** Time format that will be used in the UIDL for time. */
     protected final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
 
-    /**
-     * Week view's scroll position. Client sends updates to this value so that
-     * scroll position wont reset all the time.
-     */
-    private int scrollTop = 0;
-
     /** Caption format provuder for the weekly view */
     private WeeklyCaptionProvider weeklyCaptionFormatProvider = date -> DateTimeFormatter.ofPattern("yyyy/MM/dd", getLocale()).format(date);
 
     /** Map from event ids to event handlers */
-    private final Map<String, EventListener> handlers;
+    private final Map<String, Registration> handlers;
 
     /**
      * Drop Handler for Vaadin DD. By default null.
@@ -177,11 +169,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private KeyMapper<Action> actionMapper = null;
 
     /**
-     *
-     */
-    private CalendarServerRpcImpl rpc = new CalendarServerRpcImpl();
-
-    /**
      * The cached minimum minute shown when using
      * {@link #autoScaleVisibleHoursOfDay()}.
      */
@@ -192,8 +179,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * {@link #autoScaleVisibleHoursOfDay()}.
      */
     private Integer maxTimeInMinutes;
-
-//    private Integer customFirstDayOfWeek;
 
     /**
      * A map with blocked timeslots.<br>
@@ -218,17 +203,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * Default date range is one week.
      */
     public Calendar() {
-        this(null, new BasicItemProvider());
+        this(null, null);
     }
 
     /**
      * Construct a Vaadin Calendar with a BasicItemProvider and the provided
      * caption. Default date range is one week.
      *
-     * @param caption
+     * @param caption A caption
      */
     public Calendar(String caption) {
-        this(caption, new BasicItemProvider());
+        this(caption, null);
     }
 
     /**
@@ -264,16 +249,18 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * {@link #setEndDate(ZonedDateTime)} to change this.
      * </p>
      *
+     * @param caption
+     *            A caption
      * @param dataProvider
      *            Item provider, cannot be null.
      */
     // this is the constructor every other constructor calls
     public Calendar(String caption, CalendarItemProvider<ITEM> dataProvider) {
-        registerRpc(rpc);
+        registerRpc(new CalendarServerRpcImpl());
         setCaption(caption);
         handlers = new HashMap<>();
         setDefaultHandlers();
-        setDataProvider(dataProvider);
+        setDataProvider(dataProvider != null ? dataProvider : new BasicItemProvider());
         getState().firstDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
         getState().firstHourOfDay = firstHour;
@@ -444,10 +431,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 item.index = i;
                 item.caption = calItem.getCaption() == null ? "" : calItem.getCaption();
 
-// TODO STRING FORMATTER yyyy-MM-dd
+// XXX STRING FORMATTER yyyy-MM-dd
                 item.dateFrom = DATE_FORMAT.format(calItem.getStart());
                 item.dateTo = DATE_FORMAT.format(calItem.getEnd());
-// TODO STRING FORMATTER HH:mm:ss
+// XXX STRING FORMATTER HH:mm:ss
                 item.timeFrom = TIME_FORMAT.format(calItem.getStart());
                 item.timeTo = TIME_FORMAT.format(calItem.getEnd());
 
@@ -600,8 +587,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 day.blockedSlots.addAll(blockedTimes.get(allOverDate));
             }
 
-            if (blockedTimes.containsKey(dateToShow)) {
-                day.blockedSlots.addAll(blockedTimes.get(dateToShow));
+            if (blockedTimes.containsKey(Date.from(dateToShow.toInstant()))) {
+                day.blockedSlots.addAll(blockedTimes.get(Date.from(dateToShow.toInstant())));
             }
 
             days.add(day);
@@ -1166,14 +1153,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         // remove old listener
         if (getDataProvider() instanceof CalendarItemProvider.ItemSetChangedNotifier) {
-            ((ItemSetChangedNotifier) getDataProvider()).removeItemSetChangedListener(this);
+            ((CalendarItemProvider.ItemSetChangedNotifier) getDataProvider()).removeItemSetChangedListener(this);
         }
 
         this.calendarItemProvider = calendarItemProvider;
 
         // add new listener
         if (calendarItemProvider instanceof CalendarItemProvider.ItemSetChangedNotifier) {
-            ((ItemSetChangedNotifier) calendarItemProvider).addItemSetChangedListener(this);
+            ((CalendarItemProvider.ItemSetChangedNotifier) calendarItemProvider).addItemSetChangedListener(this);
         }
     }
 
@@ -1185,7 +1172,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     @Override
-    public void itemSetChanged(ItemSetChangedEvent changeEvent) {
+    public void itemSetChanged(CalendarItemProvider.ItemSetChangedEvent changeEvent) {
         // sanity check
         if (calendarItemProvider == changeEvent.getProvider()) {
             markAsDirty();
@@ -1207,70 +1194,77 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            A listener that listens to the given event
      * @param listenerMethod
      *            The method on the lister to call when the event is triggered
+     * @return handler registration
      */
-    protected void setHandler(String eventId, Class<?> eventType, EventListener listener, Method listenerMethod) {
+    protected Registration setHandler(String eventId, Class<?> eventType, EventListener listener, Method listenerMethod) {
+
         if (handlers.get(eventId) != null) {
-            removeListener(eventId, eventType, handlers.get(eventId));
+            handlers.get(eventId).remove();
             handlers.remove(eventId);
         }
 
         if (listener != null) {
-            addListener(eventId, eventType, listener, listenerMethod);
-            handlers.put(eventId, listener);
+            Registration registration = addListener(eventId, eventType, listener, listenerMethod);
+            handlers.put(eventId, registration);
+            return registration;
         }
+
+        return null;
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.ForwardHandler listener) {
-        setHandler(CalendarComponentEvents.ForwardEvent.EVENT_ID, CalendarComponentEvents.ForwardEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.ForwardHandler listener) {
+        return setHandler(CalendarComponentEvents.ForwardEvent.EVENT_ID, CalendarComponentEvents.ForwardEvent.class, listener,
                 CalendarComponentEvents.ForwardHandler.forwardMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.BackwardHandler listener) {
-        setHandler(CalendarComponentEvents.BackwardEvent.EVENT_ID, CalendarComponentEvents.BackwardEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.BackwardHandler listener) {
+        return setHandler(CalendarComponentEvents.BackwardEvent.EVENT_ID,
+                CalendarComponentEvents.BackwardEvent.class, listener,
                 CalendarComponentEvents.BackwardHandler.backwardMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.DateClickHandler listener) {
-        setHandler(CalendarComponentEvents.DateClickEvent.EVENT_ID, CalendarComponentEvents.DateClickEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.DateClickHandler listener) {
+        return setHandler(CalendarComponentEvents.DateClickEvent.EVENT_ID,
+                CalendarComponentEvents.DateClickEvent.class, listener,
                 CalendarComponentEvents.DateClickHandler.dateClickMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.ItemClickHandler listener) {
-        setHandler(CalendarComponentEvents.ItemClickEvent.EVENT_ID, CalendarComponentEvents.ItemClickEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.ItemClickHandler listener) {
+        return setHandler(CalendarComponentEvents.ItemClickEvent.EVENT_ID,
+                CalendarComponentEvents.ItemClickEvent.class, listener,
                 CalendarComponentEvents.ItemClickHandler.itemClickMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.WeekClickHandler listener) {
-        setHandler(CalendarComponentEvents.WeekClick.EVENT_ID, CalendarComponentEvents.WeekClick.class, listener,
+    public Registration setHandler(CalendarComponentEvents.WeekClickHandler listener) {
+        return setHandler(CalendarComponentEvents.WeekClick.EVENT_ID,
+                CalendarComponentEvents.WeekClick.class, listener,
                 CalendarComponentEvents.WeekClickHandler.weekClickMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.EventResizeHandler listener) {
-        setHandler(CalendarComponentEvents.ItemResizeEvent.EVENT_ID, CalendarComponentEvents.ItemResizeEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.EventResizeHandler listener) {
+        return setHandler(CalendarComponentEvents.ItemResizeEvent.EVENT_ID,
+                CalendarComponentEvents.ItemResizeEvent.class, listener,
                 CalendarComponentEvents.EventResizeHandler.itemResizeMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.RangeSelectHandler listener) {
-        setHandler(CalendarComponentEvents.RangeSelectEvent.EVENT_ID, CalendarComponentEvents.RangeSelectEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.RangeSelectHandler listener) {
+        return setHandler(CalendarComponentEvents.RangeSelectEvent.EVENT_ID,
+                CalendarComponentEvents.RangeSelectEvent.class, listener,
                 CalendarComponentEvents.RangeSelectHandler.rangeSelectMethod);
     }
 
     @Override
-    public void setHandler(CalendarComponentEvents.ItemMoveHandler listener) {
-        setHandler(CalendarComponentEvents.ItemMoveEvent.EVENT_ID, CalendarComponentEvents.ItemMoveEvent.class, listener,
+    public Registration setHandler(CalendarComponentEvents.ItemMoveHandler listener) {
+        return setHandler(CalendarComponentEvents.ItemMoveEvent.EVENT_ID,
+                CalendarComponentEvents.ItemMoveEvent.class, listener,
                 CalendarComponentEvents.ItemMoveHandler.itemMoveMethod);
-    }
-
-    @Override
-    public EventListener getHandler(String eventId) {
-        return handlers.get(eventId);
     }
 
     /**
@@ -1323,7 +1317,13 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         return td;
     }
 
-    @Override
+    /**
+     * Return the calendar items from current data provider
+     *
+     * @param startDate The start of the date range
+     * @param endDate The end of the date range
+     * @return A list of calendar items
+     */
     public List<ITEM> getItems(ZonedDateTime startDate, ZonedDateTime endDate) {
         List<ITEM> events = getDataProvider().getItems(startDate, endDate);
         cacheMinMaxTimeOfDay(events);
@@ -1530,7 +1530,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         @Override
         public void scroll(int scrollPosition) {
-            scrollTop = scrollPosition;
             getState().scroll = scrollPosition;
         }
 
@@ -1608,10 +1607,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         Attributes attr = design.attributes();
 
-        ZoneId zoneId = ZoneId.systemDefault();
-
         if (design.hasAttr("time-zone")) {
-            zoneId = ZoneId.of(DesignAttributeHandler.readAttribute("end-date", attr, String.class));
+            setZoneId(ZoneId.of(DesignAttributeHandler.readAttribute("end-date", attr, String.class)));
         }
 
         if (design.hasAttr("time-format")) {

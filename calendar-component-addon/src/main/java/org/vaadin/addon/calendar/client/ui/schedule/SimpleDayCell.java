@@ -408,7 +408,9 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
 
             } else if (calendar.getItemClickListener() != null) {
                 CalendarItem e = getItemByWidget(mel);
-                calendar.getItemClickListener().itemClick(e);
+
+                if(e.isClickable())
+                    calendar.getItemClickListener().itemClick(e);
             }
 
             movingItem = null;
@@ -437,13 +439,13 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
         Widget w = (Widget) event.getSource();
         clickedWidget = w;
 
-        if (w instanceof MonthItemLabel
-                && ((MonthItemLabel)w).getCalendarItem().isMoveable()) {
+        if (w instanceof MonthItemLabel) {
 
             // event clicks should be allowed even when read-only
             monthEventMouseDown = true;
 
-            if (calendar.isItemMoveAllowed()) {
+            if (calendar.isItemMoveAllowed()
+                    && ((MonthItemLabel)w).getCalendarItem().isMoveable()) {
                 startCalendarItemDrag(event, (MonthItemLabel) w);
             }
 
