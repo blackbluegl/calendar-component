@@ -266,6 +266,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         getState().firstHourOfDay = firstHour;
         getState().lastHourOfDay = lastHour;
         setTimeFormat(null);
+
+        withWeek(ZonedDateTime.now(getZoneId()));
     }
 
     @Override

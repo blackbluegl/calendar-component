@@ -22,6 +22,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+
 /**
  * Implements basic functionality needed to enable forward navigation.
  *
@@ -56,7 +58,7 @@ public class BasicForwardHandler implements CalendarComponentEvents.ForwardHandl
         } else if (event.getComponent().isWeeklyMode()) {
             durationInDays = 7;
         } else {
-            durationInDays = Duration.between(start, end).toDays();
+            durationInDays = Duration.between(start, end).toDays() +1;
         }
 
         start = start.plus(durationInDays, ChronoUnit.DAYS);
@@ -75,9 +77,16 @@ public class BasicForwardHandler implements CalendarComponentEvents.ForwardHandl
             }
 
             setDates(event, newDate, newDate);
+
+            return;
         }
 
-        setDates(event, start, end);
+        if (durationInDays < 28) {
+            setDates(event, start, end);
+        } else {
+            // go 7 days forth and get the first day from month
+            setDates(event, start.with(firstDayOfMonth()), end.plus(7, ChronoUnit.DAYS).with(firstDayOfMonth()));
+        }
 
     }
 

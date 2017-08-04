@@ -22,6 +22,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+
 /**
  * Implements basic functionality needed to enable backwards navigation.
  *
@@ -49,7 +51,7 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
         ZonedDateTime start = event.getComponent().getStartDate();
         ZonedDateTime end = event.getComponent().getEndDate();
 
-        long durationInDays = 0;
+        long durationInDays;
 
         // for week view durationInDays = 7, for day view durationInDays = 1
         if (event.getComponent().isDayMode()) { // day view
@@ -57,7 +59,7 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
         } else if (event.getComponent().isWeeklyMode()) {
             durationInDays = 7;
         } else {
-            durationInDays = Duration.between(start, end).toDays();
+            durationInDays = Duration.between(start, end).toDays() +1;
         }
 
         start = start.minus(durationInDays, ChronoUnit.DAYS);
@@ -77,9 +79,15 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
 
             setDates(event, newDate, newDate);
 
-        } else {
+            return;
 
+        }
+
+        if (durationInDays < 28) {
             setDates(event, start, end);
+        } else {
+            // go 7 days before and get the last day from month
+            setDates(event, start.minus(7, ChronoUnit.DAYS).with(lastDayOfMonth()), end.with(lastDayOfMonth()));
         }
     }
 
