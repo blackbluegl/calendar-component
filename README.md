@@ -19,7 +19,7 @@ Moved to BETA stage and testing for stable release. After that, a new feature-br
 - Enhanced: individual time caption pattern for time added
 - Enhanced: new api to set date ranges added
     - withDay, withDayInMonth, withWeek, withWeekInYear, withMonth, withMonthInYear
-- Enhanced: new controls for switching forth and back on month view.
+- Enhanced: new controls for switching forward and back in month view.
 - Enhanced: extended styling of first day in month
 
 ### Version 2.0-BETA1
