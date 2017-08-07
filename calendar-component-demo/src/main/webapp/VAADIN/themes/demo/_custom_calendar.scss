@@ -11,14 +11,14 @@
     .v-calendar-event-month:hover {
         position: absolute;
         width: inherit;
-        height: 160px;
+        height: 230px;
+        overflow: auto;
         background: rgba(236, 243, 247, 0.95);
         box-shadow: 0px 7px 20px 0px #ddd;
         border: 1px solid #d6d6d6;
         border-top: 3px solid #00ace0;
-        border-radius: 0 3px 3px 3px;
+        border-radius: 0 0 3px 3px;
         z-index: 1;
-        margin-top: (round($v-font-size * 1.2) * (-1) -5);
         margin-left: 15px;
 
         opacity:0;
@@ -44,12 +44,19 @@
             position: fixed;
             width: 15px;
             border-radius: 10px 0 0 10px;
+            box-shadow: 0px 1px 3px 0px #c5c5c5;
             margin-top: -3px;
             margin-left: -20px;
             content: "";
         }
     }
 
+.v-calendar-month-day-today {
+background: none;
+}
+    .v-calendar-month-day-today .v-calendar-day-number {
+        background: #eef3f8;
+    }
 
 /*
     .v-calendar-month-day.firstDay {

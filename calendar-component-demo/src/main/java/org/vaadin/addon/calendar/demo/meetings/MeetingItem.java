@@ -20,7 +20,7 @@ public class MeetingItem extends BasicItem {
 	 */
 
 	public MeetingItem(Meeting meeting) {
-        super(meeting.getDetails(), meeting.getName(), meeting.getStart(), meeting.getEnd());
+        super(meeting.getDetails(), null, meeting.getStart(), meeting.getEnd());
         this.meeting = meeting;
 	}
 

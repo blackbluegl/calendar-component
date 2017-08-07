@@ -286,9 +286,9 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   }
 
   .#{$primary-stylename}-month-day-today {
-    background: blend-normal(rgba($v-focus-color, .05), $v-background-color);
 
     .#{$primary-stylename}-day-number {
+      background: blend-normal(rgba($v-focus-color, .05), $v-background-color);
       font-weight: $v-font-weight + 100;
       color: $v-focus-color;
       border-top: 2px solid $v-focus-color;
@@ -581,6 +581,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     $stylename: if($i == 1, '', '[class*="color#{$i}"]');
 
     .#{$primary-stylename}-event-month#{$stylename}:before {
+      border-color: $color;
       color: $color;
     }
 
