@@ -1,6 +1,56 @@
+
+/* Keyframes for the fade-in */
+@-webkit-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@-moz-keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
 @mixin meetings_calendar {
 
 .meetings {
+
+    .v-calendar-event-month:hover {
+        position: absolute;
+        width: inherit;
+        height: 160px;
+        background: rgba(236, 243, 247, 0.95);
+        box-shadow: 0px 7px 20px 0px #ddd;
+        border: 1px solid #d6d6d6;
+        border-top: 3px solid #00ace0;
+        border-radius: 0 3px 3px 3px;
+        z-index: 1;
+        margin-top: (round($v-font-size * 1.2) * (-1) -5);
+        margin-left: 15px;
+
+        opacity:0;
+        opacity: 1 \9; /*just in case ie*/
+        -webkit-animation:fadeIn ease-in 1;
+        -moz-animation:fadeIn ease-in 1;
+        animation:fadeIn ease-in 1;
+
+        -webkit-animation-fill-mode:forwards;
+        -moz-animation-fill-mode:forwards;
+        animation-fill-mode:forwards;
+
+        -webkit-animation-duration:.2s;
+        -moz-animation-duration:.2s;
+        animation-duration:.2s;
+
+        -webkit-animation-delay: .12s;
+        -moz-animation-delay: .12s;
+        animation-delay: .12s;
+
+        &:before {
+            border-top: 19px solid #00ace0;
+            position: fixed;
+            width: 15px;
+            border-radius: 10px 0 0 10px;
+            margin-top: -3px;
+            margin-left: -20px;
+            content: "";
+        }
+    }
+
+
 /*
     .v-calendar-month-day.firstDay {
         outline: none;

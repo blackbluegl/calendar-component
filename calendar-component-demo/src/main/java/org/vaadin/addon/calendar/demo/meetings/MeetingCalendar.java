@@ -64,7 +64,7 @@ public class MeetingCalendar extends CustomComponent {
         meeting.setEnd(event.getEnd());
 
         meeting.setName("A Name");
-        meeting.setDetails("A Detail");
+        meeting.setDetails("A Detail<br>with HTML<br> with more lines");
 
         // Random state
         meeting.setState(R.nextInt(2) == 1 ? Meeting.State.planned : Meeting.State.confirmed);
