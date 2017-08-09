@@ -1770,36 +1770,73 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         markAsDirty();
     }
 
-    public void withDay(ZonedDateTime today) {
+    /*
+     * Builder methods
+     */
+
+    public Calendar<ITEM> withDataProvider(CalendarItemProvider<ITEM> provider) {
+        setDataProvider(provider);
+        return this;
+    }
+
+    public Calendar<ITEM> withDay(ZonedDateTime today) {
         setStartDate(today);
         setEndDate(today);
+        return this;
     }
 
-    public void withDayInMonth(ZonedDateTime today) {
+    public Calendar<ITEM> withDayInMonth(ZonedDateTime today) {
         withMonth(today.getMonth());
+        return this;
     }
 
-    public void withWeek(ZonedDateTime today) {
+    public Calendar<ITEM> withWeek(ZonedDateTime today) {
         setStartDate(today.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
         setEndDate(today.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+        return this;
     }
 
-    public void withWeekInYear(int weekInYear) {
+    public Calendar<ITEM> withWeekInYear(int weekInYear) {
         ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(ChronoField.ALIGNED_WEEK_OF_YEAR, weekInYear);
         setStartDate(dateTime.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
         setEndDate(dateTime.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+        return this;
     }
 
-    public void withMonth(Month month) {
+    public Calendar<ITEM> withMonth(Month month) {
         ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(month);
         setStartDate(dateTime.with(firstDayOfMonth()));
         setEndDate(dateTime.with(lastDayOfMonth()));
+        return this;
     }
 
-    public void withMonthInYear(Month month, int year) {
+    public Calendar<ITEM> withMonthInYear(Month month, int year) {
         ZonedDateTime dateTime = ZonedDateTime.now(getZoneId()).with(month).withYear(year);
         setStartDate(dateTime.with(firstDayOfMonth()));
         setEndDate(dateTime.with(lastDayOfMonth()));
+        return this;
+    }
+
+    public Calendar<ITEM> withFullSize() {
+        return withFullWidth().withFullHeight();
+    }
+
+    public Calendar<ITEM> withFullWidth() {
+        return withWidth(100, Unit.PERCENTAGE);
+    }
+
+    public Calendar<ITEM> withFullHeight() {
+        return withHeight(100, Unit.PERCENTAGE);
+    }
+
+    public Calendar<ITEM> withWidth(float width, Unit unit) {
+        setWidth(width, unit);
+        return this;
+    }
+
+    public Calendar<ITEM> withHeight(float width, Unit unit) {
+        setHeight(width, unit);
+        return this;
     }
 
 }
