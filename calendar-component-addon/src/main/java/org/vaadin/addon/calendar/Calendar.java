@@ -767,7 +767,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param lastDay
      *            the first day of the week to show, between 1 and 7
      */
-    public void setVisibleDayRange(int firstDay, int lastDay) {
+    private void setVisibleDayRange(int firstDay, int lastDay) {
         assert (firstDay >= 1 && firstDay < lastDay && lastDay <= 7);
 
         this.firstDay = firstDay;
@@ -775,7 +775,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         getState(false).firstVisibleDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
-
     }
 
     /**
@@ -818,10 +817,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            the first hour of the day to show, between 0 and 23
      * @see #autoScaleVisibleHoursOfDay()
      */
-    public void setFirstVisibleHourOfDay(int firstHour) {
+    private void setFirstVisibleHourOfDay(int firstHour) {
         if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23  && firstHour <= getLastVisibleHourOfDay()) {
             this.firstHour = firstHour;
-            getState().firstHourOfDay = firstHour;
+            getState(false).firstHourOfDay = firstHour;
         }
     }
 
@@ -849,7 +848,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            the first hour of the day to show, between 0 and 23
      * @see #autoScaleVisibleHoursOfDay()
      */
-    public void setLastVisibleHourOfDay(int lastHour) {
+    private void setLastVisibleHourOfDay(int lastHour) {
         if (this.lastHour != lastHour && lastHour >= 0 && lastHour <= 23 && lastHour >= getFirstVisibleHourOfDay()) {
             this.lastHour = lastHour;
             getState().lastHourOfDay = lastHour;
@@ -1836,6 +1835,57 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
     public Calendar<ITEM> withHeight(float width, Unit unit) {
         setHeight(width, unit);
+        return this;
+    }
+
+    /**
+     * <p>
+     * This method restricts the weekdays that are shown. This affects both the
+     * monthly and the weekly view. The general contract is that <b>firstDay <
+     * lastDay</b>.
+     * </p>
+     *
+     * <p>
+     * Note that this only affects the rendering process. Items are still
+     * requested by the dates set by {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)}.
+     * </p>
+     *
+     * @param firstDay
+     *            the first day of the week to show, between 1 and 7
+     * @param lastDay
+     *            the first day of the week to show, between 1 and 7
+     */
+
+    public Calendar<ITEM> withVisibleDays(int firstDay, int lastDay) {
+        setVisibleDayRange(firstDay, lastDay);
+        return this;
+    }
+
+    /**
+     * <p>
+     * This method restricts the hours that are shown per day. This affects the
+     * weekly view. The general contract is that <b>firstHour < lastHour</b>.
+     * </p>
+     *
+     * <p>
+     * Note that this only affects the rendering process. Items are still
+     * requested by the dates set by {@link #setStartDate(ZonedDateTime)} and
+     * {@link #setEndDate(ZonedDateTime)}.
+     * </p>
+     * You can use {@link #autoScaleVisibleHoursOfDay()} for automatic scaling
+     * of the visible hours based on current items.
+     *
+     * @param firstHour
+     *            the first hour of the day to show, between 0 and 23
+     * @param lastHour
+     *            the last hour of the day to show, between 0 and 23
+     *
+     * @see #autoScaleVisibleHoursOfDay()
+     */
+    public Calendar<ITEM> withVisibleHours(int firstHour, int lastHour) {
+        setFirstVisibleHourOfDay(firstHour);
+        setLastVisibleHourOfDay(lastHour);
         return this;
     }
 
