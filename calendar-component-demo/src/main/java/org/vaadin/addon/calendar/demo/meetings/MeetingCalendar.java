@@ -99,7 +99,7 @@ public class MeetingCalendar extends CustomComponent {
         //calendar.setZoneId(ZoneId.of("America/Chicago"));
         calendar.setWeeklyCaptionProvider(date ->  "<br>" + DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 
-        calendar.setVisibleDayRange(1, 7);
+        calendar.withVisibleDays(1, 7);
 
         calendar.withMonth(ZonedDateTime.now().getMonth());
 

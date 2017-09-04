@@ -1658,30 +1658,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         return customAttributes;
     }
 
-    /*
-     * Allow setting first day of week independent of Locale. Set to null if you
-     * want first day of week being defined by the locale
-     *
-     * @since 7.6
-     * @param dayOfWeek
-     *            any of java.util.Calendar.SUNDAY..java.util.Calendar.SATURDAY
-     *            or null to revert to default first day of week by locale
-
-    public void setFirstDayOfWeek(Integer dayOfWeek) {
-
-        int minimalSupported = java.util.Calendar.SUNDAY;
-        int maximalSupported = java.util.Calendar.SATURDAY;
-
-        if (dayOfWeek != null && (dayOfWeek < minimalSupported || dayOfWeek > maximalSupported)) {
-            throw new IllegalArgumentException(String.format(
-                    "Day of week must be between %s and %s. Actually received: %s",
-                    minimalSupported, maximalSupported, dayOfWeek));
-        }
-
-        customFirstDayOfWeek = dayOfWeek;
-        markAsDirty();
-    } */
-
     /**
      * Add a time block start index. Time steps are half hour beginning at 0
      * and a minimal time slot length of 1800000 milliseconds is used.
