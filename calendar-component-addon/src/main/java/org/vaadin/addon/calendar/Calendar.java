@@ -1734,12 +1734,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         markAsDirty();
     }
 
-    public void clearBlockedTimes() {
+    public void clearTimeBlocks() {
         blockedTimes.clear();
         markAsDirty();
     }
 
-    public void clearBlockedTimes(Date day) {
+    public void clearTimeBlocks(Date day) {
         if (blockedTimes.containsKey(day)) {
             blockedTimes.remove(day);
         }
