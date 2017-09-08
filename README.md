@@ -9,6 +9,7 @@ Moved to BETA stage and testing for stable release.
 ### Version 2.0-BETA3
 - Fix:      [Issue#13] Fix default caption set from current locale.
 - Enhanced: more builder methods added
+- Timeblocks now uses LocalDate instead of Date
 - minor fixes
 
 ### Version 2.0-BETA2

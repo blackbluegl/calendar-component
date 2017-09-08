@@ -126,7 +126,7 @@ public class MeetingCalendar extends CustomComponent {
         bcal.add(java.util.Calendar.MINUTE, 30);
         long end = bcal.getTimeInMillis();
 
-        calendar.addTimeBlock(start, end, "");
+        calendar.addTimeBlock(start, end, "my-blocky-style");
 
         cal.add(java.util.Calendar.DAY_OF_WEEK, 1);
 

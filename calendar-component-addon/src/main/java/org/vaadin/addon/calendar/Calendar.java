@@ -185,12 +185,12 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * A map with blocked timeslots.<br>
      *     Contains a set with timestamp of starttimes.
      */
-    private final Map<Date, Set<Long>> blockedTimes = new HashMap<>();
+    private final Map<LocalDate, Set<Long>> blockedTimes = new HashMap<>();
 
     /**
      * Initial date for all blocked times
      */
-    private final Date allOverDate = new Date(0);
+    private final LocalDate allOverDate = LocalDate.ofEpochDay(0);
 
     /**
      * Returns the logger for the calendar
@@ -1667,7 +1667,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param fromMillies time millies from where the block starts
      * @param styleName css class for this block (currently unused)
      */
-    protected final void addTimeBlockInternaly(Date day, Long fromMillies, String styleName) {
+    protected final void addTimeBlockInternaly(LocalDate day, Long fromMillies, String styleName) {
         Set<Long> times;
         if (blockedTimes.containsKey(day)) {
             times = blockedTimes.get(day);
@@ -1709,7 +1709,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param fromMillies time millies from where the block starts
      * @param toMillies time millies from where the block ends
      */
-    public void addTimeBlock(Date day, long fromMillies, long toMillies) {
+    public void addTimeBlock(LocalDate day, long fromMillies, long toMillies) {
         addTimeBlock(day, fromMillies, toMillies, "");
     }
 
@@ -1722,7 +1722,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param toMillies time millies from where the block ends
      * @param styleName css class for this block (currently unused)
      */
-    public void addTimeBlock(Date day, long fromMillies, long toMillies, String styleName) {
+    public void addTimeBlock(LocalDate day, long fromMillies, long toMillies, String styleName) {
         assert (toMillies > fromMillies && fromMillies % 1800000 == 0 && toMillies % 1800000 == 0);
 
         while (fromMillies < toMillies) {
