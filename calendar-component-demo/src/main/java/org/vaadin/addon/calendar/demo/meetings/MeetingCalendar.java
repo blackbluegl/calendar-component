@@ -9,6 +9,7 @@ import org.vaadin.addon.calendar.item.BasicItemProvider;
 import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import java.time.Month;
+import java.time.ZonedDateTime;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
@@ -93,7 +94,7 @@ public class MeetingCalendar extends CustomComponent {
         calendar.setItemCaptionAsHtml(true);
         calendar.setContentMode(ContentMode.HTML);
 
-//        calendar.setLocale(Locale.US);
+//        calendar.setLocale(Locale.JAPAN);
 //        calendar.setZoneId(ZoneId.of("America/Chicago"));
 //        calendar.setWeeklyCaptionProvider(date ->  "<br>" + DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 //        calendar.setWeeklyCaptionProvider(date -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale()).format(date));
@@ -101,8 +102,8 @@ public class MeetingCalendar extends CustomComponent {
         calendar.withVisibleDays(1, 7);
 //        calendar.withMonth(ZonedDateTime.now().getMonth());
 
-//        calendar.setStartDate(ZonedDateTime.now().plus(3, DAYS));
-//        calendar.setEndDate(ZonedDateTime.now().plus(10, DAYS));
+        calendar.setStartDate(ZonedDateTime.now().withDayOfMonth(10));
+        calendar.setEndDate(ZonedDateTime.now().withDayOfMonth(16));
 
         addCalendarEventListeners();
 

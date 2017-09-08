@@ -525,7 +525,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         CalendarState state = getState();
 
-        state.firstDayOfWeek = java.util.Calendar.getInstance(getLocale()).getFirstDayOfWeek();
+        //state.firstDayOfWeek = java.util.Calendar.getInstance(getLocale()).getFirstDayOfWeek();
+        state.firstDayOfWeek = 2; // FIXME !!! remove old style week start
 
         // If only one is null, throw exception
         // If both are null, set defaults
@@ -743,8 +744,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         if (!zoneId.equals(zone)) {
             zoneId = zone;
 
-            setStartDate(ZonedDateTime.ofInstant(getStartDate().toInstant(), zone));
-            setEndDate(ZonedDateTime.ofInstant(getEndDate().toInstant(), zone));
+            setStartDate(getStartDate().withZoneSameLocal(zone));
+            setEndDate(getEndDate().withZoneSameLocal(zone));
 
             markAsDirty();
         }

@@ -7,6 +7,7 @@ Calendar-component is a UI component add-on for Vaadin 8.
 Moved to BETA stage and testing for stable release.
 
 ### Version 2.0-BETA3
+- Fix:      [Issue#11] Calculation of day names fixed
 - Fix:      [Issue#13] Fix default caption set from current locale.
 - Enhanced: more builder methods added
 - Timeblocks now uses LocalDate instead of Date
