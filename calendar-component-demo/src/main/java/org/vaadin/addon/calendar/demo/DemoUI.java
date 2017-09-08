@@ -34,10 +34,10 @@ public class DemoUI extends UI
 
         ComboBox<CalStyle> calActionComboBox = new ComboBox<>();
         calActionComboBox.setItems(
-                new CalStyle("Col 1 - 7", () -> calendar.getCalendar().setVisibleDayRange(1, 7)),
-                new CalStyle("Col 1 - 5", () -> calendar.getCalendar().setVisibleDayRange(1, 5)),
-                new CalStyle("Col 2 - 5", () -> calendar.getCalendar().setVisibleDayRange(2, 5)),
-                new CalStyle("Col 6 - 7", () -> calendar.getCalendar().setVisibleDayRange(6, 7))
+                new CalStyle("Col 1 - 7", () -> calendar.getCalendar().withVisibleDays(1, 7)),
+                new CalStyle("Col 1 - 5", () -> calendar.getCalendar().withVisibleDays(1, 5)),
+                new CalStyle("Col 2 - 5", () -> calendar.getCalendar().withVisibleDays(2, 5)),
+                new CalStyle("Col 6 - 7", () -> calendar.getCalendar().withVisibleDays(6, 7))
         );
         calActionComboBox.addValueChangeListener(e -> e.getValue().act());
         calActionComboBox.setEmptySelectionAllowed(false);

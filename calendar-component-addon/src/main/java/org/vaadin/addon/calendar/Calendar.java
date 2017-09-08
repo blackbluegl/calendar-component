@@ -44,6 +44,7 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
@@ -128,7 +129,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     protected final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
 
     /** Caption format provuder for the weekly view */
-    private WeeklyCaptionProvider weeklyCaptionFormatProvider = date -> DateTimeFormatter.ofPattern("yyyy/MM/dd", getLocale()).format(date);
+    private WeeklyCaptionProvider weeklyCaptionFormatProvider = date -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale()).format(date);
 
     /** Map from event ids to event handlers */
     private final Map<String, Registration> handlers;

@@ -6,6 +6,11 @@ Calendar-component is a UI component add-on for Vaadin 8.
 
 Moved to BETA stage and testing for stable release.
 
+### Version 2.0-BETA3
+- Fix:      [Issue#13] Fix default caption set from current locale.
+- Enhanced: more builder methods added
+- minor fixes
+
 ### Version 2.0-BETA2
 - Fix:      [Issue#1] missing toolips in month view
 - Fix:      [Issue#6] SetHeight to 100% gives wrong height
