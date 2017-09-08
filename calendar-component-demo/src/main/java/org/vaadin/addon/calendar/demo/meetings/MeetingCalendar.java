@@ -102,8 +102,8 @@ public class MeetingCalendar extends CustomComponent {
         calendar.withVisibleDays(1, 7);
 //        calendar.withMonth(ZonedDateTime.now().getMonth());
 
-        calendar.setStartDate(ZonedDateTime.now().withDayOfMonth(10));
-        calendar.setEndDate(ZonedDateTime.now().withDayOfMonth(16));
+        calendar.setStartDate(ZonedDateTime.of(2017, 9, 10, 0,0,0, 0, calendar.getZoneId()));
+        calendar.setEndDate(ZonedDateTime.of(2017, 9, 16, 0,0,0, 0, calendar.getZoneId()));
 
         addCalendarEventListeners();
 
