@@ -272,4 +272,26 @@ public class BasicItem implements EditableCalendarItem {
             listeners.remove(listener);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BasicItem basicItem = (BasicItem) o;
+
+        if (isAllDay != basicItem.isAllDay) return false;
+        if (!caption.equals(basicItem.caption)) return false;
+        if (!end.equals(basicItem.end)) return false;
+        return start.equals(basicItem.start);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = caption.hashCode();
+        result = 31 * result + end.hashCode();
+        result = 31 * result + start.hashCode();
+        result = 31 * result + (isAllDay ? 1 : 0);
+        return result;
+    }
 }

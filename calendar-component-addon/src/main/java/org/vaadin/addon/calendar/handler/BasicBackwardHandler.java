@@ -15,14 +15,14 @@
  */
 package org.vaadin.addon.calendar.handler;
 
-import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 
-import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 /**
  * Implements basic functionality needed to enable backwards navigation.
@@ -74,7 +74,7 @@ public class BasicBackwardHandler implements CalendarComponentEvents.BackwardHan
 
                 newDate = newDate.minus(1, ChronoUnit.DAYS);
 
-                dayOfWeek = start.get(ChronoField.DAY_OF_WEEK);
+                dayOfWeek = newDate.get(ChronoField.DAY_OF_WEEK);
             }
 
             setDates(event, newDate, newDate);
