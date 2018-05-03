@@ -1,23 +1,30 @@
 package org.vaadin.addon.calendar.demo;
 
+import javax.servlet.annotation.WebServlet;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.util.Locale;
+
+import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.*;
+import com.vaadin.shared.ui.ui.Transport;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 import org.vaadin.addon.calendar.demo.meetings.MeetingCalendar;
-
-import javax.servlet.annotation.WebServlet;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.TextStyle;
-import java.util.Locale;
 
 @Theme("demo")
 @Title("Calendar Add-on Demo")
+@Push(transport = Transport.LONG_POLLING)
 @SuppressWarnings("serial")
 public class DemoUI extends UI
 {
@@ -46,12 +53,15 @@ public class DemoUI extends UI
         zoneBox.setValue(meetings.getCalendar().getZoneId().getId());
         zoneBox.addValueChangeListener(e -> meetings.getCalendar().setZoneId(ZoneId.of(e.getValue())));
 
+
+        CalStyle initial = new CalStyle("Day 1 - 7", () -> meetings.getCalendar().withVisibleDays(1, 7));
+
         ComboBox<CalStyle> calActionComboBox = new ComboBox<>();
         calActionComboBox.setItems(
-                new CalStyle("Col 1 - 7", () -> meetings.getCalendar().withVisibleDays(1, 7)),
-                new CalStyle("Col 1 - 5", () -> meetings.getCalendar().withVisibleDays(1, 5)),
-                new CalStyle("Col 2 - 5", () -> meetings.getCalendar().withVisibleDays(2, 5)),
-                new CalStyle("Col 6 - 7", () -> meetings.getCalendar().withVisibleDays(6, 7))
+                initial,
+                new CalStyle("Day 1 - 5", () -> meetings.getCalendar().withVisibleDays(1, 5)),
+                new CalStyle("Day 2 - 5", () -> meetings.getCalendar().withVisibleDays(2, 5)),
+                new CalStyle("Day 6 - 7", () -> meetings.getCalendar().withVisibleDays(6, 7))
         );
         calActionComboBox.addValueChangeListener(e -> e.getValue().act());
         calActionComboBox.setEmptySelectionAllowed(false);
@@ -68,10 +78,10 @@ public class DemoUI extends UI
         months.setEmptySelectionAllowed(false);
         months.addValueChangeListener(me -> meetings.switchToMonth(me.getValue()));
 
-        Button today = new Button("today", (Button.ClickEvent clickEvent) -> meetings.getCalendar().withDay(ZonedDateTime.now()));
-        Button week = new Button("week", (Button.ClickEvent clickEvent) -> meetings.getCalendar().withWeek(ZonedDateTime.now()));
+        Button today = new Button("today", (Button.ClickEvent clickEvent) -> meetings.getCalendar().withDay(LocalDate.now()));
+        Button week = new Button("week", (Button.ClickEvent clickEvent) -> meetings.getCalendar().withWeek(LocalDate.now()));
 
-        HorizontalLayout nav = new HorizontalLayout(localeBox, zoneBox, fixedSize, fullSize, months, today, week);
+        HorizontalLayout nav = new HorizontalLayout(localeBox, zoneBox, fixedSize, fullSize, months, today, week, calActionComboBox);
         //nav.setWidth("100%");
 
         // Show it in the middle of the screen
@@ -84,6 +94,7 @@ public class DemoUI extends UI
         layout.addComponentsAndExpand(meetings);
         setContent(layout);
 
+        calActionComboBox.setSelectedItem(initial);
     }
 
     private static class CalStyle {

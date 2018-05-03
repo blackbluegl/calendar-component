@@ -15,12 +15,12 @@
  */
 package org.vaadin.addon.calendar.client;
 
-import com.vaadin.shared.AbstractComponentState;
-import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
+
+import com.vaadin.shared.AbstractComponentState;
+import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
 
 /**
  * @since 7.1.0
@@ -35,7 +35,7 @@ public class CalendarState extends AbstractComponentState {
     public int lastVisibleDayOfWeek = 7;
     public int firstHourOfDay = 0;
     public int lastHourOfDay = 23;
-    public int firstDayOfWeek;
+    public int firstDayOfWeek = 1;
     public int scroll = 0;
     public CalDate now;
     public List<Day> days;

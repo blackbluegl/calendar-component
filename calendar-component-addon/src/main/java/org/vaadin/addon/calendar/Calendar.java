@@ -15,6 +15,40 @@
  */
 package org.vaadin.addon.calendar;
 
+import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
+import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+
+import java.lang.reflect.Method;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
 import com.vaadin.event.dd.DropHandler;
@@ -35,25 +69,21 @@ import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
 import org.vaadin.addon.calendar.client.ui.schedule.CalTime;
 import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
-import org.vaadin.addon.calendar.handler.*;
-import org.vaadin.addon.calendar.item.*;
-import org.vaadin.addon.calendar.ui.*;
-
-import java.lang.reflect.Method;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.WeekFields;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.logging.Logger;
-
-import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
-import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
+import org.vaadin.addon.calendar.handler.BasicBackwardHandler;
+import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
+import org.vaadin.addon.calendar.handler.BasicForwardHandler;
+import org.vaadin.addon.calendar.handler.BasicItemMoveHandler;
+import org.vaadin.addon.calendar.handler.BasicItemResizeHandler;
+import org.vaadin.addon.calendar.handler.BasicWeekClickHandler;
+import org.vaadin.addon.calendar.item.BasicItemProvider;
+import org.vaadin.addon.calendar.item.CalendarItem;
+import org.vaadin.addon.calendar.item.CalendarItemProvider;
+import org.vaadin.addon.calendar.item.EditableCalendarItem;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvent;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
+import org.vaadin.addon.calendar.ui.CalendarDateRange;
+import org.vaadin.addon.calendar.ui.CalendarTargetDetails;
+import org.vaadin.addon.calendar.ui.WeeklyCaptionProvider;
 
 /**
  * <p>
@@ -262,7 +292,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         handlers = new HashMap<>();
         setDefaultHandlers();
         setDataProvider(dataProvider != null ? dataProvider : new BasicItemProvider());
-        getState().firstDayOfWeek = firstDay;
+        getState().firstDayOfWeek = 1;
         getState().lastVisibleDayOfWeek = lastDay;
         getState().firstHourOfDay = firstHour;
         getState().lastHourOfDay = lastHour;
@@ -346,14 +376,19 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            First visible date to show.
      */
     public void setStartDate(ZonedDateTime date) {
-        // reset all time information
-        date = date.with(LocalTime.MIN);
 
-        // and update, if the given date is not the same as current date
-        if (!date.equals(startDate)) {
-            startDate = date;
-            markAsDirty();
-        }
+        System.out.println(getZoneId());
+
+        System.out.println(date);
+
+        // reset all time information
+        date = date.withZoneSameLocal(getZoneId()).with(LocalTime.MIN);
+
+        System.out.println(date);
+
+        startDate = date;
+
+        markAsDirty();
     }
 
     /**
@@ -384,16 +419,18 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public void setEndDate(ZonedDateTime date) {
         // reset all time information
-        date = date.with(LocalTime.MIN);
+        date = date.withZoneSameLocal(getZoneId()).with(LocalTime.MIN);
 
         // check start after end
         if (startDate != null && startDate.isAfter(date)) {
+
             startDate = date;
             markAsDirty();
+
         } else
 
             // and end is not the same as current end
-            if (!date.equals(endDate)) {
+         {
             endDate = date;
             markAsDirty();
         }
@@ -407,6 +444,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     @Override
     public void setLocale(Locale newLocale) {
         super.setLocale(newLocale);
+
         markAsDirty();
     }
 
@@ -521,12 +559,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         setLastVisibleHourOfDay(23);
     }
 
+    private void setupFirstDayOfWeek() {
+        // TODO change calculation to Java 8 Style day mapping
+        // Convert to old day mapping from Java 7
+        getState().firstDayOfWeek = (WeekFields.of(getLocale()).getFirstDayOfWeek().getValue() %7)+1 ;
+    }
+
     private void setupDaysAndActions() {
 
         CalendarState state = getState();
 
-        //state.firstDayOfWeek = java.util.Calendar.getInstance(getLocale()).getFirstDayOfWeek();
-        state.firstDayOfWeek = 2; // FIXME !!! remove old style week start
+        setupFirstDayOfWeek();
 
         // If only one is null, throw exception
         // If both are null, set defaults
@@ -744,11 +787,19 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         if (!zoneId.equals(zone)) {
             zoneId = zone;
 
-            setStartDate(getStartDate().withZoneSameLocal(zone));
-            setEndDate(getEndDate().withZoneSameLocal(zone));
-
-            markAsDirty();
+            refreshDates();
         }
+    }
+
+    /**
+     * Reset the current dates with current settings
+     */
+    private void refreshDates() {
+
+        setStartDate(getStartDate());
+        setEndDate(getEndDate());
+
+        markAsDirty();
     }
 
     /**
@@ -1757,19 +1808,39 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     public Calendar<ITEM> withDay(ZonedDateTime today) {
+        setZoneId(today.getZone());
         setStartDate(today);
         setEndDate(today);
         return this;
     }
 
+    public Calendar<ITEM> withDay(LocalDate today) {
+        setStartDate(ZonedDateTime.now(getZoneId()).with(today));
+        setEndDate(ZonedDateTime.now(getZoneId()).with(today));
+        return this;
+    }
+
     public Calendar<ITEM> withDayInMonth(ZonedDateTime today) {
+        setZoneId(today.getZone());
+        withMonth(today.getMonth());
+        return this;
+    }
+
+    public Calendar<ITEM> withDayInMonth(LocalDate today) {
         withMonth(today.getMonth());
         return this;
     }
 
     public Calendar<ITEM> withWeek(ZonedDateTime today) {
+        setZoneId(today.getZone());
         setStartDate(today.with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
         setEndDate(today.with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
+        return this;
+    }
+
+    public Calendar<ITEM> withWeek(LocalDate today) {
+        setStartDate(ZonedDateTime.now(getZoneId()).with(today).with(ChronoField.DAY_OF_WEEK, getFirstVisibleDayOfWeek()));
+        setEndDate(ZonedDateTime.now(getZoneId()).with(today).with(ChronoField.DAY_OF_WEEK, getLastVisibleDayOfWeek()));
         return this;
     }
 
@@ -1837,6 +1908,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
     public Calendar<ITEM> withVisibleDays(int firstDay, int lastDay) {
         setVisibleDayRange(firstDay, lastDay);
+
+        refreshDates();
+
         return this;
     }
 
