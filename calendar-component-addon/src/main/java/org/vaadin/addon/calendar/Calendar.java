@@ -942,8 +942,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         getState(false).firstVisibleDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
-
-        refreshDates();
     }
 
     /**
