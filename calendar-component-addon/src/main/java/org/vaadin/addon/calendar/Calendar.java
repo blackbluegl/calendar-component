@@ -296,6 +296,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         setDefaultHandlers();
         setDataProvider(dataProvider != null ? dataProvider : new BasicItemProvider());
         getState().firstDayOfWeek = 1;
+        getState().firstVisibleDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
         getState().firstHourOfDay = firstHour;
         getState().lastHourOfDay = lastHour;
