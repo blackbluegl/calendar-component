@@ -15,6 +15,13 @@
  */
 package org.vaadin.addon.calendar.client.ui;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -25,13 +32,20 @@ import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.ui.dd.VHasDropHandler;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.client.ui.schedule.*;
+import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+import org.vaadin.addon.calendar.client.ui.schedule.CalendarDay;
+import org.vaadin.addon.calendar.client.ui.schedule.CalendarItem;
+import org.vaadin.addon.calendar.client.ui.schedule.DayToolbar;
+import org.vaadin.addon.calendar.client.ui.schedule.MonthGrid;
+import org.vaadin.addon.calendar.client.ui.schedule.SelectionRange;
+import org.vaadin.addon.calendar.client.ui.schedule.SimpleDayCell;
+import org.vaadin.addon.calendar.client.ui.schedule.SimpleDayToolbar;
+import org.vaadin.addon.calendar.client.ui.schedule.SimpleWeekToolbar;
+import org.vaadin.addon.calendar.client.ui.schedule.WeekGrid;
+import org.vaadin.addon.calendar.client.ui.schedule.WeeklyLongItems;
 import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarDropHandler;
 import org.vaadin.addon.calendar.client.ui.util.ItemDurationComparator;
 import org.vaadin.addon.calendar.client.ui.util.StartDateComparator;
-
-import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Client side implementation for Calendar
@@ -974,20 +988,20 @@ public class VCalendar extends Composite implements VHasDropHandler {
         }
 
         monthGrid = null;
+
         String[] realDayNames = new String[getDayNames().length];
         int j = 0;
 
-        if (firstDayOfWeek == 2) {
+//        if (firstDayOfWeek == 2) {
             for (int i = 1; i < getDayNames().length; i++) {
                 realDayNames[j++] = getDayNames()[i];
             }
             realDayNames[j] = getDayNames()[0];
-        } else {
-            for (int i = 0; i < getDayNames().length; i++) {
-                realDayNames[j++] = getDayNames()[i];
-            }
-
-        }
+//        } else {
+//            for (int i = 0; i < getDayNames().length; i++) {
+//                realDayNames[j++] = getDayNames()[i];
+//            }
+//        }
 
         weeklyLongEvents = new WeeklyLongItems(this);
         if (weekGrid == null) {

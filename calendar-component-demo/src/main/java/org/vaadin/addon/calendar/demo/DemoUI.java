@@ -37,6 +37,8 @@ public class DemoUI extends UI
     @Override
     protected void init(VaadinRequest request) {
 
+        UI.getCurrent().setLocale(Locale.ENGLISH);
+
         // Initialize our new UI component
         MeetingCalendar meetings = new MeetingCalendar();
         meetings.setSizeFull();

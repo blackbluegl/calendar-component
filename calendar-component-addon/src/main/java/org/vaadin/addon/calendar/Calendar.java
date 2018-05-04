@@ -15,12 +15,15 @@
  */
 package org.vaadin.addon.calendar;
 
+import static java.time.DayOfWeek.MONDAY;
+import static java.time.DayOfWeek.SUNDAY;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
 
 import java.lang.reflect.Method;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -377,14 +380,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public void setStartDate(ZonedDateTime date) {
 
-        System.out.println(getZoneId());
-
-        System.out.println(date);
-
         // reset all time information
         date = date.withZoneSameLocal(getZoneId()).with(LocalTime.MIN);
-
-        System.out.println(date);
 
         startDate = date;
 
@@ -430,6 +427,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         } else
 
             // and end is not the same as current end
+        if(endDate == null || !endDate.equals(date))
          {
             endDate = date;
             markAsDirty();
@@ -562,7 +560,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private void setupFirstDayOfWeek() {
         // TODO change calculation to Java 8 Style day mapping
         // Convert to old day mapping from Java 7
-        getState().firstDayOfWeek = (WeekFields.of(getLocale()).getFirstDayOfWeek().getValue() %7)+1 ;
+        getState().firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek() == MONDAY ? 2 : 1;
     }
 
     private void setupDaysAndActions() {
@@ -596,7 +594,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             throw new RuntimeException( "Daterange is too big (max 60) = " + durationInDays);
         }
 
-        boolean monthView = durationInDays > 7;
 
         state.dayNames = getDayNamesShort();
         state.monthNames = getMonthNamesShort();
@@ -609,6 +606,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         // Send all dates to client from server. This
         // approach was taken because gwt doesn't
         // support date localization properly.
+        boolean monthView = durationInDays > 7;
         ZonedDateTime firstDateToShow = expandStartDate(startDate, monthView);
         ZonedDateTime lastDateToShow = expandEndDate(endDate, monthView);
         ZonedDateTime dateToShow = firstDateToShow;
@@ -668,6 +666,122 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         state.days = days;
         state.actions = createActionsList(actionMap);
+    }
+
+
+
+    /**
+     * Finds the first day of the week and returns a day representing the start
+     * of that day
+     *
+     * @param start
+     *            The actual date
+     * @param expandToFullWeek
+     *            Should the returned date be moved to the start of the week
+     * @return If expandToFullWeek is set then it returns the first day of the
+     *         week, else it returns a clone of the actual date with the time
+     *         set to the start of the day
+     */
+    protected ZonedDateTime expandStartDate(ZonedDateTime start, boolean expandToFullWeek) {
+
+        if (expandToFullWeek) {
+            start = getFirstDayOfWeek(start);
+
+        } else {
+
+            start = getDayByLocale(start);
+        }
+
+        // Always expand to the start of the first day to the end of the last day
+        return start.with(LocalTime.MIN);
+    }
+
+    /**
+     * Finds the last day of the week and returns a day representing the end of
+     * that day
+     *
+     * @param end
+     *            The actual date
+     * @param expandToFullWeek
+     *            Should the returned date be moved to the end of the week
+     * @return If expandToFullWeek is set then it returns the last day of the
+     *         week, else it returns a clone of the actual date with the time
+     *         set to the end of the day
+     */
+    protected ZonedDateTime expandEndDate(ZonedDateTime end, boolean expandToFullWeek) {
+
+        if (expandToFullWeek) {
+            end = getLastDayOfWeek(end);
+        } else {
+            end = getDayByLocale(end);
+        }
+
+        // Always expand to the start of the first day to the end of the last day
+        return end.with(LocalTime.MAX);
+    }
+
+    /**
+     * Gets a date that is first day in the week that target given date belongs
+     * to.
+     *
+     * @param date
+     *            Target date
+     * @return Date that is first date in same week that given date is.
+     */
+
+    protected ZonedDateTime getFirstDayOfWeek(ZonedDateTime date) {
+
+        DayOfWeek firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek();
+
+        while (firstDayOfWeek != date.getDayOfWeek()) {
+            date = date.minus(1, ChronoUnit.DAYS);
+        }
+        return date;
+    }
+
+    /**
+     * Gets a date that is last day in the week that target given date belongs
+     * to.
+     *
+     * @param date
+     *            Target date
+     * @return Date that is last date in same week that given date is.
+     */
+    protected ZonedDateTime getLastDayOfWeek(ZonedDateTime date) {
+
+        DayOfWeek firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek();
+
+        date = date.plus(1, ChronoUnit.DAYS);
+
+        // Roll to weeks last day using firstdayofweek. Roll until FDofW is
+        // found and then roll back one day.
+        while (firstDayOfWeek != date.getDayOfWeek()) {
+            date = date.plus(1, ChronoUnit.DAYS);
+        }
+
+        date = date.minus(1, ChronoUnit.DAYS);
+
+        return date;
+    }
+
+    /**
+     * Get the day of week by the given calendar and its locale
+     *
+     * @param date
+     *              Target date
+     * @return The date corespond to the locale
+     */
+    private ZonedDateTime getDayByLocale(ZonedDateTime date) {
+
+        DayOfWeek firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek();
+        int fow = date.getDayOfWeek().getValue();
+
+        // sonday first ?
+        if (firstDayOfWeek == SUNDAY && Duration.between(startDate, endDate).toDays() > 0) {
+            return date.minus(1, ChronoUnit.DAYS);
+        }
+
+        return date;
     }
 
     private void setActionsForEachHalfHour(Map<CalendarDateRange, Set<Action>> actionMap,
@@ -828,6 +942,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
         getState(false).firstVisibleDayOfWeek = firstDay;
         getState().lastVisibleDayOfWeek = lastDay;
+
+        refreshDates();
     }
 
     /**
@@ -1113,81 +1229,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     protected String[] getMonthNamesShort() {
         DateFormatSymbols s = new DateFormatSymbols(getLocale());
         return Arrays.copyOf(s.getShortMonths(), 12);
-    }
-
-    /**
-     * Gets a date that is first day in the week that target given date belongs
-     * to.
-     *
-     * @param date
-     *            Target date
-     * @return Date that is first date in same week that given date is.
-     */
-
-    public ZonedDateTime getfirstDayOfWeek(ZonedDateTime date) {
-        return date.with(ChronoField.DAY_OF_WEEK, 1);
-    }
-
-
-    /**
-     * Gets a date that is last day in the week that target given date belongs
-     * to.
-     *
-     * @param date
-     *            Target date
-     * @return Date that is last date in same week that given date is.
-     */
-    public ZonedDateTime getLastDayOfWeek(ZonedDateTime date) {
-        return date.with(ChronoField.DAY_OF_WEEK, 7);
-    }
-
-    /**
-     * Finds the first day of the week and returns a day representing the start
-     * of that day
-     *
-     * @param start
-     *            The actual date
-     * @param expandToFullWeek
-     *            Should the returned date be moved to the start of the week
-     * @return If expandToFullWeek is set then it returns the first day of the
-     *         week, else it returns a clone of the actual date with the time
-     *         set to the start of the day
-     */
-    protected ZonedDateTime expandStartDate(ZonedDateTime start, boolean expandToFullWeek) {
-
-        if (expandToFullWeek) {
-            start = getfirstDayOfWeek(start);
-
-        } else {
-            start = ZonedDateTime.from(start);
-        }
-
-        // Always expand to the start of the first day to the end of the last day
-        return start.with(LocalTime.MIN);
-    }
-
-    /**
-     * Finds the last day of the week and returns a day representing the end of
-     * that day
-     *
-     * @param end
-     *            The actual date
-     * @param expandToFullWeek
-     *            Should the returned date be moved to the end of the week
-     * @return If expandToFullWeek is set then it returns the last day of the
-     *         week, else it returns a clone of the actual date with the time
-     *         set to the end of the day
-     */
-    protected ZonedDateTime expandEndDate(ZonedDateTime end, boolean expandToFullWeek) {
-
-        if (expandToFullWeek) {
-            end = getLastDayOfWeek(end);
-        } else {
-            end = ZonedDateTime.from(end);
-        }
-
-        // Always expand to the start of the first day to the end of the last day
-        return end.with(LocalTime.MAX);
     }
 
     /**

@@ -3,7 +3,6 @@ package org.vaadin.addon.calendar.demo.meetings;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 import java.time.Month;
-import java.time.ZoneId;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
@@ -99,7 +98,7 @@ public class MeetingCalendar extends CustomComponent {
         calendar.setContentMode(ContentMode.HTML);
 
 //        calendar.setLocale(Locale.JAPAN);
-        calendar.setZoneId(ZoneId.of("America/Chicago"));
+//        calendar.setZoneId(ZoneId.of("America/Chicago"));
 //        calendar.setWeeklyCaptionProvider(date ->  "<br>" + DateTimeFormatter.ofPattern("dd.MM.YYYY", getLocale()).format(date));
 //        calendar.setWeeklyCaptionProvider(date -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale()).format(date));
 
