@@ -984,7 +984,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            the first hour of the day to show, between 0 and 23
      * @see #autoScaleVisibleHoursOfDay()
      */
-    private void setFirstVisibleHourOfDay(int firstHour) {
+    public void setFirstVisibleHourOfDay(int firstHour) {
         if (this.firstHour != firstHour && firstHour >= 0 && firstHour <= 23  && firstHour <= getLastVisibleHourOfDay()) {
             this.firstHour = firstHour;
             getState(false).firstHourOfDay = firstHour;
@@ -1015,7 +1015,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            the first hour of the day to show, between 0 and 23
      * @see #autoScaleVisibleHoursOfDay()
      */
-    private void setLastVisibleHourOfDay(int lastHour) {
+    public void setLastVisibleHourOfDay(int lastHour) {
         if (this.lastHour != lastHour && lastHour >= 0 && lastHour <= 23 && lastHour >= getFirstVisibleHourOfDay()) {
             this.lastHour = lastHour;
             getState().lastHourOfDay = lastHour;
