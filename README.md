@@ -6,6 +6,8 @@ Calendar-component is a UI component add-on for Vaadin 8.
 
 Moved to BETA stage and testing for stable release.
 
+### Version 2.0-BETA5
+
 ### Version 2.0-BETA4
 - Change:   Vaadin version 8.4.0 for the demo
 - Fix:      [Issue#17] BasicBackwardHandler and BasicForewardHandler loop cycle fixed  
