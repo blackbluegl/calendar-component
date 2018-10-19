@@ -213,6 +213,9 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * {@link #autoScaleVisibleHoursOfDay()}.
      */
     private Integer maxTimeInMinutes;
+    
+
+    private DayOfWeek customFirstDayOfWeek;
 
     /**
      * A map with blocked timeslots.<br>
@@ -560,9 +563,29 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private void setupFirstDayOfWeek() {
         // TODO change calculation to Java 8 Style day mapping
         // Convert to old day mapping from Java 7
-        getState().firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek() == MONDAY ? 2 : 1;
+        getState().firstDayOfWeek = getFirstDayOfWeek() == MONDAY ? 2 : 1;
     }
 
+	private DayOfWeek getFirstDayOfWeek() {
+		if(Objects.nonNull(customFirstDayOfWeek)) {
+			return customFirstDayOfWeek;
+		}
+		return WeekFields.of(getLocale()).getFirstDayOfWeek();
+	}
+
+    /**
+     * Allow setting first day of week independent of Locale. Set to null if you
+     * want first day of week being defined by the locale
+     *
+     * @param dayOfWeek
+     *            any of java.time.DayOfWeek
+     *            or null to revert to default first day of week by locale
+     */
+    public void setFirstDayOfWeek(DayOfWeek dayOfWeek) {
+        customFirstDayOfWeek = dayOfWeek;
+        markAsDirty();
+    }
+    
     private void setupDaysAndActions() {
 
         CalendarState state = getState();
@@ -731,7 +754,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
 
     protected ZonedDateTime getFirstDayOfWeek(ZonedDateTime date) {
 
-        DayOfWeek firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek();
+        DayOfWeek firstDayOfWeek = getFirstDayOfWeek();
 
         while (firstDayOfWeek != date.getDayOfWeek()) {
             date = date.minus(1, ChronoUnit.DAYS);
@@ -749,7 +772,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     protected ZonedDateTime getLastDayOfWeek(ZonedDateTime date) {
 
-        DayOfWeek firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek();
+        DayOfWeek firstDayOfWeek = getFirstDayOfWeek();
 
         date = date.plus(1, ChronoUnit.DAYS);
 
@@ -773,7 +796,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     private ZonedDateTime getDayByLocale(ZonedDateTime date) {
 
-        DayOfWeek firstDayOfWeek = WeekFields.of(getLocale()).getFirstDayOfWeek();
+        DayOfWeek firstDayOfWeek = getFirstDayOfWeek();
         int fow = date.getDayOfWeek().getValue();
 
         // sonday first ?
