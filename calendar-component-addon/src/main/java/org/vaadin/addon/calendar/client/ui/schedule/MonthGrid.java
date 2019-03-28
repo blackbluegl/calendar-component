@@ -162,7 +162,7 @@ public class MonthGrid extends FocusableGrid implements KeyDownHandler {
         int widthRemainder = totalWidthPX % cells;
 
         // Division for cells might not be even. Distribute it evenly to will whole space.
-        int cellHeight = totalHeightPX / rows;
+        int cellHeight = (totalHeightPX / rows) - 1;
         int heightRemainder = totalHeightPX % rows;
 
         for (int i = 0; i < rows; i++) {
