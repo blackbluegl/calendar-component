@@ -179,17 +179,15 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
                 }
             }
 
-            setHeight(intHeight + "px"); // Fixed height
-
         } else {
 
-            // Dynamic height by the content
-            getElement().removeAttribute("height");
-            slots = (intHeight - caption.getOffsetHeight() - bottomSpacerHeight) / eventHeight;
-            if (slots > 10) {
-                slots = 10;
-            }
+           slots = (intHeight - caption.getOffsetHeight() - bottomSpacerHeight) / eventHeight;
+           if (slots > 10) {
+               slots = 10;
+           }
         }
+
+        setHeight(intHeight + "px"); // Fixed height
 
         updateItems(slots, clear);
 
@@ -236,6 +234,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
 
         int remainingSpace = intHeight - ((slots * eventHeight) + bottomSpacerHeight + caption.getOffsetHeight());
         int newHeight = remainingSpace + bottomSpacerHeight;
+
         if (newHeight < 0) {
             newHeight = eventHeight;
         }
