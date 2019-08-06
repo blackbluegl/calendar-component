@@ -641,8 +641,7 @@ public class DateCell extends FocusableComplexPanel
         setFocus(false);
 
         // Drag initialized?
-        int dragDistance = Math.abs(eventRangeStart - event.getY());
-        if (dragDistance > 0 && eventRangeStart >= 0) {
+        if (eventRangeStart >= 0) {
             Element main = getElement();
             if (eventRangeStart > eventRangeStop) {
                 if (eventRangeStop <= -1) {
@@ -651,6 +650,11 @@ public class DateCell extends FocusableComplexPanel
                 int temp = eventRangeStart;
                 eventRangeStart = eventRangeStop;
                 eventRangeStop = temp;
+            }
+
+            // This happens for single clicks without dragging on the calendar
+            if(eventRangeStart == eventRangeStop) {
+                handleEventRange(event);
             }
 
             NodeList<Node> nodes = main.getChildNodes();
@@ -706,6 +710,10 @@ public class DateCell extends FocusableComplexPanel
 
     @Override
     public void onMouseMove(MouseMoveEvent event) {
+        handleEventRange(event);
+    }
+
+    private void handleEventRange(final MouseEvent event) {
 
         if (event.getNativeButton() != NativeEvent.BUTTON_LEFT) {
             return;
