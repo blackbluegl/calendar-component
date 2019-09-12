@@ -16,7 +16,11 @@
 package org.vaadin.addon.calendar.client.ui.schedule;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import org.vaadin.addon.calendar.client.CalendarState;
 
 /**
  * Utility class used to represent a day when updating views. Only used
@@ -32,16 +36,20 @@ public class CalendarDay {
     private int dayOfWeek;
     private int week;
     private int yearOfWeek;
-    private Set<Long> blockedSlots;
+    private Map<Long, CalTimeSlot> styledSlots;
 
-    public CalendarDay(Date date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek, Set<Long> blockedSlots) {
+    public CalendarDay(Date date, String localizedDateFormat, int dayOfWeek, int week, int yearOfWeek, Set<CalendarState.SlotStyle> slotStyles) {
         super();
         this.date = date;
         this.localizedDateFormat = localizedDateFormat;
         this.dayOfWeek = dayOfWeek;
         this.week = week;
         this.yearOfWeek = yearOfWeek;
-        this.blockedSlots = blockedSlots;
+
+        this.styledSlots = new HashMap<>();
+        for (CalendarState.SlotStyle slot : slotStyles) {
+            styledSlots.put(slot.slotStart, new CalTimeSlot(slot.slotStart, slot.styleName));
+        }
     }
 
     public Date getDate() {
@@ -64,7 +72,7 @@ public class CalendarDay {
         return yearOfWeek;
     }
 
-    public Set<Long> getBlockedSlots() {
-        return blockedSlots;
+    public Map<Long, CalTimeSlot> getStyledSlots() {
+        return styledSlots;
     }
 }

@@ -15,18 +15,40 @@
  */
 package org.vaadin.addon.calendar.client.ui.schedule;
 
-import com.google.gwt.dom.client.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.vaadin.addon.calendar.client.DateConstants;
+
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseEvent;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.WidgetUtil;
-import org.vaadin.addon.calendar.client.DateConstants;
-
-import java.util.*;
 
 public class DateCell extends FocusableComplexPanel
         implements MouseDownHandler, MouseMoveHandler, MouseUpHandler, KeyDownHandler, ContextMenuHandler {
@@ -59,15 +81,12 @@ public class DateCell extends FocusableComplexPanel
 
         private final Date to;
 
-        private final Boolean enabled;
-
-        public DateCellSlot(DateCell cell, Date from, Date to, Boolean enabled) {
+        public DateCellSlot(DateCell cell, Date from, Date to) {
             setElement(Document.get().createDivElement());
             getElement().setInnerHTML("&nbsp;");
             this.cell = cell;
             this.from = from;
             this.to = to;
-            this.enabled = enabled;
         }
 
         public Date getFrom() {
@@ -81,13 +100,9 @@ public class DateCell extends FocusableComplexPanel
         public DateCell getParentCell() {
             return cell;
         }
-
-        public Boolean getEnabled() {
-            return enabled;
-        }
     }
 
-    public DateCell(WeekGrid parent, Date date, Set<Long> blockedSlots) {
+    public DateCell(WeekGrid parent, Date date, Map<Long, CalTimeSlot> timeSlotStyles) {
         weekgrid = parent;
         Element mainElement = DOM.createDiv();
         setElement(mainElement);
@@ -116,13 +131,11 @@ public class DateCell extends FocusableComplexPanel
 
         for (int i = 0; i < numberOfSlots; i++) {
 
-            boolean blocked = blockedSlots != null && blockedSlots.contains(start-dateTime);
-
-            DateCellSlot slot = new DateCellSlot(this, new Date(start), new Date(end), blocked);
+            DateCellSlot slot = new DateCellSlot(this, new Date(start), new Date(end));
             if (i % 2 == 0) {
-                slot.setStyleName(blocked ? "v-datecellslot-blocked-even" : "v-datecellslot-even");
+                slot.setStyleName("v-datecellslot-even" + getStyledTimeSlot(start-dateTime, timeSlotStyles));
             } else {
-                slot.setStyleName(blocked ? "v-datecellslot-blocked" : "v-datecellslot");
+                slot.setStyleName("v-datecellslot" + getStyledTimeSlot(start-dateTime, timeSlotStyles));
             }
 
             Event.sinkEvents(slot.getElement(), Event.MOUSEEVENTS);
@@ -136,6 +149,14 @@ public class DateCell extends FocusableComplexPanel
 
         // Sink items for tooltip handling
         Event.sinkEvents(mainElement, Event.MOUSEEVENTS);
+    }
+
+    protected String getStyledTimeSlot(long time, Map<Long, CalTimeSlot> timeSlotStyles) {
+
+        if (timeSlotStyles.keySet().contains(time)) {
+            return " " + timeSlotStyles.get(time).style;
+        }
+        return "";
     }
 
     public int getFirstHour() {

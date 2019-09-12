@@ -222,7 +222,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * A map with blocked timeslots.<br>
      *     Contains a set with timestamp of starttimes.
      */
-    private final Map<LocalDate, Set<Long>> blockedTimes = new HashMap<>();
+    private final Map<LocalDate, Set<CalendarState.SlotStyle>> styledTimes = new HashMap<>();
 
     /**
      * Initial date for all blocked times
@@ -651,14 +651,14 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             day.week = (int) WeekFields.of(getLocale()).weekOfYear().getFrom(dateToShow);
             day.yearOfWeek = dateToShow.getYear();
 
-            day.blockedSlots = new HashSet<>();
+            day.slotStyles = new HashSet<>();
 
-            if (blockedTimes.containsKey(allOverDate)) {
-                day.blockedSlots.addAll(blockedTimes.get(allOverDate));
+            if (styledTimes.containsKey(allOverDate)) {
+                day.slotStyles.addAll(styledTimes.get(allOverDate));
             }
 
-            if (blockedTimes.containsKey(Date.from(dateToShow.toInstant()))) {
-                day.blockedSlots.addAll(blockedTimes.get(Date.from(dateToShow.toInstant())));
+            if (styledTimes.containsKey(dateToShow.toLocalDate())) {
+                day.slotStyles.addAll(styledTimes.get(dateToShow.toLocalDate()));
             }
 
             days.add(day);
@@ -1784,25 +1784,20 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      * @param styleName css class for this block (currently unused)
      */
     protected final void addTimeBlockInternaly(LocalDate day, Long fromMillies, String styleName) {
-        Set<Long> times;
-        if (blockedTimes.containsKey(day)) {
-            times = blockedTimes.get(day);
+        Set<CalendarState.SlotStyle> styledTimes;
+        if (this.styledTimes.containsKey(day)) {
+            styledTimes = this.styledTimes.get(day);
         } else {
-            times = new HashSet<>();
+            styledTimes = new HashSet<>();
         }
-        times.add(fromMillies);
-        blockedTimes.put(day, times);
-    }
 
-    /**
-     * Add a time block marker for a range of time. Time steps are half hour,
-     * so a minimal time slot is 1800000 milliseconds long.
-     *
-     * @param fromMillies time millies from where the block starts
-     * @param toMillies time millies from where the block ends
-     */
-    public void addTimeBlock(long fromMillies, long toMillies) {
-        addTimeBlock(fromMillies, toMillies, "");
+        // create a new styled time slot
+        final CalendarState.SlotStyle slotStyle = new CalendarState.SlotStyle();
+        slotStyle.slotStart = fromMillies;
+        slotStyle.styleName = styleName;
+        styledTimes.add(slotStyle);
+
+        this.styledTimes.put(day, styledTimes);
     }
 
     /**
@@ -1815,18 +1810,6 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public void addTimeBlock(long fromMillies, long toMillies, String styleName) {
         addTimeBlock(allOverDate, fromMillies, toMillies, styleName);
-    }
-
-    /**
-     * Add a time block marker for a range of time. Time steps are half hour,
-     * so a minimal time slot is 1800000 milliseconds long.
-     *
-     * @param day Day for this time slot
-     * @param fromMillies time millies from where the block starts
-     * @param toMillies time millies from where the block ends
-     */
-    public void addTimeBlock(LocalDate day, long fromMillies, long toMillies) {
-        addTimeBlock(day, fromMillies, toMillies, "");
     }
 
     /**
@@ -1851,13 +1834,13 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
 
     public void clearTimeBlocks() {
-        blockedTimes.clear();
+        styledTimes.clear();
         markAsDirty();
     }
 
-    public void clearTimeBlocks(Date day) {
-        if (blockedTimes.containsKey(day)) {
-            blockedTimes.remove(day);
+    public void clearTimeBlocks(LocalDate day) {
+        if (styledTimes.containsKey(day)) {
+            styledTimes.remove(day);
         }
         markAsDirty();
     }

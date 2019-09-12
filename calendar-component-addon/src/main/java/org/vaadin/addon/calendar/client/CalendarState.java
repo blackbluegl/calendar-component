@@ -19,8 +19,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.shared.AbstractComponentState;
 import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
+
+import com.vaadin.shared.AbstractComponentState;
 
 /**
  * @since 7.1.0
@@ -75,10 +76,10 @@ public class CalendarState extends AbstractComponentState {
         public int dayOfWeek;
         public int week;
         public int yearOfWeek;
-        public Set<Long> blockedSlots;
+        public Set<SlotStyle> slotStyles;
     }
 
-    public static class TimeSlot implements Serializable {
+    public static class SlotStyle implements Serializable {
         public long slotStart;
         public String styleName;
     }
