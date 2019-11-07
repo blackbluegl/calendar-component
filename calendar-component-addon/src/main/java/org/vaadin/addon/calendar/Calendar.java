@@ -1726,7 +1726,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         Attributes attr = design.attributes();
 
         if (design.hasAttr("time-zone")) {
-            setZoneId(ZoneId.of(DesignAttributeHandler.readAttribute("end-date", attr, String.class)));
+            setZoneId(ZoneId.of(DesignAttributeHandler.readAttribute("time-zone", attr, String.class)));
         }
 
         if (design.hasAttr("time-format")) {
