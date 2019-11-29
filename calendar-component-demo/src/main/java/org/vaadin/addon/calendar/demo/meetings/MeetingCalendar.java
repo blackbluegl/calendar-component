@@ -2,9 +2,17 @@ package org.vaadin.addon.calendar.demo.meetings;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.Month;
+import java.time.temporal.ChronoField;
 import java.util.GregorianCalendar;
 import java.util.Random;
+
+import org.vaadin.addon.calendar.Calendar;
+import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
+import org.vaadin.addon.calendar.item.BasicItemProvider;
+import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.CustomComponent;
@@ -13,10 +21,6 @@ import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import org.vaadin.addon.calendar.Calendar;
-import org.vaadin.addon.calendar.handler.BasicDateClickHandler;
-import org.vaadin.addon.calendar.item.BasicItemProvider;
-import org.vaadin.addon.calendar.ui.CalendarComponentEvents;
 
 
 public class MeetingCalendar extends CustomComponent {
@@ -111,6 +115,17 @@ public class MeetingCalendar extends CustomComponent {
         addCalendarEventListeners();
 
         setupBlockedTimeSlots();
+
+        addStyledBlocks();
+    }
+
+    private void addStyledBlocks() {
+
+        final LocalDate yesterday = LocalDate.now().minusDays(1);
+        final long start = LocalTime.of(8, 0).getLong(ChronoField.MILLI_OF_DAY);
+        final long end = LocalTime.of(23, 0).getLong(ChronoField.MILLI_OF_DAY);
+
+        calendar.addTimeBlock(yesterday, start, end, "custom");
     }
 
     private void setupBlockedTimeSlots() {
@@ -130,7 +145,7 @@ public class MeetingCalendar extends CustomComponent {
         bcal.add(java.util.Calendar.MINUTE, 30);
         long end = bcal.getTimeInMillis();
 
-        calendar.addTimeBlock(start, end, "my-blocky-style");
+        calendar.addTimeBlock(start, end, "blocked");
 
         cal.add(java.util.Calendar.DAY_OF_WEEK, 1);
 
@@ -142,7 +157,7 @@ public class MeetingCalendar extends CustomComponent {
         bcal.add(java.util.Calendar.MINUTE, 60);
         end = bcal.getTimeInMillis();
 
-        calendar.addTimeBlock(start, end);
+        calendar.addTimeBlock(start, end, "blocked");
 
     }
 

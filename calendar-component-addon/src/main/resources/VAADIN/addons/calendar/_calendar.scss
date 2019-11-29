@@ -112,17 +112,13 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   }
 
   .#{$primary-stylename}-day-times-Vsized .v-datecellslot,
-  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-even,
-  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-blocked,
-  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-blocked-even {
+  .#{$primary-stylename}-day-times-Vsized .v-datecellslot-even {
     height: 18px;
   }
 
   .#{$primary-stylename}-day-times-Hsized,
   .#{$primary-stylename}-day-times-Hsized .v-datecellslot,
-  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-even,
-  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-blocked,
-  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-blocked-even {
+  .#{$primary-stylename}-day-times-Hsized .v-datecellslot-even {
       width: 200px;
   }
 }
@@ -376,9 +372,7 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
   $valo-calendar-time-divider-color: first-color(valo-border($color: $v-app-background-color, $strength: 0.5));
 
   .#{$primary-stylename} .v-datecellslot,
-  .#{$primary-stylename} .v-datecellslot-even,
-  .#{$primary-stylename} .v-datecellslot-blocked,
-  .#{$primary-stylename} .v-datecellslot-blocked-even {
+  .#{$primary-stylename} .v-datecellslot-even {
     border-top: 1px solid $valo-calendar-time-divider-color;
 
     &:first-child {
@@ -386,24 +380,16 @@ $v-calendar-event-colors: #00ace0, #2d9f19, #d18100, #ce3812, #2d55cd !default;
     }
   }
 
-  .#{$primary-stylename} .v-datecellslot,
-  .#{$primary-stylename} .v-datecellslot-blocked {
+  .#{$primary-stylename} .v-datecellslot {
     border-top-style: dotted;
   }
 /*
   .#{$primary-stylename} .v-datecellslot,
-  .#{$primary-stylename} .v-datecellslot-even,
-  .#{$primary-stylename} .v-datecellslot-blocked,
-  .#{$primary-stylename} .v-datecellslot-blocked-even {
+  .#{$primary-stylename} .v-datecellslot-even {
     margin-left: round($v-unit-size/16);
     margin-right: round($v-unit-size/16);
   }
 */
-  .#{$primary-stylename} .v-datecellslot-blocked,
-  .#{$primary-stylename} .v-datecellslot-blocked-even {
-    background: #d6d6d6;
-    border-color: #cecece;
-  }
 
   .#{$primary-stylename}-current-time {
     background: $v-focus-color;

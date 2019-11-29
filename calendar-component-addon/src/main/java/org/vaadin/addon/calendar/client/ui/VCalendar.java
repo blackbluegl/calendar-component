@@ -22,14 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.client.ui.dd.VHasDropHandler;
 import org.vaadin.addon.calendar.client.CalendarState;
 import org.vaadin.addon.calendar.client.DateConstants;
 import org.vaadin.addon.calendar.client.ui.schedule.CalDate;
@@ -46,6 +38,15 @@ import org.vaadin.addon.calendar.client.ui.schedule.WeeklyLongItems;
 import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarDropHandler;
 import org.vaadin.addon.calendar.client.ui.util.ItemDurationComparator;
 import org.vaadin.addon.calendar.client.ui.util.StartDateComparator;
+
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ContextMenuEvent;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.vaadin.client.ui.dd.VHasDropHandler;
 
 /**
  * Client side implementation for Calendar
@@ -548,7 +549,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
             dayToolbar.add(realDayNames[dayOfWeek - 1], date, day.getLocalizedDateFormat(), isToday ? "today" : null);
             weeklyLongEvents.addDate(date);
-            weekGrid.addDate(date, day.getBlockedSlots());
+            weekGrid.addDate(date, day.getStyledSlots());
 
             if (isToday) {
                 weekGrid.setToday(date, today);

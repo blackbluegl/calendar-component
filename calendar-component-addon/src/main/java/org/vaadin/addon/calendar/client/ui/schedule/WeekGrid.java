@@ -15,19 +15,25 @@
  */
 package org.vaadin.addon.calendar.client.ui.schedule;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Map;
+
+import org.vaadin.addon.calendar.client.DateConstants;
+import org.vaadin.addon.calendar.client.ui.VCalendar;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.client.DateTimeService;
 import com.vaadin.client.WidgetUtil;
-import org.vaadin.addon.calendar.client.DateConstants;
-import org.vaadin.addon.calendar.client.ui.VCalendar;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Set;
 
 /**
  *
@@ -118,8 +124,8 @@ public class WeekGrid extends SimplePanel {
         return width;
     }
 
-    public void addDate(Date d, Set<Long> blockedSlots) {
-        final DateCell dc = new DateCell(this, d, blockedSlots);
+    public void addDate(Date d, Map<Long, CalTimeSlot> timeSlotStyles) {
+        final DateCell dc = new DateCell(this, d, timeSlotStyles);
         dc.setDisabled(isDisabled());
         dc.setHorizontalSized(isHorizontalScrollable() || width < 0);
         dc.setVerticalSized(isVerticalScrollable());

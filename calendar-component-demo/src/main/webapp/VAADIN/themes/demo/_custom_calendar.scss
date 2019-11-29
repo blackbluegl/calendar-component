@@ -109,5 +109,17 @@ background: none;
         }
     }
 
+  .v-datecellslot.blocked,
+  .v-datecellslot-even.blocked {
+    background: #d6d6d6;
+    border-color: #cecece;
+  }
+
+  .v-datecellslot.custom,
+  .v-datecellslot-even.custom {
+    background: #65c6d6;
+    border-color: #65c6d6;
+  }
+
 }
 }

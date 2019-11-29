@@ -15,12 +15,38 @@
  */
 package org.vaadin.addon.calendar.client;
 
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.vaadin.addon.calendar.client.ui.VCalendar;
+import org.vaadin.addon.calendar.client.ui.schedule.CalendarDay;
+import org.vaadin.addon.calendar.client.ui.schedule.CalendarItem;
+import org.vaadin.addon.calendar.client.ui.schedule.DateCell;
+import org.vaadin.addon.calendar.client.ui.schedule.DateCellDayItem;
+import org.vaadin.addon.calendar.client.ui.schedule.HasTooltipKey;
+import org.vaadin.addon.calendar.client.ui.schedule.MonthItemLabel;
+import org.vaadin.addon.calendar.client.ui.schedule.SimpleDayCell;
+import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarDropHandler;
+import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarMonthDropHandler;
+import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarWeekDropHandler;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Widget;
-import com.vaadin.client.*;
+import com.vaadin.client.ApplicationConnection;
+import com.vaadin.client.Paintable;
+import com.vaadin.client.TooltipInfo;
+import com.vaadin.client.UIDL;
+import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.communication.RpcProxy;
 import com.vaadin.client.communication.StateChangeEvent;
 import com.vaadin.client.ui.AbstractComponentConnector;
@@ -30,16 +56,6 @@ import com.vaadin.client.ui.SimpleManagedLayout;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
 import com.vaadin.shared.util.SharedUtil;
-import org.vaadin.addon.calendar.client.ui.VCalendar;
-import org.vaadin.addon.calendar.client.ui.schedule.*;
-import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarDropHandler;
-import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarMonthDropHandler;
-import org.vaadin.addon.calendar.client.ui.schedule.dd.CalendarWeekDropHandler;
-
-import java.text.ParseException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Handles communication between Calendar on the server side and
@@ -607,7 +623,7 @@ public class CalendarConnector extends AbstractComponentConnector
         for (CalendarState.Day day : days) {
             CalendarDay d = new CalendarDay(
                     DateConstants.toClientDate(day.date),
-                    day.localizedDateFormat, day.dayOfWeek, day.week, day.yearOfWeek, day.blockedSlots);
+                    day.localizedDateFormat, day.dayOfWeek, day.week, day.yearOfWeek, day.slotStyles);
             list.add(d);
         }
         return list;

@@ -6,6 +6,19 @@ Calendar-component is a UI component add-on for Vaadin 8.
 
 Moved to BETA stage and testing for stable release.
 
+### Version 2.0.1
+- Enhanced: Ability to add styled timeboxes added 
+            See addTimeBlock(<long> start, <long> end, <String> style) and 
+            addTimeBlock(<LocalDate> day, <long> start, <long> end, <String> style).
+            Braking change: -> The two methods without style has being removed. Use the methods above with 
+            your custom style.
+
+### Version 2.0
+- Fix:      [Issue#32] Resolves the cell scaling issue when a fixed calendar height (or 100%) is used. - _Thanks to datadobi_
+- Enhanced: [Issue#27] Added possibility to set first day of week - _Thanks to voltor_
+- Change:   [Issue#33] Range selection events are now also triggered on single clicks - _Thanks to danieljsv_
+- Change:   Vaadin version 8.8.5
+
 ### Version 2.0-BETA4
 - Change:   Vaadin version 8.4.0 for the demo
 - Fix:      [Issue#17] BasicBackwardHandler and BasicForewardHandler loop cycle fixed  
