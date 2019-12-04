@@ -596,8 +596,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     }
     
     /**
-     * Allow setting first day of week independent of Locale. Set to null if you
-     * want first day of week being defined by the locale
+     * Allow setting minimum number of days in the first week independent of Locale. Set to null if you
+     * want minimum number of days in the first week being defined by the locale
      *
      * @param minimalDaysInFirstWeek 
      * 		the minimal number of days in the first week, from 1 to 7
@@ -606,10 +606,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     public void setMinimalDaysInFirstWeek(Integer minimalDaysInFirstWeek) {    	
     	if (minimalDaysInFirstWeek!=null && (minimalDaysInFirstWeek < 1 || minimalDaysInFirstWeek > 7) ) {
-    		throw new IllegalArgumentException("Minimal number of days is invalid");    		
+	    throw new IllegalArgumentException("Minimal number of days is invalid");    		
     	}  
-		this.customMinimalDaysInFirstWeek = minimalDaysInFirstWeek;
-	}
+	this.customMinimalDaysInFirstWeek = minimalDaysInFirstWeek;
+    }
 
     private void setupDaysAndActions() {
 
