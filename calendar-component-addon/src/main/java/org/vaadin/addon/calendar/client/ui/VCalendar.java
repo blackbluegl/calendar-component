@@ -606,7 +606,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
 
             int y = (pos / columns);
             int x = pos - (y * columns);
-            if (x == 0 && daysCount > 7) {
+            if (x == (columns - 1) && daysCount > 7) {
                 // Add week to weekToolbar for navigation
                 weekToolbar.addWeek(week, day.getYearOfWeek());
             }
