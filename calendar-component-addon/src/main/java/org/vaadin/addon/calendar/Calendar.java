@@ -215,8 +215,15 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      */
     private Integer maxTimeInMinutes;
 
-
+	/**
+	 * the first day of the week
+	 */
     private DayOfWeek customFirstDayOfWeek;
+    
+    /**
+     * the minimal number of days in the first week, from 1 to 7
+     */
+	private Integer customMinimalDaysInFirstWeek;
 
     /**
      * A map with blocked timeslots.<br>
@@ -587,6 +594,22 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         customFirstDayOfWeek = dayOfWeek;
         markAsDirty();
     }
+    
+    /**
+     * Allow setting first day of week independent of Locale. Set to null if you
+     * want first day of week being defined by the locale
+     *
+     * @param minimalDaysInFirstWeek 
+     * 		the minimal number of days in the first week, from 1 to 7
+     * @throws IllegalArgumentException if the minimal days value is less than one
+     *      or greater than 7
+     */
+    public void setMinimalDaysInFirstWeek(Integer minimalDaysInFirstWeek) {    	
+    	if (minimalDaysInFirstWeek!=null && (minimalDaysInFirstWeek < 1 || minimalDaysInFirstWeek > 7) ) {
+    		throw new IllegalArgumentException("Minimal number of days is invalid");    		
+    	}  
+		this.customMinimalDaysInFirstWeek = minimalDaysInFirstWeek;
+	}
 
     private void setupDaysAndActions() {
 
@@ -648,7 +671,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
             day.localizedDateFormat = weeklyCaptionFormatProvider.captionFrom(dateToShow);
 
             day.dayOfWeek = dateToShow.getDayOfWeek().getValue();
-            day.week = (int) WeekFields.of(getLocale()).weekOfYear().getFrom(dateToShow);
+            day.week = getWeekByDate(dateToShow);
             day.yearOfWeek = dateToShow.getYear();
 
             day.slotStyles = new HashSet<>();
@@ -692,6 +715,18 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         state.days = days;
         state.actions = createActionsList(actionMap);
     }
+
+	private int getWeekByDate(ZonedDateTime dateToShow) {
+		if(Objects.nonNull(customMinimalDaysInFirstWeek)) {
+			DayOfWeek firstDayOfWeek = getFirstDayOfWeek();
+			return (int) WeekFields.of(firstDayOfWeek, customMinimalDaysInFirstWeek)
+					.weekOfYear()
+					.getFrom(dateToShow);
+		}
+		return (int) WeekFields.of(getLocale())
+				.weekOfYear()
+				.getFrom(dateToShow);
+	}
 
 
 
