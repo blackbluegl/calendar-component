@@ -307,6 +307,19 @@ public class CalendarItem {
     }
 
     /**
+     * Answers whether the start of the event and end of the event is within
+     * the same day. 
+     *
+     * @return true if start and end are in the same day, false otherwise
+     */
+    @SuppressWarnings("deprecation")
+    public boolean isSingleDay() {
+        Date start = getStart();
+        Date end = getEnd();
+        return start.getYear() == end.getYear() && start.getMonth() == end.getMonth() && start.getDate() == end.getDate();
+    }
+
+    /**
      * Get the amount of minutes for the event on a specific day. This is useful
      * if the event spans several days.
      *
