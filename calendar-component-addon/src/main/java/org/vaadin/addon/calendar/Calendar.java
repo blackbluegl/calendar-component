@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -79,6 +78,7 @@ import org.vaadin.addon.calendar.ui.WeeklyCaptionProvider;
 
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
+import com.vaadin.event.SerializableEventListener;
 import com.vaadin.event.dd.DropHandler;
 import com.vaadin.event.dd.DropTarget;
 import com.vaadin.event.dd.TargetDetails;
@@ -1314,7 +1314,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
      *            The method on the lister to call when the event is triggered
      * @return handler registration
      */
-    protected Registration setHandler(String eventId, Class<?> eventType, EventListener listener, Method listenerMethod) {
+    protected Registration setHandler(String eventId, Class<?> eventType, SerializableEventListener listener, Method listenerMethod) {
 
         if (handlers.get(eventId) != null) {
             handlers.get(eventId).remove();
