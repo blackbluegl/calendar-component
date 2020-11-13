@@ -338,8 +338,7 @@ public class VCalendar extends Composite implements VHasDropHandler {
                         itemMoving = sdc.getMoveItem() != null;
                     }
 
-                    long d = e.getRangeInMilliseconds();
-                    if ((d > 0 && d <= DateConstants.DAYINMILLIS)
+                    if (e.isSingleDay()
                             && !e.isAllDay()) {
                         timeCells.add(sdc);
                     } else {

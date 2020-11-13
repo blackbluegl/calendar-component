@@ -281,7 +281,7 @@ public class SimpleDayCell extends FocusableFlowPanel implements MouseUpHandler,
         eventDiv.setItemIndex(item.getIndex());
         eventDiv.setCalendarItem(item);
 
-        if (item.getRangeInMilliseconds() <= DateConstants.DAYINMILLIS && !item.isAllDay()) {
+        if (item.isSingleDay() && !item.isAllDay()) {
 
             if (item.getStyleName() != null) {
                 eventDiv.addStyleDependentName(item.getStyleName());
