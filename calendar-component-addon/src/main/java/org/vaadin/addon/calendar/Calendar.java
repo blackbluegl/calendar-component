@@ -157,10 +157,10 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
     private final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern(DateConstants.DATE_FORMAT_PATTERN);
 
     /** Time format that will be used in the UIDL for time. */
-    private final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.TIME_FORMAT_PATTERN);
+    protected final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
 
     /** Time format that will be used in the UIDL for time. */
-    protected final DateTimeFormatter ACTION_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern(DateConstants.ACTION_DATE_TIME_FORMAT_PATTERN);
+    private DateTimeFormatter timeFormatter;
 
     /** Caption format provuder for the weekly view */
     private WeeklyCaptionProvider weeklyCaptionFormatProvider = date -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale()).format(date);
@@ -479,8 +479,8 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
                 item.dateFrom = DATE_FORMAT.format(calItem.getStart());
                 item.dateTo = DATE_FORMAT.format(calItem.getEnd());
 // XXX STRING FORMATTER HH:mm:ss
-                item.timeFrom = TIME_FORMAT.format(calItem.getStart());
-                item.timeTo = TIME_FORMAT.format(calItem.getEnd());
+                item.timeFrom = getTimeFormatter().format(calItem.getStart());
+                item.timeTo = getTimeFormatter().format(calItem.getEnd());
 
                 item.description = calItem.getDescription() == null ? "" : calItem.getDescription();
                 item.styleName = calItem.getStyleName() == null ? "" : calItem.getStyleName();
@@ -926,6 +926,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         if (!zoneId.equals(zone)) {
             zoneId = zone;
 
+            timeFormatter = null;
             refreshDates();
         }
     }
@@ -1726,7 +1727,7 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         Attributes attr = design.attributes();
 
         if (design.hasAttr("time-zone")) {
-            setZoneId(ZoneId.of(DesignAttributeHandler.readAttribute("end-date", attr, String.class)));
+            setZoneId(ZoneId.of(DesignAttributeHandler.readAttribute("time-zone", attr, String.class)));
         }
 
         if (design.hasAttr("time-format")) {
@@ -1988,4 +1989,17 @@ public class Calendar<ITEM extends EditableCalendarItem> extends AbstractCompone
         return this;
     }
 
+    /**
+     * Create or get {@link DateTimeFormatter} with valid zone
+     *
+     * @return DateTimeFormatter
+     */
+    protected DateTimeFormatter getTimeFormatter() {
+        if (timeFormatter == null) {
+            timeFormatter = DateTimeFormatter.ofPattern(DateConstants.TIME_FORMAT_PATTERN).withZone(getZoneId());
+        }
+        return timeFormatter;
+    }
+
 }
+
