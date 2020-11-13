@@ -6,6 +6,14 @@ Calendar-component is a UI component add-on for Vaadin 8.
 
 Moved to BETA stage and testing for stable release.
 
+### Version 2.0.2
+- Change:   [Issue#48] Fix Vaadin 8.12 listener deprecations (by evanzel)
+- Update:   [Issue#47] Update JUnit to 8.13.1
+- Enhanced: [Issue#44] Month view : Add possibility to set the minimum number of days in the first week (by voltor)
+- Fix:      [Issue#39] Fix time zones (by neovmt)
+
+Thanks to all contributors.
+
 ### Version 2.0.1
 - Enhanced: Ability to add styled timeboxes added 
             See addTimeBlock(<long> start, <long> end, <String> style) and 
